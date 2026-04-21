@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="MD笔记">
     <meta name="description" content="一个简单易用的 Markdown 笔记应用，支持知识卡片、实时预览和离线使用">
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="manifest" href="/markdown-notebook/manifest.json">
+    <link rel="apple-touch-icon" href="/markdown-notebook/icons/icon-192x192.png">
     <title>Markdown笔记工具</title>
     <!-- Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -2597,7 +2597,7 @@ $$
         // 注册 Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('/markdown-notebook/sw.js')
                     .then((registration) => {
                         console.log('Service Worker 注册成功:', registration.scope);
                     })

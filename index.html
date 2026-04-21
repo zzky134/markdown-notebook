@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="MD笔记">
     <meta name="description" content="一个简单易用的 Markdown 笔记应用，支持知识卡片、实时预览和离线使用">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <title>Markdown笔记工具</title>
     <!-- Marked.js -->
@@ -1306,6 +1306,14 @@
                     </svg>
                 </button>
             </div>
+            <div class="sidebar-actions" id="pwaInstallBtn" style="display: none; padding-top: 0;">
+                <button class="btn btn-primary" onclick="installPWA()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; justify-content: center;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    安装应用
+                </button>
+            </div>
             <div class="notebook-list" id="notebookList">
                 <!-- 动态生成笔记本列表 -->
             </div>
@@ -2589,7 +2597,7 @@ $$
         // 注册 Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js')
                     .then((registration) => {
                         console.log('Service Worker 注册成功:', registration.scope);
                     })
@@ -2605,6 +2613,37 @@ $$
             e.preventDefault();
             deferredPrompt = e;
             console.log('PWA 可以安装');
+            // 显示安装按钮
+            const installBtn = document.getElementById('pwaInstallBtn');
+            if (installBtn) {
+                installBtn.style.display = 'flex';
+            }
+        });
+
+        // PWA 安装函数
+        async function installPWA() {
+            if (!deferredPrompt) {
+                console.log('暂无法安装，请确保满足 PWA 安装条件');
+                return;
+            }
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('用户选择:', outcome);
+            deferredPrompt = null;
+            const installBtn = document.getElementById('pwaInstallBtn');
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+        }
+
+        // 检测 PWA 是否已安装
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA 已安装');
+            deferredPrompt = null;
+            const installBtn = document.getElementById('pwaInstallBtn');
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
         });
 
         // 初始化应用

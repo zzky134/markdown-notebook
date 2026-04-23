@@ -1,0 +1,18 @@
+# 自动检测文本文件
+* text=auto
+
+# 模型权重文件使用 Git LFS
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.wasm filter=lfs diff=lfs merge=lfs -text
+
+# 大文件使用 LFS
+tokenizer.json filter=lfs diff=lfs merge=lfs -text
+
+# 配置文件保持文本
+*.json text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.ps1 text eol=crlf
+*.sh text eol=lf

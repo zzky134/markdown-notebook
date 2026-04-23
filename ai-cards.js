@@ -13,27 +13,52 @@
 // ============================================
 
 /**
- * AI 模型配置
- * 使用 WebLLM 支持的 Qwen2.5-Coder 模型
+ * ============================================
+ * 模型本地化部署配置
+ * ============================================
+ *
+ * 使用方式：
+ * 1. 将模型文件放入仓库 /models/ 目录
+ * 2. 修改 MODEL_BASE_URL 为你的 GitHub Pages 地址
+ * 3. 确保模型文件路径与 modelRecord 配置匹配
+ *
+ * 模型文件获取：
+ * - 从 HuggingFace 下载: https://huggingface.co/mlc-ai/
+ * - 或从浏览器缓存导出（见文档）
+ */
+
+/**
+ * 模型基础配置
  */
 const AI_CONFIG = {
     // 模型名称 - 使用 WebLLM 支持的模型 ID
-    // 可用的轻量级模型:
-    // - Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC (0.5B参数，适合低内存设备)
-    // - Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC (1.5B参数，质量更好)
-    // - Llama-3.2-1B-Instruct-q4f16_1-MLC (Meta 1B模型)
-    // - gemma-2b-it-q4f16_1-MLC (Google 2B模型)
+    // 推荐轻量级模型（按体积排序）:
+    // 1. Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC (~300MB) - 最轻量，推荐
+    // 2. gemma-2b-it-q4f16_1-MLC (~500MB) - Google 模型
+    // 3. Llama-3.2-1B-Instruct-q4f16_1-MLC (~600MB) - Meta 模型
+    // 4. Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC (~800MB) - 质量更好
     MODEL_ID: 'Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC',
 
-    // 模型下载地址
-    MODEL_URL: 'https://huggingface.co/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC',
+    // ============================================
+    // 【关键配置】模型文件基础 URL
+    // ============================================
+    // 选项 1: 使用 GitHub Pages 本地模型（推荐）
+    // MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models',
+    //
+    // 选项 2: 使用原始 HuggingFace CDN（需要网络畅通）
+    MODEL_BASE_URL: 'https://huggingface.co/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
+    //
+    // 选项 3: 使用镜像加速
+    // MODEL_BASE_URL: 'https://hf-mirror.com/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
+
+    // 是否使用本地模型（影响加载方式）
+    USE_LOCAL_MODEL: false,
 
     // 生成参数配置
     GENERATION_CONFIG: {
         temperature: 0.7,      // 温度参数，控制创造性
         top_p: 0.9,            // 核采样参数
         max_tokens: 2048,      // 最大生成 token 数
-        repetition_penalty: 1.1 // 重复惩罚
     },
 
     // 超时配置（毫秒）
@@ -42,6 +67,61 @@ const AI_CONFIG = {
         GENERATION: 120000     // 生成超时：2分钟
     }
 };
+
+/**
+ * ============================================
+ * 自定义模型记录配置
+ * ============================================
+ * 定义模型文件的加载路径和参数
+ * 用于从 GitHub Pages 本地资源加载模型
+ */
+function createCustomModelRecord(baseUrl, modelId) {
+    // 模型文件列表 - Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC
+    // 这些文件需要从 HuggingFace 下载并放入仓库 models/ 目录
+    const modelFiles = [
+        'params_shard_0.bin',
+        'params_shard_1.bin',
+        'params_shard_2.bin',
+        'params_shard_3.bin',
+        'tokenizer.json',
+        'tokenizer_config.json',
+        'mlc-chat-config.json',
+        'ndarray-cache.json'
+    ];
+
+    // 构建文件 URL 映射
+    const modelLibs = [];
+    const tokenizerFiles = [];
+
+    modelFiles.forEach(file => {
+        const url = `${baseUrl}/${file}`;
+        if (file.includes('shard') || file === 'ndarray-cache.json') {
+            modelLibs.push(url);
+        } else {
+            tokenizerFiles.push(url);
+        }
+    });
+
+    return {
+        model: modelId,
+        model_id: modelId,
+        model_lib: `${baseUrl}/model_lib.wasm`,
+        model_url: baseUrl,
+        tokenizer: `${baseUrl}/tokenizer.json`,
+        tokenizer_config: `${baseUrl}/tokenizer_config.json`,
+        chat_config: {
+            context_window_size: 4096,
+            prefill_chunk_size: 1024,
+            temperature: AI_CONFIG.GENERATION_CONFIG.temperature,
+            top_p: AI_CONFIG.GENERATION_CONFIG.top_p,
+            repetition_penalty: 1.0,
+        },
+        // 自定义加载参数
+        overrides: {
+            context_window_size: 4096,
+        }
+    };
+}
 
 /**
  * 知识卡片分隔符
@@ -246,12 +326,34 @@ class AICardGenerator {
                 context_window_size: 4096,
             };
 
-            // 创建引擎
-            this.state.engine = await CreateMLCEngine(
-                this.config.MODEL_ID,
-                engineConfig,
-                chatConfig
-            );
+            // 检查是否使用本地模型
+            if (this.config.USE_LOCAL_MODEL) {
+                console.log('使用本地模型模式');
+                console.log('模型基础URL:', this.config.MODEL_BASE_URL);
+
+                // 创建自定义模型记录
+                const customModelRecord = createCustomModelRecord(
+                    this.config.MODEL_BASE_URL,
+                    this.config.MODEL_ID
+                );
+                console.log('自定义模型记录:', customModelRecord);
+
+                // 使用自定义模型记录创建引擎
+                // WebLLM v0.2.x 支持通过 modelRecord 参数指定自定义模型
+                this.state.engine = await CreateMLCEngine(
+                    customModelRecord,
+                    engineConfig,
+                    chatConfig
+                );
+            } else {
+                // 使用默认模型（从 HuggingFace 下载）
+                console.log('使用默认模型模式（从 HuggingFace 下载）');
+                this.state.engine = await CreateMLCEngine(
+                    this.config.MODEL_ID,
+                    engineConfig,
+                    chatConfig
+                );
+            }
 
             this.state.isReady = true;
             this.state.initError = null;

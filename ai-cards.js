@@ -42,16 +42,13 @@ const AI_CONFIG = {
     // ============================================
     // 【关键配置】模型文件基础 URL
     // ============================================
-    // 【修改1】使用 HuggingFace 国内镜像（最稳定）
-    // 虽然你上传到了 GitHub Release，但 GitHub 有 CORS 限制
-    // 建议方案：
-    // 1. 使用 hf-mirror.com 国内镜像（当前配置）
-    // 2. 将模型文件放入仓库 main 分支，用 jsDelivr 加速
-    // 3. 使用自己的服务器/对象存储
-    MODEL_BASE_URL: 'https://hf-mirror.com/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
+    // 【修改1】使用 WebLLM 官方模型仓库
+    // WebLLM 会自动从官方源加载模型，使用内置的模型列表
+    // 无需配置自定义 URL，最稳定可靠
+    MODEL_BASE_URL: '',  // 留空表示使用 WebLLM 默认源
     //
-    // 备用：如果用 GitHub Release，需要解决 CORS 问题
-    // MODEL_BASE_URL: 'https://ghproxy.com/https://github.com/zzky134/markdown-notebook/releases/download/v1.0.0-model',
+    // 备用方案（如果官方源不稳定）：
+    // MODEL_BASE_URL: 'https://huggingface.co/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
     //
     // 其他选项（备用）：
     // 选项 2: 使用国内镜像
@@ -59,10 +56,10 @@ const AI_CONFIG = {
     // 选项 3: 使用 GitHub Pages 本地模型
     // MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/qwen2.5-coder-0.5b',
 
-    // 【修改2】启用本地模型加载模式
-    // true = 使用 MODEL_BASE_URL 指定的地址加载模型
-    // false = 使用 WebLLM 默认的 HuggingFace CDN
-    USE_LOCAL_MODEL: true,
+    // 【修改2】模型加载模式
+    // false = 使用 WebLLM 内置模型列表（推荐，最稳定）
+    // true = 使用自定义 MODEL_BASE_URL（需要解决 CORS）
+    USE_LOCAL_MODEL: false,
 
     // 当模型加载失败时，是否自动切换到模拟模式
     AUTO_FALLBACK_TO_MOCK: true,
@@ -345,34 +342,28 @@ class AICardGenerator {
                 console.log('【模型加载】模型基础URL:', this.config.MODEL_BASE_URL);
                 console.log('【模型加载】模型ID:', this.config.MODEL_ID);
 
-                // 创建自定义模型记录
-                const customModelRecord = createCustomModelRecord(
-                    this.config.MODEL_BASE_URL,
-                    this.config.MODEL_ID
-                );
-                console.log('【模型加载】自定义模型记录:', customModelRecord);
+                // 【修改4】使用 WebLLM 的自定义模型列表功能
+                // 通过 appConfig 参数传入自定义模型配置
+                const customAppConfig = {
+                    model_list: [
+                        {
+                            model: this.config.MODEL_ID,
+                            model_id: this.config.MODEL_ID,
+                            model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_30/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC-webgpu.wasm',
+                            overrides: {
+                                context_window_size: 4096,
+                            }
+                        }
+                    ]
+                };
 
-                // 【修改4】验证模型文件是否可访问
-                try {
-                    const testUrl = `${this.config.MODEL_BASE_URL}/mlc-chat-config.json`;
-                    console.log('【模型加载】测试模型文件可访问性:', testUrl);
-                    const response = await fetch(testUrl, { method: 'HEAD' });
-                    if (response.ok) {
-                        console.log('【模型加载】模型文件可访问 ✓');
-                    } else {
-                        console.warn('【模型加载】模型文件可能无法访问，状态码:', response.status);
-                    }
-                } catch (e) {
-                    console.warn('【模型加载】无法验证模型文件可访问性:', e.message);
-                }
-
-                // 使用自定义模型记录创建引擎
-                // WebLLM v0.2.x 支持通过 modelRecord 参数指定自定义模型
+                // 创建引擎，传入自定义 appConfig
                 console.log('【模型加载】开始创建引擎...');
                 this.state.engine = await CreateMLCEngine(
-                    customModelRecord,
+                    this.config.MODEL_ID,
                     engineConfig,
-                    chatConfig
+                    chatConfig,
+                    customAppConfig  // 传入自定义配置
                 );
                 console.log('【模型加载】引擎创建成功 ✓');
             } else {

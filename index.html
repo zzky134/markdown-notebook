@@ -2293,7 +2293,7 @@
                 </button>
             </div>
             <div class="sidebar-actions" style="padding-top: 0;">
-                <button class="btn btn-secondary" onclick="aiCardGeneratorUI.openModal()" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;">
+                <button class="btn btn-secondary" onclick="if(typeof aiCardGeneratorUI!=='undefined'){aiCardGeneratorUI.openModal()}else{alert('AI模块加载中，请稍后重试')}" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;"
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>

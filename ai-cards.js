@@ -1206,3 +1206,6 @@ window.aiCardGeneratorUI = aiCardGeneratorUI;
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { AICardGenerator, AICardGeneratorUI, aiCardGenerator, aiCardGeneratorUI };
 }
+
+// 确保全局变量已定义
+console.log('ai-cards.js loaded, aiCardGeneratorUI:', typeof window.aiCardGeneratorUI);

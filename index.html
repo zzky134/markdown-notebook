@@ -873,6 +873,169 @@
             border-radius: 3px;
         }
 
+        /* 模板库样式 */
+        .template-library-modal {
+            width: 700px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .template-library-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .template-library-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .template-card {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--card-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .template-card-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .template-card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .template-card-category {
+            font-size: 12px;
+            color: var(--primary-color);
+            background: rgba(79, 70, 229, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .template-card-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .template-card-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        /* 模板预览模态框 */
+        .template-preview-modal {
+            width: 600px;
+            max-width: 90vw;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-preview-content {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: var(--text-primary);
+        }
+
+        .template-preview-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 模板库移动端适配 */
+        @media (max-width: 768px) {
+            .template-library-modal,
+            .template-preview-modal {
+                width: 95vw;
+                max-height: 85vh;
+                margin: 20px;
+            }
+
+            .template-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .template-card {
+                padding: 16px;
+            }
+
+            .template-card-icon {
+                font-size: 32px;
+            }
+
+            .template-preview-content {
+                max-height: 300px;
+                font-size: 12px;
+            }
+        }
+
         /* 响应式 */
         @media (max-width: 768px) {
             .sidebar {
@@ -1305,6 +1468,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
                     </svg>
                 </button>
+                <button class="btn-icon" onclick="app.openTemplateLibrary()" title="模板库">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                    </svg>
+                </button>
             </div>
             <div class="sidebar-actions" id="pwaInstallBtn" style="display: none; padding-top: 0;">
                 <button class="btn btn-primary" onclick="installPWA()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 100%; justify-content: center; animation: pulse 2s infinite;">
@@ -1437,6 +1605,39 @@
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="app.closeModal('notebookModal')">取消</button>
                 <button class="btn btn-primary" onclick="app.confirmCreateNotebook()">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模板库模态框 -->
+    <div class="modal" id="templateLibraryModal">
+        <div class="modal-content template-library-modal">
+            <div class="template-library-header">
+                <div class="modal-title">📚 模板库</div>
+                <button class="close-btn" onclick="app.closeModal('templateLibraryModal')">&times;</button>
+            </div>
+            <div class="template-library-desc">
+                选择合适的模板，快速开始你的笔记
+            </div>
+            <div class="template-grid" id="templateGrid">
+                <!-- 模板卡片动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 模板预览/确认模态框 -->
+    <div class="modal" id="templatePreviewModal">
+        <div class="modal-content template-preview-modal">
+            <div class="template-library-header">
+                <div class="modal-title" id="previewTemplateTitle">模板预览</div>
+                <button class="close-btn" onclick="app.closeModal('templatePreviewModal')">&times;</button>
+            </div>
+            <div class="template-preview-content" id="templatePreviewContent">
+                <!-- 模板内容预览 -->
+            </div>
+            <div class="template-preview-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('templatePreviewModal')">取消</button>
+                <button class="btn btn-primary" onclick="app.insertTemplateContent()">使用此模板</button>
             </div>
         </div>
     </div>
@@ -2598,6 +2799,122 @@ $$
             closeModal(id) {
                 document.getElementById(id).classList.remove('active');
             }
+
+            // ========== 模板库功能 ==========
+
+            // 打开模板库
+            openTemplateLibrary() {
+                this.renderTemplateLibrary();
+                document.getElementById('templateLibraryModal').classList.add('active');
+            }
+
+            // 渲染模板库
+            renderTemplateLibrary() {
+                const grid = document.getElementById('templateGrid');
+                if (!grid || typeof markdownTemplates === 'undefined') return;
+
+                grid.innerHTML = '';
+
+                Object.values(markdownTemplates).forEach(template => {
+                    const card = document.createElement('div');
+                    card.className = 'template-card';
+                    card.onclick = () => this.previewTemplate(template.id);
+
+                    card.innerHTML = `
+                        <div class="template-card-icon">${template.icon}</div>
+                        <div class="template-card-name">${template.name}</div>
+                        <div class="template-card-category">${template.category}</div>
+                        <div class="template-card-desc">${template.description}</div>
+                    `;
+
+                    grid.appendChild(card);
+                });
+            }
+
+            // 预览模板
+            previewTemplate(templateId) {
+                if (typeof markdownTemplates === 'undefined') return;
+
+                const template = markdownTemplates[templateId];
+                if (!template) return;
+
+                this.selectedTemplateId = templateId;
+
+                document.getElementById('previewTemplateTitle').textContent = `${template.icon} ${template.name}`;
+                document.getElementById('templatePreviewContent').textContent = template.content;
+                document.getElementById('templatePreviewModal').classList.add('active');
+            }
+
+            // 插入模板内容到编辑器
+            insertTemplateContent() {
+                if (!this.selectedTemplateId || typeof markdownTemplates === 'undefined') {
+                    this.closeModal('templatePreviewModal');
+                    return;
+                }
+
+                const template = markdownTemplates[this.selectedTemplateId];
+                if (!template) {
+                    this.closeModal('templatePreviewModal');
+                    return;
+                }
+
+                // 如果没有打开的笔记，先创建一个新笔记
+                if (!this.currentNoteId) {
+                    this.createNote();
+                }
+
+                const editor = document.getElementById('editor');
+                if (!editor) {
+                    this.closeModal('templatePreviewModal');
+                    return;
+                }
+
+                // 获取当前光标位置
+                const cursorPos = editor.selectionStart;
+                const textBefore = editor.value.substring(0, cursorPos);
+                const textAfter = editor.value.substring(cursorPos);
+
+                // 插入模板内容
+                const content = template.content;
+                editor.value = textBefore + content + textAfter;
+
+                // 设置光标位置到插入内容的末尾
+                const newCursorPos = cursorPos + content.length;
+                editor.setSelectionRange(newCursorPos, newCursorPos);
+                editor.focus();
+
+                // 更新预览和保存
+                this.updatePreview();
+                this.saveCurrentNote();
+                this.updateStats();
+
+                // 关闭模态框
+                this.closeModal('templatePreviewModal');
+                this.closeModal('templateLibraryModal');
+
+                // 显示成功提示
+                this.showTemplateFeedback();
+            }
+
+            // 显示模板插入成功反馈
+            showTemplateFeedback() {
+                const tooltip = document.getElementById('helpTooltip');
+                if (!tooltip) return;
+
+                const originalHTML = tooltip.innerHTML;
+                tooltip.innerHTML = `
+                    <strong>模板已插入！</strong><br>
+                    将【】中的内容替换为你自己的笔记
+                `;
+                tooltip.style.background = '#10b981';
+                tooltip.classList.add('active');
+
+                setTimeout(() => {
+                    tooltip.innerHTML = originalHTML;
+                    tooltip.style.background = '';
+                    tooltip.classList.remove('active');
+                }, 3000);
+            }
         }
 
         // 注册 Service Worker
@@ -2888,5 +3205,7 @@ $$
         // 初始化移动端
         app.initMobile();
     </script>
+    <!-- 引入模板库 -->
+    <script src="templates.js"></script>
 </body>
 </html>

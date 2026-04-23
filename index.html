@@ -1410,17 +1410,30 @@
             .schedule-toolbar .dropdown-menu {
                 position: fixed;
                 top: auto;
-                bottom: 80px;
+                bottom: 70px;
                 left: 50%;
                 transform: translateX(-50%);
                 width: 90%;
                 max-width: 280px;
                 z-index: 2000;
                 display: none;
+                margin-bottom: 0;
             }
 
             .schedule-toolbar .dropdown.active .dropdown-menu {
                 display: block;
+            }
+
+            /* 课表工具栏移动端适配 */
+            .schedule-toolbar {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .schedule-toolbar .btn {
+                flex: 1;
+                min-width: 120px;
             }
         }
 

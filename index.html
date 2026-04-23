@@ -1689,10 +1689,12 @@
         }
 
         /* 桌面端隐藏移动元素 */
-        .mobile-nav,
-        .mobile-menu-btn,
-        .mobile-tabs {
-            display: none;
+        @media (min-width: 769px) {
+            .mobile-nav,
+            .mobile-menu-btn,
+            .mobile-tabs {
+                display: none;
+            }
         }
 
         /* 触摸优化 - 确保移动端按钮足够大 */

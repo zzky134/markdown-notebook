@@ -1008,6 +1008,381 @@
             gap: 12px;
         }
 
+        /* ==================== AI 知识卡片生成模块样式 ==================== */
+
+        /* AI 卡片生成模态框 */
+        .ai-card-modal {
+            width: 700px;
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        /* 模态框头部 */
+        .ai-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .ai-modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-modal-title svg {
+            color: #8b5cf6;
+        }
+
+        .ai-modal-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 输入区域 */
+        .ai-input-section {
+            margin-bottom: 16px;
+        }
+
+        .ai-section-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .ai-textarea {
+            width: 100%;
+            min-height: 150px;
+            max-height: 250px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            background: var(--editor-bg);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .ai-textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .ai-textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .ai-textarea:disabled {
+            background: var(--hover-bg);
+            cursor: not-allowed;
+        }
+
+        .ai-input-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* 生成按钮 */
+        .ai-generate-btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .ai-generate-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .ai-generate-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .ai-generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #a78bfa 0%, #a78bfa 100%);
+        }
+
+        /* 加载状态动画 */
+        .ai-generate-btn.loading .ai-btn-text::after {
+            content: '';
+            animation: ai-loading-dots 1.5s infinite;
+        }
+
+        @keyframes ai-loading-dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* 状态区域 */
+        .ai-status-area {
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .ai-status-area.active {
+            display: block;
+        }
+
+        .ai-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--hover-bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .ai-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .ai-status-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .ai-error-text {
+            color: #ef4444;
+        }
+
+        /* 结果区域 */
+        .ai-result-area {
+            display: none;
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .ai-result-area.active {
+            display: block;
+        }
+
+        .ai-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .ai-result-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ai-card-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--hover-bg);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        /* 卡片容器 */
+        .ai-cards-container {
+            max-height: 350px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            padding-right: 4px;
+        }
+
+        .ai-cards-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ai-cards-container::-webkit-scrollbar-track {
+            background: var(--hover-bg);
+            border-radius: 3px;
+        }
+
+        .ai-cards-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        /* 单个卡片项 */
+        .ai-card-item {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .ai-card-item:hover {
+            border-color: #8b5cf6;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+        }
+
+        .ai-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .ai-card-number {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .ai-card-front,
+        .ai-card-back {
+            margin-bottom: 10px;
+        }
+
+        .ai-card-front {
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .ai-card-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .ai-card-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .ai-card-content strong {
+            color: var(--primary-color);
+        }
+
+        .ai-card-content code {
+            background: var(--hover-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        /* 结果操作按钮 */
+        .ai-result-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .ai-result-actions .btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Toast 提示 */
+        .ai-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .ai-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .ai-toast.success {
+            background: #10b981;
+        }
+
+        .ai-toast.error {
+            background: #ef4444;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .ai-card-modal {
+                width: 100%;
+                max-width: 100%;
+                max-height: 90vh;
+                margin: 0;
+                border-radius: 12px 12px 0 0;
+            }
+
+            .ai-textarea {
+                min-height: 120px;
+            }
+
+            .ai-cards-container {
+                max-height: 280px;
+            }
+
+            .ai-result-actions {
+                flex-wrap: wrap;
+            }
+
+            .ai-result-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* 暗色模式支持（如果项目支持） */
+        @media (prefers-color-scheme: dark) {
+            .ai-card-item {
+                background: var(--card-bg);
+            }
+        }
+
         /* ==================== 课表模块样式 ==================== */
         .schedule-view {
             flex: 1;
@@ -1917,6 +2292,14 @@
                     我的课表
                 </button>
             </div>
+            <div class="sidebar-actions" style="padding-top: 0;">
+                <button class="btn btn-secondary" onclick="aiCardGeneratorUI.openModal()" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    AI 生成卡片
+                </button>
+            </div>
             <div class="sidebar-actions" id="pwaInstallBtn" style="display: none; padding-top: 0;">
                 <button class="btn btn-primary" onclick="installPWA()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 100%; justify-content: center; animation: pulse 2s infinite;">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2081,6 +2464,92 @@
             <div class="template-preview-actions">
                 <button class="btn btn-secondary" onclick="app.closeModal('templatePreviewModal')">取消</button>
                 <button class="btn btn-primary" onclick="app.insertTemplateContent()">使用此模板</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 知识卡片生成模态框 -->
+    <div class="modal" id="aiCardModal">
+        <div class="modal-content ai-card-modal">
+            <div class="ai-modal-header">
+                <div class="ai-modal-title">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    AI 知识卡片生成
+                </div>
+                <button class="close-btn" id="aiCloseBtn">&times;</button>
+            </div>
+
+            <div class="ai-modal-desc">
+                使用本地 AI 模型将笔记转换为知识卡片。所有处理在浏览器内完成，无需联网。
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="ai-input-section">
+                <label class="ai-section-label">输入课堂笔记</label>
+                <textarea
+                    class="ai-textarea"
+                    id="aiCardInput"
+                    placeholder="请粘贴你的课堂笔记、学习材料或任何需要整理的内容...
+
+例如：
+JavaScript 是一种轻量级的解释型编程语言。它是一门基于原型、多范式的动态脚本语言，支持面向对象、命令式和声明式（如函数式编程）风格。
+
+JavaScript 在网页开发中主要用于：
+1. 操作 DOM 元素
+2. 处理用户交互
+3. 发送网络请求
+4. 存储本地数据"
+                ></textarea>
+                <div class="ai-input-hint">建议输入 100-3000 字的笔记内容，AI 将自动生成 3-10 张知识卡片</div>
+            </div>
+
+            <!-- 生成按钮 -->
+            <button class="ai-generate-btn" id="aiGenerateBtn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <span class="ai-btn-text">生成知识卡片</span>
+            </button>
+
+            <!-- 状态显示区域 -->
+            <div class="ai-status-area" id="aiStatusArea">
+                <div class="ai-progress-bar">
+                    <div class="ai-progress-fill" id="aiProgressBar"></div>
+                </div>
+                <div class="ai-status-text" id="aiStatusText">准备就绪</div>
+            </div>
+
+            <!-- 结果区域 -->
+            <div class="ai-result-area" id="aiResultArea">
+                <div class="ai-result-header">
+                    <span class="ai-result-title">生成结果</span>
+                    <span class="ai-card-count" id="aiCardCount"></span>
+                </div>
+                <div class="ai-cards-container" id="aiCardsContainer">
+                    <!-- 卡片动态生成 -->
+                </div>
+                <div class="ai-result-actions">
+                    <button class="btn btn-secondary" id="aiCopyBtn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        复制
+                    </button>
+                    <button class="btn btn-primary" id="aiInsertBtn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        插入到笔记
+                    </button>
+                    <button class="btn btn-secondary" id="aiRegenerateBtn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        重新生成
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -3364,6 +3833,65 @@ $$
                     tooltip.classList.remove('active');
                 }, 3000);
             }
+
+            // 插入 AI 生成的知识卡片
+            insertAICards(markdown) {
+                if (!markdown || markdown.trim().length === 0) {
+                    return;
+                }
+
+                // 如果没有打开的笔记，先创建一个新笔记
+                if (!this.currentNoteId) {
+                    this.createNote();
+                }
+
+                const editor = document.getElementById('editor');
+                if (!editor) {
+                    return;
+                }
+
+                // 获取当前光标位置
+                const cursorPos = editor.selectionStart;
+                const textBefore = editor.value.substring(0, cursorPos);
+                const textAfter = editor.value.substring(cursorPos);
+
+                // 准备插入内容（添加前后换行）
+                const contentToInsert = '\n\n' + markdown.trim() + '\n\n';
+                editor.value = textBefore + contentToInsert + textAfter;
+
+                // 设置光标位置到插入内容的末尾
+                const newCursorPos = cursorPos + contentToInsert.length;
+                editor.setSelectionRange(newCursorPos, newCursorPos);
+                editor.focus();
+
+                // 更新预览和保存
+                this.updatePreview();
+                this.saveCurrentNote();
+                this.updateStats();
+
+                // 显示成功提示
+                this.showAICardsFeedback();
+            }
+
+            // 显示 AI 卡片插入成功反馈
+            showAICardsFeedback() {
+                const tooltip = document.getElementById('helpTooltip');
+                if (!tooltip) return;
+
+                const originalHTML = tooltip.innerHTML;
+                tooltip.innerHTML = `
+                    <strong>AI 卡片已插入！</strong><br>
+                    点击"卡片复习"开始记忆
+                `;
+                tooltip.style.background = '#8b5cf6';
+                tooltip.classList.add('active');
+
+                setTimeout(() => {
+                    tooltip.innerHTML = originalHTML;
+                    tooltip.style.background = '';
+                    tooltip.classList.remove('active');
+                }, 3000);
+            }
         }
 
         // 注册 Service Worker
@@ -3665,5 +4193,6 @@ $$
     <!-- 引入模板库 -->
     <script src="templates.js"></script>
     <script src="schedule.js"></script>
+    <script src="ai-cards.js"></script>
 </body>
 </html>

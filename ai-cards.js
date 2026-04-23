@@ -42,12 +42,13 @@ const AI_CONFIG = {
     // ============================================
     // 【关键配置】模型文件基础 URL
     // ============================================
-    // 【修改1】使用 WebLLM 官方模型仓库
-    // WebLLM 会自动从官方源加载模型，使用内置的模型列表
-    // 无需配置自定义 URL，最稳定可靠
-    MODEL_BASE_URL: '',  // 留空表示使用 WebLLM 默认源
+    // 【修改1】使用 GitHub Pages 本地模型（已上传模型文件到仓库）
+    // 模型文件位于: models/qwen2.5-coder-0.5b/
+    // 通过 GitHub Pages 访问，无 CORS 问题
+    MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/qwen2.5-coder-0.5b',
     //
-    // 备用方案（如果官方源不稳定）：
+    // 备用方案：
+    // MODEL_BASE_URL: '',  // 使用 WebLLM 官方源
     // MODEL_BASE_URL: 'https://huggingface.co/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
     //
     // 其他选项（备用）：
@@ -56,10 +57,10 @@ const AI_CONFIG = {
     // 选项 3: 使用 GitHub Pages 本地模型
     // MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/qwen2.5-coder-0.5b',
 
-    // 【修改2】模型加载模式
-    // false = 使用 WebLLM 内置模型列表（推荐，最稳定）
-    // true = 使用自定义 MODEL_BASE_URL（需要解决 CORS）
-    USE_LOCAL_MODEL: false,
+    // 【修改2】启用本地模型加载模式
+    // true = 使用 MODEL_BASE_URL 指定的本地路径加载模型（已配置）
+    // false = 使用 WebLLM 内置模型列表
+    USE_LOCAL_MODEL: true,
 
     // 当模型加载失败时，是否自动切换到模拟模式
     AUTO_FALLBACK_TO_MOCK: true,

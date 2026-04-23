@@ -42,9 +42,16 @@ const AI_CONFIG = {
     // ============================================
     // 【关键配置】模型文件基础 URL
     // ============================================
-    // 【修改1】使用 GitHub Releases 托管模型文件
-    // 用户已将模型文件上传到 Release v1.0.0-model
-    MODEL_BASE_URL: 'https://github.com/zzky134/markdown-notebook/releases/download/v1.0.0-model',
+    // 【修改1】使用 HuggingFace 国内镜像（最稳定）
+    // 虽然你上传到了 GitHub Release，但 GitHub 有 CORS 限制
+    // 建议方案：
+    // 1. 使用 hf-mirror.com 国内镜像（当前配置）
+    // 2. 将模型文件放入仓库 main 分支，用 jsDelivr 加速
+    // 3. 使用自己的服务器/对象存储
+    MODEL_BASE_URL: 'https://hf-mirror.com/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
+    //
+    // 备用：如果用 GitHub Release，需要解决 CORS 问题
+    // MODEL_BASE_URL: 'https://ghproxy.com/https://github.com/zzky134/markdown-notebook/releases/download/v1.0.0-model',
     //
     // 其他选项（备用）：
     // 选项 2: 使用国内镜像

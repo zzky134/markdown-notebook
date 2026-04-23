@@ -265,6 +265,25 @@ class AICardGenerator {
             this.state.initError = error.message;
             console.error('AI 引擎初始化失败:', error);
 
+            // 检查是否是网络/缓存错误
+            const isNetworkError = error.message?.includes('network') ||
+                                   error.message?.includes('Cache') ||
+                                   error.message?.includes('fetch') ||
+                                   error.message?.includes('Failed to fetch');
+
+            if (isNetworkError) {
+                console.warn('检测到网络错误，建议使用模拟模式');
+                // 自动切换到模拟模式
+                window.AI_MOCK_MODE = true;
+                this.state.engine = this.createMockEngine();
+                this.state.isReady = true;
+                this.state.initError = null;
+                if (onProgress) {
+                    onProgress(100, '已切换到演示模式（网络受限）');
+                }
+                return true;
+            }
+
             // 如果启用模拟模式，使用模拟引擎
             if (window.AI_MOCK_MODE) {
                 console.warn('使用模拟模式');
@@ -857,7 +876,9 @@ class AICardGeneratorUI {
 
         // 更新卡片计数
         if (this.elements.cardCount) {
-            this.elements.cardCount.textContent = `共生成 ${this.generatedCards.length} 张卡片`;
+            const mockBadge = window.AI_MOCK_MODE ?
+                ' <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">演示模式</span>' : '';
+            this.elements.cardCount.innerHTML = `共生成 ${this.generatedCards.length} 张卡片${mockBadge}`;
         }
     }
 

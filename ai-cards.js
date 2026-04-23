@@ -37,15 +37,18 @@ const AI_CONFIG = {
     // 2. gemma-2b-it-q4f16_1-MLC (~500MB) - Google 模型
     // 3. Llama-3.2-1B-Instruct-q4f16_1-MLC (~600MB) - Meta 模型
     // 4. Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC (~800MB) - 质量更好
-    MODEL_ID: 'Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC',
+    // 【升级】使用 Llama-3.2-1B 模型（推理能力更强）
+    // 原模型: Qwen2.5-Coder-0.5B (190MB, 推理能力较弱)
+    // 新模型: Llama-3.2-1B (210MB, 推理能力更强)
+    MODEL_ID: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
 
     // ============================================
     // 【关键配置】模型文件基础 URL
     // ============================================
     // 【修改1】使用 GitHub Pages 本地模型（已上传模型文件到仓库）
-    // 模型文件位于: models/qwen2.5-coder-0.5b/
+    // 模型文件位于: models/llama-3.2-1b/
     // 通过 GitHub Pages 访问，无 CORS 问题
-    MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/qwen2.5-coder-0.5b',
+    MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/llama-3.2-1b',
     //
     // 备用方案：
     // MODEL_BASE_URL: '',  // 使用 WebLLM 官方源

@@ -42,18 +42,18 @@ const AI_CONFIG = {
     // ============================================
     // 【关键配置】模型文件基础 URL
     // ============================================
-    // 选项 1: 使用 GitHub Pages 本地模型（推荐）
-    // MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models',
+    // 选项 1: 使用 GitHub Pages 本地模型（推荐，需上传模型文件）
+    MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/qwen2.5-coder-0.5b',
     //
-    // 选项 2: 使用原始 HuggingFace CDN（需要网络畅通）
-    MODEL_BASE_URL: 'https://huggingface.co/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
+    // 选项 2: 使用 GitHub Releases（推荐，上传模型到 Release）
+    // MODEL_BASE_URL: 'https://github.com/zzky134/markdown-notebook/releases/download/v1.0.0-model',
     //
     // 选项 3: 使用镜像加速
     // MODEL_BASE_URL: 'https://hf-mirror.com/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
 
     // 是否使用本地模型（影响加载方式）
-    // 注意：设置为 true 前，请确保已将模型文件上传到仓库 models/ 目录
-    USE_LOCAL_MODEL: false,
+    // 注意：设置为 true 前，请确保已将模型文件上传到仓库 models/ 目录或 Release
+    USE_LOCAL_MODEL: true,
 
     // 当模型加载失败时，是否自动切换到模拟模式
     AUTO_FALLBACK_TO_MOCK: true,

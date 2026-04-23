@@ -18,6 +18,7 @@
  */
 const AI_CONFIG = {
     // 模型名称 - 使用轻量级 0.5B 参数模型，适合浏览器运行
+    // 使用 WebLLM 支持的模型 ID
     MODEL_ID: 'Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC',
 
     // 模型下载地址
@@ -33,7 +34,7 @@ const AI_CONFIG = {
 
     // 超时配置（毫秒）
     TIMEOUT: {
-        MODEL_LOAD: 300000,    // 模型加载超时：5分钟
+        MODEL_LOAD: 600000,    // 模型加载超时：10分钟
         GENERATION: 120000     // 生成超时：2分钟
     }
 };
@@ -206,28 +207,46 @@ class AICardGenerator {
 
         try {
             // 动态导入 WebLLM
-            const { CreateMLCEngine } = await import(
+            const webllm = await import(
                 'https://esm.run/@mlc-ai/web-llm@0.2.76'
             );
+
+            // 检查导入的内容
+            console.log('WebLLM imported:', webllm);
+
+            // 获取 CreateMLCEngine 函数
+            const CreateMLCEngine = webllm.CreateMLCEngine || webllm.default?.CreateMLCEngine;
+
+            if (!CreateMLCEngine) {
+                throw new Error('无法加载 CreateMLCEngine，请检查 WebLLM 版本');
+            }
+
+            // 创建引擎 - WebLLM v0.2.x 使用新的 API
+            const engineConfig = {
+                // 初始化进度回调
+                initProgressCallback: (progress) => {
+                    console.log('WebLLM progress:', progress);
+                    const percent = progress.progress
+                        ? Math.round(progress.progress * 100)
+                        : 0;
+                    const message = progress.text || `加载中... ${percent}%`;
+
+                    if (onProgress) {
+                        onProgress(percent, message);
+                    }
+                }
+            };
+
+            // 创建设置
+            const chatConfig = {
+                context_window_size: 4096,
+            };
 
             // 创建引擎
             this.state.engine = await CreateMLCEngine(
                 this.config.MODEL_ID,
-                {
-                    // 初始化进度回调
-                    initProgressCallback: (progress) => {
-                        const percent = Math.round(progress.progress * 100);
-                        const message = progress.text || `加载中... ${percent}%`;
-
-                        if (onProgress) {
-                            onProgress(percent, message);
-                        }
-                    }
-                },
-                {
-                    // 模型配置
-                    context_window_size: 4096,
-                }
+                engineConfig,
+                chatConfig
             );
 
             this.state.isReady = true;
@@ -277,6 +296,8 @@ class AICardGenerator {
         ];
 
         try {
+            this.state.currentGeneration = true;
+
             // 设置生成超时
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => {
@@ -284,15 +305,32 @@ class AICardGenerator {
                 }, this.config.TIMEOUT.GENERATION);
             });
 
-            // 生成请求
-            const generationPromise = this.state.engine.chat.completions.create({
-                messages,
-                stream: true,
-                temperature: this.config.GENERATION_CONFIG.temperature,
-                top_p: this.config.GENERATION_CONFIG.top_p,
-                max_tokens: this.config.GENERATION_CONFIG.max_tokens,
-                repetition_penalty: this.config.GENERATION_CONFIG.repetition_penalty
-            });
+            // 检查引擎 API 格式
+            const engine = this.state.engine;
+            let generationPromise;
+
+            // WebLLM v0.2.x 使用 engine.chat.completions.create
+            if (engine.chat?.completions?.create) {
+                generationPromise = engine.chat.completions.create({
+                    messages,
+                    stream: true,
+                    temperature: this.config.GENERATION_CONFIG.temperature,
+                    top_p: this.config.GENERATION_CONFIG.top_p,
+                    max_tokens: this.config.GENERATION_CONFIG.max_tokens,
+                });
+            }
+            // 备用 API 格式
+            else if (engine.generate) {
+                generationPromise = engine.generate(messages, {
+                    stream: true,
+                    temperature: this.config.GENERATION_CONFIG.temperature,
+                    top_p: this.config.GENERATION_CONFIG.top_p,
+                    max_tokens: this.config.GENERATION_CONFIG.max_tokens,
+                });
+            }
+            else {
+                throw new Error('不支持的引擎 API 格式');
+            }
 
             // 竞争执行
             const stream = await Promise.race([generationPromise, timeoutPromise]);
@@ -301,7 +339,7 @@ class AICardGenerator {
 
             // 流式读取输出
             for await (const chunk of stream) {
-                const token = chunk.choices[0]?.delta?.content || '';
+                const token = chunk.choices?.[0]?.delta?.content || chunk.delta?.content || '';
                 fullResponse += token;
 
                 if (onToken) {
@@ -313,6 +351,8 @@ class AICardGenerator {
         } catch (error) {
             console.error('生成失败:', error);
             throw error;
+        } finally {
+            this.state.currentGeneration = false;
         }
     }
 
@@ -594,27 +634,46 @@ class AICardGeneratorUI {
             this.updateUIState('loading');
             this.generatedCards = [];
 
+            // 检查兼容性
+            const compatibility = this.ai.checkCompatibility();
+            if (!compatibility.compatible) {
+                throw new Error(compatibility.message);
+            }
+
             // 初始化 AI（如果尚未初始化）
             if (!this.ai.state.isReady) {
+                console.log('开始初始化 AI 引擎...');
                 await this.ai.initialize((progress, message) => {
+                    console.log(`加载进度: ${progress}% - ${message}`);
                     this.updateProgress(progress, message);
                 });
+                console.log('AI 引擎初始化完成');
             }
 
             this.updateProgress(0, '正在生成知识卡片...');
 
             // 生成卡片
+            console.log('开始生成卡片...');
             const result = await this.ai.generateCards(content, (token) => {
                 // 流式输出回调（可选，用于实时显示）
+                console.log('生成 token:', token);
             });
+            console.log('生成完成，原始结果:', result);
 
             // 解析卡片
             this.generatedCards = this.ai.parseCards(result);
+            console.log('解析后的卡片:', this.generatedCards);
 
             if (this.generatedCards.length === 0) {
-                this.showError('未能生成有效的知识卡片，请尝试重新生成或修改输入内容');
-                this.updateUIState('error');
-                return;
+                // 如果标准解析失败，尝试备用方法
+                console.log('标准解析失败，尝试备用解析...');
+                this.generatedCards = this.ai.parseCardsFallback(result);
+
+                if (this.generatedCards.length === 0) {
+                    this.showError('未能生成有效的知识卡片，请尝试重新生成或修改输入内容');
+                    this.updateUIState('error');
+                    return;
+                }
             }
 
             // 显示结果

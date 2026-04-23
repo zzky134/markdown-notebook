@@ -17,8 +17,12 @@
  * 使用 WebLLM 支持的 Qwen2.5-Coder 模型
  */
 const AI_CONFIG = {
-    // 模型名称 - 使用轻量级 0.5B 参数模型，适合浏览器运行
-    // 使用 WebLLM 支持的模型 ID
+    // 模型名称 - 使用 WebLLM 支持的模型 ID
+    // 可用的轻量级模型:
+    // - Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC (0.5B参数，适合低内存设备)
+    // - Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC (1.5B参数，质量更好)
+    // - Llama-3.2-1B-Instruct-q4f16_1-MLC (Meta 1B模型)
+    // - gemma-2b-it-q4f16_1-MLC (Google 2B模型)
     MODEL_ID: 'Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC',
 
     // 模型下载地址
@@ -260,10 +264,98 @@ class AICardGenerator {
         } catch (error) {
             this.state.initError = error.message;
             console.error('AI 引擎初始化失败:', error);
+
+            // 如果启用模拟模式，使用模拟引擎
+            if (window.AI_MOCK_MODE) {
+                console.warn('使用模拟模式');
+                this.state.engine = this.createMockEngine();
+                this.state.isReady = true;
+                this.state.initError = null;
+                return true;
+            }
+
             throw error;
         } finally {
             this.state.isLoading = false;
         }
+    }
+
+    /**
+     * 创建模拟引擎（用于演示或测试）
+     * @returns {Object} 模拟引擎对象
+     */
+    createMockEngine() {
+        return {
+            chat: {
+                completions: {
+                    create: async ({ messages }) => {
+                        // 模拟流式输出
+                        const userMessage = messages[messages.length - 1]?.content || '';
+
+                        // 简单的模拟响应
+                        const mockResponse = this.generateMockResponse(userMessage);
+
+                        // 创建异步迭代器模拟流式输出
+                        const chunks = mockResponse.split('').map((char, i) => ({
+                            choices: [{
+                                delta: { content: char }
+                            }]
+                        }));
+
+                        return {
+                            [Symbol.asyncIterator]: async function* () {
+                                for (const chunk of chunks) {
+                                    await new Promise(r => setTimeout(r, 10));
+                                    yield chunk;
+                                }
+                            }
+                        };
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * 生成模拟响应
+     * @param {string} userContent - 用户输入
+     * @returns {string} 模拟的 AI 响应
+     */
+    generateMockResponse(userContent) {
+        // 提取用户输入的前 50 个字符作为主题
+        const topic = userContent.substring(0, 50).replace(/\s+/g, ' ').trim();
+
+        return `---CARD_START---
+---FRONT---
+什么是 ${topic}？
+---BACK---
+${topic} 是一个重要的概念，需要深入理解和记忆。
+---CARD_END---
+
+---CARD_START---
+---FRONT---
+${topic} 的核心要点是什么？
+---BACK---
+1. 理解基本概念和定义
+2. 掌握关键公式和原理
+3. 能够应用到实际问题中
+4. 注意易错点和常见误区
+---CARD_END---
+
+---CARD_START---
+---FRONT---
+学习 ${topic} 时需要注意什么？
+---BACK---
+**重点内容：**
+- 仔细阅读教材和笔记
+- 多做练习题巩固知识
+- 及时复习避免遗忘
+- 建立知识之间的联系
+
+**易错提醒：**
+- 不要死记硬背，要理解原理
+- 注意区分相似概念
+---CARD_END---`;
     }
 
     /**
@@ -875,7 +967,18 @@ class AICardGeneratorUI {
      */
     showError(message) {
         if (this.elements.statusText) {
-            this.elements.statusText.innerHTML = `<span class="ai-error-text">${this.escapeHtml(message)}</span>`;
+            // 添加更友好的错误提示
+            let helpText = '';
+
+            if (message.includes('WebGPU') || message.includes('WebGL')) {
+                helpText = '<br><small style="color: var(--text-secondary);">请使用 Chrome 114+、Edge 114+ 或 Safari 17+ 浏览器</small>';
+            } else if (message.includes('加载') || message.includes('Load')) {
+                helpText = '<br><small style="color: var(--text-secondary);">模型首次加载需要下载约 300MB 数据，请耐心等待</small>';
+            } else if (message.includes('timeout') || message.includes('超时')) {
+                helpText = '<br><small style="color: var(--text-secondary);">网络连接较慢，请检查网络后重试</small>';
+            }
+
+            this.elements.statusText.innerHTML = `<span class="ai-error-text">${this.escapeHtml(message)}</span>${helpText}`;
         }
     }
 

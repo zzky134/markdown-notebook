@@ -52,7 +52,11 @@ const AI_CONFIG = {
     // MODEL_BASE_URL: 'https://hf-mirror.com/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
 
     // 是否使用本地模型（影响加载方式）
+    // 注意：设置为 true 前，请确保已将模型文件上传到仓库 models/ 目录
     USE_LOCAL_MODEL: false,
+
+    // 当模型加载失败时，是否自动切换到模拟模式
+    AUTO_FALLBACK_TO_MOCK: true,
 
     // 生成参数配置
     GENERATION_CONFIG: {
@@ -371,17 +375,29 @@ class AICardGenerator {
             const isNetworkError = error.message?.includes('network') ||
                                    error.message?.includes('Cache') ||
                                    error.message?.includes('fetch') ||
-                                   error.message?.includes('Failed to fetch');
+                                   error.message?.includes('Failed to fetch') ||
+                                   error.message?.includes('503') ||
+                                   error.message?.includes('502') ||
+                                   error.message?.includes('timeout') ||
+                                   error.message?.includes('ETIMEDOUT');
 
-            if (isNetworkError) {
-                console.warn('检测到网络错误，建议使用模拟模式');
+            const shouldUseMock = isNetworkError ||
+                                  this.config.AUTO_FALLBACK_TO_MOCK ||
+                                  window.AI_MOCK_MODE;
+
+            if (shouldUseMock) {
+                console.warn('检测到网络错误或配置为模拟模式，切换到演示模式');
+                console.warn('错误详情:', error.message);
+
                 // 自动切换到模拟模式
                 window.AI_MOCK_MODE = true;
                 this.state.engine = this.createMockEngine();
                 this.state.isReady = true;
                 this.state.initError = null;
+
                 if (onProgress) {
-                    onProgress(100, '已切换到演示模式（网络受限）');
+                    const reason = isNetworkError ? '网络受限' : '演示模式';
+                    onProgress(100, `已切换到${reason}（点击生成体验功能）`);
                 }
                 return true;
             }
@@ -1095,6 +1111,8 @@ class AICardGeneratorUI {
 
             if (message.includes('WebGPU') || message.includes('WebGL')) {
                 helpText = '<br><small style="color: var(--text-secondary);">请使用 Chrome 114+、Edge 114+ 或 Safari 17+ 浏览器</small>';
+            } else if (message.includes('503') || message.includes('502')) {
+                helpText = '<br><small style="color: var(--text-secondary);">GitHub Pages 服务暂时不可用，已自动切换到演示模式</small>';
             } else if (message.includes('加载') || message.includes('Load')) {
                 helpText = '<br><small style="color: var(--text-secondary);">模型首次加载需要下载约 300MB 数据，请耐心等待</small>';
             } else if (message.includes('timeout') || message.includes('超时')) {

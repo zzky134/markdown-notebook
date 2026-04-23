@@ -1400,6 +1400,28 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            /* 课表移动端 dropdown 优化 */
+            .schedule-toolbar .dropdown {
+                width: 100%;
+                position: relative;
+            }
+
+            .schedule-toolbar .dropdown-menu {
+                position: fixed;
+                top: auto;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 280px;
+                z-index: 2000;
+                display: none;
+            }
+
+            .schedule-toolbar .dropdown.active .dropdown-menu {
+                display: block;
+            }
         }
 
         /* 模板库移动端适配 */
@@ -1568,7 +1590,7 @@
 
             /* 移动端标签切换 */
             .mobile-tabs {
-                display: flex !important;
+                display: flex;
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -1577,6 +1599,10 @@
                 background: white;
                 border-bottom: 1px solid var(--border-color);
                 z-index: 40;
+            }
+
+            .mobile-tabs.hidden {
+                display: none !important;
             }
 
             .mobile-tab {
@@ -3530,15 +3556,17 @@ $$
             document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('nav' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
 
+            const mobileTabs = document.getElementById('mobileTabs');
+
             if (view === 'notes') {
-                document.getElementById('mobileTabs').style.display = 'flex';
+                mobileTabs.classList.remove('hidden');
                 if (scheduleApp) scheduleApp.switchToNotes();
                 this.updateMobileTabUI();
             } else if (view === 'schedule') {
-                document.getElementById('mobileTabs').style.display = 'none';
+                mobileTabs.classList.add('hidden');
                 if (scheduleApp) scheduleApp.showSchedule();
             } else if (view === 'cards') {
-                document.getElementById('mobileTabs').style.display = 'none';
+                mobileTabs.classList.add('hidden');
                 if (scheduleApp) scheduleApp.switchToNotes();
                 this.startCardReview();
             } else if (view === 'menu') {

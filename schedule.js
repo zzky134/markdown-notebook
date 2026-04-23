@@ -599,7 +599,7 @@ class ScheduleRenderer {
                     添加课程
                 </button>
                 <div class="dropdown" id="scheduleExportDropdown">
-                    <button class="btn btn-secondary" onclick="scheduleApp.toggleDropdown('scheduleExportDropdown')">
+                    <button class="btn btn-secondary" onclick="scheduleApp.toggleDropdown('scheduleExportDropdown', event)">
                         导入/导出
                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -632,12 +632,12 @@ class ScheduleRenderer {
 
     // 绑定事件
     bindEvents() {
-        // 点击外部关闭下拉菜单
+        // 点击外部关闭下拉菜单 - 使用捕获阶段避免冲突
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown')) {
                 document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
             }
-        });
+        }, true);
     }
 
     // 开始倒计时刷新
@@ -938,9 +938,21 @@ class ScheduleApp {
     }
 
     // 切换下拉菜单
-    toggleDropdown(id) {
+    toggleDropdown(id, event) {
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
         const dropdown = document.getElementById(id);
-        dropdown.classList.toggle('active');
+        if (dropdown) {
+            const isActive = dropdown.classList.contains('active');
+            // 先关闭所有 dropdown
+            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+            // 切换当前 dropdown
+            if (!isActive) {
+                dropdown.classList.add('active');
+            }
+        }
     }
 
     // 导入 CSV

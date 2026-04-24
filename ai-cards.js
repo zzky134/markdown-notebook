@@ -70,8 +70,8 @@ const AI_CONFIG = {
 
     // 生成参数配置
     GENERATION_CONFIG: {
-        temperature: 0.7,      // 温度参数，控制创造性
-        top_p: 0.9,            // 核采样参数
+        temperature: 0.1,      // 低温度，输出更确定
+        top_p: 0.5,            // 低核采样，减少随机性
         max_tokens: 2048,      // 最大生成 token 数
     },
 
@@ -153,39 +153,28 @@ const CARD_SEPARATORS = {
  * 用于指导 AI 生成知识卡片
  */
 const PROMPT_TEMPLATES = {
-    // 系统提示词 - 针对小模型优化，使用更明确的格式
-    SYSTEM: `你是一个知识卡片生成助手。将用户输入的内容转换为问答形式的知识卡片。
+    // 系统提示词 - 极简格式，小模型容易理解
+    SYSTEM: `你生成问答卡片。只输出问题和答案，格式如下：
 
-必须严格遵循以下格式：
-问题: [问题内容]
-答案: [答案内容]
+问题: [问题]
+答案: [答案]
 
-示例1：
-问题: 什么是JavaScript？
-答案: JavaScript是一种轻量级的解释型编程语言，主要用于网页开发。
+问题: [问题]
+答案: [答案]
 
-示例2：
-问题: 鸡兔同笼问题的解法是什么？
-答案: 设鸡有x只，兔有y只，根据题意列方程组求解。
-
-要求：
-1. 必须严格按照"问题: "和"答案: "的格式输出
-2. 每个问题必须对应一个答案
-3. 生成3-5张卡片
-4. 问题要简洁明确
-5. 答案要准确详细`,
+规则：
+- 必须严格使用"问题:"和"答案:"作为前缀
+- 生成3-5组问答
+- 不要输出任何其他内容`,
 
     // 用户提示词模板
-    USER: (content) => `请将以下内容转换为知识卡片格式：
+    USER: (content) => `根据以下内容生成问答卡片：
 
 ${content}
 
-请输出：
+只输出问题和答案，格式：
 问题: ...
-答案: ...
-问题: ...
-答案: ...
-（共3-5组）`
+答案: ...`
 };
 
 // ============================================
@@ -964,11 +953,12 @@ class AICardGeneratorUI {
             if (this.generatedCards.length === 0) {
                 // 如果标准解析失败，尝试备用方法
                 console.log('标准解析失败，尝试备用解析...');
+                console.log('原始生成内容:', JSON.stringify(result));
                 this.generatedCards = this.ai.parseCardsFallback(result);
 
                 if (this.generatedCards.length === 0) {
-                    this.showError('未能生成有效的知识卡片，请尝试重新生成或修改输入内容');
-                    this.updateUIState('error');
+                    // 显示原始内容供用户查看
+                    this.showRawResult(result);
                     return;
                 }
             }
@@ -1266,6 +1256,45 @@ class AICardGeneratorUI {
             toast.classList.remove('show');
             setTimeout(() => document.body.removeChild(toast), 300);
         }, 2000);
+    }
+
+    /**
+     * 显示原始生成结果（当解析失败时）
+     * @param {string} rawText - 原始生成的文本
+     */
+    showRawResult(rawText) {
+        if (!this.elements.cardsContainer) return;
+
+        // 显示原始内容，让用户知道发生了什么
+        this.elements.cardsContainer.innerHTML = `
+            <div class="ai-card-item" style="border-color: #f59e0b;">
+                <div class="ai-card-header">
+                    <span class="ai-card-number" style="background: #f59e0b;">解析失败</span>
+                </div>
+                <div style="padding: 16px;">
+                    <p style="margin-bottom: 12px; color: var(--text-secondary);">
+                        AI 生成的内容格式无法解析。以下是原始输出：
+                    </p>
+                    <pre style="background: #f8f9fa; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; max-height: 300px; overflow-y: auto;">${this.escapeHtml(rawText)}</pre>
+                    <p style="margin-top: 12px; font-size: 13px; color: var(--text-secondary);">
+                        提示：当前使用的是 ${this.isMockMode() ? '演示模式（模拟数据）' : '本地 AI 模型'}。
+                        ${this.isMockMode() ? '点击"切换真实模型"按钮尝试加载真实模型。' : '模型可能输出格式不正确，请尝试重新生成。'}
+                    </p>
+                </div>
+            </div>
+        `;
+
+        // 更新卡片计数
+        if (this.elements.cardCount) {
+            this.elements.cardCount.innerHTML = '生成失败 <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">原始输出</span>';
+        }
+
+        // 显示/隐藏"切换真实模型"按钮
+        if (this.elements.resetModelBtn) {
+            this.elements.resetModelBtn.style.display = this.isMockMode() ? 'inline-flex' : 'none';
+        }
+
+        this.updateUIState('success');
     }
 
     /**

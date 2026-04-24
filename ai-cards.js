@@ -153,23 +153,39 @@ const CARD_SEPARATORS = {
  * 用于指导 AI 生成知识卡片
  */
 const PROMPT_TEMPLATES = {
-    // 系统提示词 - 针对小模型简化
-    SYSTEM: `将笔记转换为知识卡片。
+    // 系统提示词 - 针对小模型优化，使用更明确的格式
+    SYSTEM: `你是一个知识卡片生成助手。将用户输入的内容转换为问答形式的知识卡片。
 
-格式：
+必须严格遵循以下格式：
 问题: [问题内容]
 答案: [答案内容]
 
-要求：
-- 生成3-5张卡片
-- 问题简洁，答案详细
-- 覆盖重点知识`,
+示例1：
+问题: 什么是JavaScript？
+答案: JavaScript是一种轻量级的解释型编程语言，主要用于网页开发。
 
-    // 用户提示词模板 - 简化版
-    USER: (content) => `笔记：
+示例2：
+问题: 鸡兔同笼问题的解法是什么？
+答案: 设鸡有x只，兔有y只，根据题意列方程组求解。
+
+要求：
+1. 必须严格按照"问题: "和"答案: "的格式输出
+2. 每个问题必须对应一个答案
+3. 生成3-5张卡片
+4. 问题要简洁明确
+5. 答案要准确详细`,
+
+    // 用户提示词模板
+    USER: (content) => `请将以下内容转换为知识卡片格式：
+
 ${content}
 
-转换为知识卡片（格式：问题: ... 答案: ...）`
+请输出：
+问题: ...
+答案: ...
+问题: ...
+答案: ...
+（共3-5组）`
 };
 
 // ============================================
@@ -466,37 +482,14 @@ class AICardGenerator {
         // 提取用户输入的前 50 个字符作为主题
         const topic = userContent.substring(0, 50).replace(/\s+/g, ' ').trim();
 
-        return `---CARD_START---
----FRONT---
-什么是 ${topic}？
----BACK---
-${topic} 是一个重要的概念，需要深入理解和记忆。
----CARD_END---
+        return `问题: 什么是${topic}？
+答案: ${topic}是一个重要的概念，需要深入理解和记忆。
 
----CARD_START---
----FRONT---
-${topic} 的核心要点是什么？
----BACK---
-1. 理解基本概念和定义
-2. 掌握关键公式和原理
-3. 能够应用到实际问题中
-4. 注意易错点和常见误区
----CARD_END---
+问题: ${topic}的核心要点是什么？
+答案: 1. 理解基本概念和定义 2. 掌握关键公式和原理 3. 能够应用到实际问题中
 
----CARD_START---
----FRONT---
-学习 ${topic} 时需要注意什么？
----BACK---
-**重点内容：**
-- 仔细阅读教材和笔记
-- 多做练习题巩固知识
-- 及时复习避免遗忘
-- 建立知识之间的联系
-
-**易错提醒：**
-- 不要死记硬背，要理解原理
-- 注意区分相似概念
----CARD_END---`;
+问题: 学习${topic}时需要注意什么？
+答案: 重点：仔细阅读教材、多做练习、及时复习、建立知识联系。易错：不要死记硬背，要理解原理。`;
     }
 
     /**
@@ -644,27 +637,61 @@ ${topic} 的核心要点是什么？
     parseCardsFallback(text) {
         const cards = [];
 
-        // 【修改】适配简化格式：问题: ... 答案: ...
-        // 格式1: 问题: ... 答案: ...
-        const qaRegex = /(?:问题|Q|Front)[:：]\s*([^\n]+)(?:\n|\r\n?)+(?:答案|A|Back)[:：]\s*([^\n]+(?:\n(?!(?:问题|Q|Front)[:：])[^\n]+)*)/gi;
+        // 清理文本，移除常见的无关内容
+        let cleanedText = text
+            .replace(/以下是笔记转换为知识卡片的内容[:：]?/gi, '')
+            .replace(/请输出[:：]?/gi, '')
+            .replace(/共\d+组/gi, '')
+            .trim();
+
+        // 格式1: 问题: ... 答案: ... (支持中英文标点)
+        const qaRegex = /(?:问题|Q|Front)[:：]\s*([\s\S]*?)(?:\n|\r\n?)+(?:答案|A|Back)[:：]\s*([\s\S]*?)(?=(?:\n|\r\n?)*(?:问题|Q|Front)[:：]|$)/gi;
 
         let match;
-        while ((match = qaRegex.exec(text)) !== null) {
-            cards.push({
-                front: match[1].trim(),
-                back: match[2].trim()
-            });
+        while ((match = qaRegex.exec(cleanedText)) !== null) {
+            const front = match[1].trim();
+            const back = match[2].trim();
+
+            // 过滤掉无效内容
+            if (front && back &&
+                front.length > 2 && back.length > 2 &&
+                !front.includes('问题:') &&
+                !back.includes('答案:')) {
+                cards.push({ front, back });
+            }
         }
 
-        // 如果还是失败，尝试按段落分割
+        // 如果还是失败，尝试按"问题:"和"答案:"分割
         if (cards.length === 0) {
-            const paragraphs = text.split(/\n{2,}/).filter(p => p.trim().length > 0);
-            for (let i = 0; i < paragraphs.length - 1; i += 2) {
-                const front = paragraphs[i].trim();
-                const back = paragraphs[i + 1]?.trim();
+            const parts = cleanedText.split(/(?:问题|Q)[:：]/i).filter(p => p.trim());
 
-                if (front && back && front.length < 200 && back.length < 1000) {
-                    cards.push({ front, back });
+            for (const part of parts) {
+                const qaParts = part.split(/(?:答案|A)[:：]/i);
+                if (qaParts.length >= 2) {
+                    const front = qaParts[0].trim();
+                    const back = qaParts.slice(1).join(' ').trim();
+
+                    if (front && back && front.length > 2 && back.length > 2) {
+                        cards.push({ front, back });
+                    }
+                }
+            }
+        }
+
+        // 最后尝试：按段落分割，奇数行为问题，偶数行为答案
+        if (cards.length === 0) {
+            const lines = cleanedText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
+            for (let i = 0; i < lines.length - 1; i++) {
+                const line = lines[i];
+                const nextLine = lines[i + 1];
+
+                // 如果当前行以问号结尾，可能是问题
+                if (line.endsWith('？') || line.endsWith('?')) {
+                    cards.push({
+                        front: line,
+                        back: nextLine
+                    });
+                    i++; // 跳过下一行
                 }
             }
         }

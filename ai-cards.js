@@ -330,7 +330,8 @@ class AICardGenerator {
                         {
                             model: this.config.MODEL_ID,
                             model_id: this.config.MODEL_ID,
-                            model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_30/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC-webgpu.wasm',
+                            // 使用与模型匹配的 wasm 文件 - Llama-3.2-1B
+                            model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_30/Llama-3.2-1B-Instruct-q4f16_1-MLC-webgpu.wasm',
                             overrides: {
                                 context_window_size: 4096,
                             }
@@ -359,6 +360,10 @@ class AICardGenerator {
 
             this.state.isReady = true;
             this.state.initError = null;
+
+            // 清除演示模式标志（模型成功加载）
+            window.AI_MOCK_MODE = false;
+            console.log('【模型加载】真实模型加载成功，已清除演示模式标志');
 
             if (onProgress) {
                 onProgress(100, '模型加载完成！');
@@ -421,6 +426,7 @@ class AICardGenerator {
      */
     createMockEngine() {
         return {
+            _isMockEngine: true,
             chat: {
                 completions: {
                     create: async ({ messages }) => {
@@ -715,8 +721,29 @@ ${topic} 的核心要点是什么？
             isLoading: this.state.isLoading,
             isReady: this.state.isReady,
             hasError: !!this.state.initError,
-            errorMessage: this.state.initError
+            errorMessage: this.state.initError,
+            isMockMode: this.state.engine?._isMockEngine || false
         };
+    }
+
+    /**
+     * 重置引擎状态，强制下次重新初始化
+     * 用于从演示模式切换回真实模型
+     */
+    async reset() {
+        if (this.state.engine) {
+            try {
+                await this.dispose();
+            } catch (e) {
+                console.error('重置时释放资源失败:', e);
+            }
+        }
+        this.state.isReady = false;
+        this.state.isLoading = false;
+        this.state.initError = null;
+        this.state.engine = null;
+        window.AI_MOCK_MODE = false;
+        console.log('【重置】AI 引擎状态已重置，下次将尝试加载真实模型');
     }
 }
 
@@ -771,6 +798,7 @@ class AICardGeneratorUI {
             insertBtn: document.getElementById('aiInsertBtn'),
             copyBtn: document.getElementById('aiCopyBtn'),
             regenerateBtn: document.getElementById('aiRegenerateBtn'),
+            resetModelBtn: document.getElementById('aiResetModelBtn'),
             closeBtn: document.getElementById('aiCloseBtn')
         };
     }
@@ -807,6 +835,11 @@ class AICardGeneratorUI {
         // 重新生成按钮
         this.elements.regenerateBtn?.addEventListener('click', () => {
             this.handleGenerate();
+        });
+
+        // 切换真实模型按钮
+        this.elements.resetModelBtn?.addEventListener('click', () => {
+            this.handleResetModel();
         });
 
         // 关闭按钮
@@ -867,6 +900,12 @@ class AICardGeneratorUI {
                 throw new Error(compatibility.message);
             }
 
+            // 重置模拟模式标志，确保每次都能尝试加载真实模型
+            if (window.AI_MOCK_MODE) {
+                console.log('【生成】检测到之前的模拟模式标志，重置后尝试加载真实模型');
+                window.AI_MOCK_MODE = false;
+            }
+
             // 初始化 AI（如果尚未初始化）
             if (!this.ai.state.isReady) {
                 console.log('开始初始化 AI 引擎...');
@@ -876,6 +915,10 @@ class AICardGeneratorUI {
                 });
                 console.log('AI 引擎初始化完成');
             }
+
+            // 检查是否成功加载了真实模型
+            const isMock = this.isMockMode();
+            console.log(`【生成】当前模式: ${isMock ? '演示模式' : '真实模型模式'}`);
 
             this.updateProgress(0, '正在生成知识卡片...');
 
@@ -969,6 +1012,42 @@ class AICardGeneratorUI {
     }
 
     /**
+     * 处理切换真实模型
+     * 重置引擎并尝试加载真实模型
+     */
+    async handleResetModel() {
+        try {
+            this.updateUIState('loading');
+            this.updateProgress(0, '正在重置模型状态...');
+
+            // 重置引擎
+            await this.ai.reset();
+
+            this.updateProgress(50, '正在尝试加载真实模型...');
+
+            // 重新初始化
+            await this.ai.initialize((progress, message) => {
+                this.updateProgress(progress, message);
+            });
+
+            // 检查是否成功加载真实模型
+            const isMock = this.isMockMode();
+            if (isMock) {
+                this.showError('真实模型加载失败，仍处于演示模式。请检查网络连接或浏览器兼容性。');
+                this.updateUIState('error');
+            } else {
+                this.showSuccess('真实模型加载成功！');
+                // 重新生成卡片
+                this.handleGenerate();
+            }
+        } catch (error) {
+            console.error('切换模型失败:', error);
+            this.showError(error.message || '切换模型失败');
+            this.updateUIState('error');
+        }
+    }
+
+    /**
      * 渲染生成的卡片
      */
     renderCards() {
@@ -990,12 +1069,32 @@ class AICardGeneratorUI {
             </div>
         `).join('');
 
-        // 更新卡片计数
+        // 更新卡片计数 - 检查是否使用真实模型
         if (this.elements.cardCount) {
-            const mockBadge = window.AI_MOCK_MODE ?
+            const isMockMode = this.isMockMode();
+            const mockBadge = isMockMode ?
                 ' <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">演示模式</span>' : '';
             this.elements.cardCount.innerHTML = `共生成 ${this.generatedCards.length} 张卡片${mockBadge}`;
         }
+
+        // 显示/隐藏"切换真实模型"按钮
+        if (this.elements.resetModelBtn) {
+            const isMockMode = this.isMockMode();
+            this.elements.resetModelBtn.style.display = isMockMode ? 'inline-flex' : 'none';
+        }
+    }
+
+    /**
+     * 检查当前是否处于模拟模式
+     * @returns {boolean}
+     */
+    isMockMode() {
+        // 检查引擎是否为模拟引擎（通过检查是否有特定的模拟标记）
+        if (this.ai.state.engine && this.ai.state.engine._isMockEngine) {
+            return true;
+        }
+        // 备用：检查全局变量
+        return !!window.AI_MOCK_MODE;
     }
 
     /**

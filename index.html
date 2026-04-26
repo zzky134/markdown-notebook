@@ -2943,13 +2943,15 @@ $$
                 // 保护块级公式 $$
                 content = content.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
                     mathBlocks.push(formula.trim());
-                    return '\n\n___MATH_BLOCK_' + (mathBlocks.length - 1) + '___\n\n';
+                    // 使用 HTML 注释作为占位符，避免被 marked 解析
+                    return '\n\n<!--MATHBLOCK' + (mathBlocks.length - 1) + '-->\n\n';
                 });
 
                 // 保护行内公式 $（但不匹配 $$）
                 content = content.replace(/(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)/g, (match, formula) => {
                     mathInline.push(formula.trim());
-                    return '___MATH_INLINE_' + (mathInline.length - 1) + '___';
+                    // 使用 HTML 注释作为占位符，避免被 marked 解析
+                    return '<!--MATHINLINE' + (mathInline.length - 1) + '-->';
                 });
 
                 return { content, mathBlocks, mathInline };
@@ -2957,19 +2959,16 @@ $$
 
             // 恢复数学公式并渲染
             restoreAndRenderMath(html, mathBlocks, mathInline) {
-                // 恢复块级公式 - 使用字符串分割/连接方式避免正则问题
+                // 恢复块级公式 - 使用 HTML 注释占位符
                 mathBlocks.forEach((formula, i) => {
-                    const placeholder = '___MATH_BLOCK_' + i + '___';
+                    const placeholder = '<!--MATHBLOCK' + i + '-->';
                     const replacement = '<div class="math-block" data-formula="' + this.escapeHtml(formula) + '"></div>';
-
-                    // 尝试多种可能的包裹形式
-                    // 1. 纯占位符
                     html = html.split(placeholder).join(replacement);
                 });
 
                 // 恢复行内公式
                 mathInline.forEach((formula, i) => {
-                    const placeholder = '___MATH_INLINE_' + i + '___';
+                    const placeholder = '<!--MATHINLINE' + i + '-->';
                     const replacement = '<span class="math-inline" data-formula="' + this.escapeHtml(formula) + '"></span>';
                     html = html.split(placeholder).join(replacement);
                 });
@@ -3024,11 +3023,6 @@ $$
                     // 保护数学公式
                     const { content: protectedContent, mathBlocks, mathInline } = this.protectMath(content);
 
-                    // 调试：检查保护后的内容
-                    console.log('Protected content:', protectedContent.substring(0, 200));
-                    console.log('Math blocks:', mathBlocks);
-                    console.log('Math inline:', mathInline);
-
                     // 配置 marked
                     marked.setOptions({
                         highlight: function(code, lang) {
@@ -3047,14 +3041,8 @@ $$
                     // 渲染 Markdown
                     let html = marked.parse(processedContent);
 
-                    // 调试：输出 HTML 查看占位符
-                    console.log('Before restore HTML:', html);
-
                     // 恢复数学公式
                     html = this.restoreAndRenderMath(html, mathBlocks, mathInline);
-
-                    // 调试：输出恢复后的 HTML
-                    console.log('After restore HTML:', html);
 
                     preview.innerHTML = html;
 

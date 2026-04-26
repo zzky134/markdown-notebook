@@ -168,6 +168,7 @@ ${content}
 3. 【答案】提供详细、完整的解答
 4. 如果是理科题目，需要展示完整的解题步骤
 5. 如果是概念性问题，需要解释清楚原理和背景`;
+}
 
 // ============================================
 // 状态管理
@@ -1103,7 +1104,6 @@ class AIQAGeneratorUI {
         if (!this.ai.state.isReady) {
             this.showError(this.ai.state.initError || 'API Key 未配置');
         }
-    }
     }
 
     /**

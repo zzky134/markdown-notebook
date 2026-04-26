@@ -1,5 +1,32 @@
 // Markdown 模板库 - 预置学科常用模板
 const markdownTemplates = {
+    // 知识卡片模板 - 快速创建复习卡片
+    knowledgeCard: {
+        id: 'knowledgeCard',
+        name: '知识卡片',
+        icon: '🎴',
+        category: '知识卡片',
+        description: '快速创建问题和答案卡片，支持批量添加',
+        content: `## 知识卡片组
+
+### 卡片 1
+:front:: 【问题1】
+:back:: 【答案1】
+
+### 卡片 2
+:front:: 【问题2】
+:back:: 【答案2】
+
+### 卡片 3
+:front:: 【问题3】
+:back:: 【答案3】
+
+---
+
+*提示：点击"卡片复习"按钮开始记忆这些卡片*
+`
+    },
+
     // 英语单词模板
     englishVocabulary: {
         id: 'englishVocabulary',

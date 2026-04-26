@@ -4108,14 +4108,14 @@ $$
             const mobileTabs = document.getElementById('mobileTabs');
 
             if (view === 'notes') {
-                mobileTabs.classList.remove('hidden');
+                if (mobileTabs) mobileTabs.classList.remove('hidden');
                 if (scheduleApp) scheduleApp.switchToNotes();
-                this.updateMobileTabUI();
+                if (isMobile()) this.updateMobileTabUI();
             } else if (view === 'schedule') {
-                mobileTabs.classList.add('hidden');
+                if (mobileTabs) mobileTabs.classList.add('hidden');
                 if (scheduleApp) scheduleApp.showSchedule();
             } else if (view === 'cards') {
-                mobileTabs.classList.add('hidden');
+                if (mobileTabs) mobileTabs.classList.add('hidden');
                 if (scheduleApp) scheduleApp.switchToNotes();
                 this.startCardReview();
             } else if (view === 'menu') {

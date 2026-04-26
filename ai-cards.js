@@ -316,9 +316,10 @@ class AICardGenerator {
                 };
 
             case 'minimax':
-                // MiniMax 格式 - 使用非流式请求
+                // MiniMax 格式 - 使用非流式请求，api_key 在请求体中
                 return {
                     model: providerConfig.model,
+                    api_key: this.config.API_KEY,  // MiniMax 需要 api_key 在 body 中
                     messages: messages,
                     stream: false,
                     temperature: providerConfig.temperature,
@@ -368,9 +369,9 @@ class AICardGenerator {
                 };
 
             case 'minimax':
+                // MiniMax 使用 api_key 在请求体中认证，不在 header 中
                 return {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
+                    'Content-Type': 'application/json'
                 };
 
             default:

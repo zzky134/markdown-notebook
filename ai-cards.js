@@ -1034,16 +1034,16 @@ class AIQAGeneratorUI {
         const mathBlocks = [];
         const mathInline = [];
 
-        // 保护块级公式 $$ - 使用 HTML 注释作为占位符
+        // 保护块级公式 $$ - 使用特殊标记作为占位符（避免被 escapeHtml 转义）
         content = content.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
             mathBlocks.push(formula.trim());
-            return '\n\n<!--MATHBLOCK' + (mathBlocks.length - 1) + '-->\n\n';
+            return '\n\n§§MATHBLOCK' + (mathBlocks.length - 1) + '§§\n\n';
         });
 
-        // 保护行内公式 $（但不匹配 $$）- 使用 HTML 注释作为占位符
+        // 保护行内公式 $（但不匹配 $$）- 使用特殊标记作为占位符
         content = content.replace(/(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)/g, (match, formula) => {
             mathInline.push(formula.trim());
-            return '<!--MATHINLINE' + (mathInline.length - 1) + '-->';
+            return '§§MATHINLINE' + (mathInline.length - 1) + '§§';
         });
 
         // 简单的 Markdown 转换
@@ -1065,13 +1065,13 @@ class AIQAGeneratorUI {
 
         // 恢复块级公式
         mathBlocks.forEach((formula, i) => {
-            const placeholder = '<!--MATHBLOCK' + i + '-->';
+            const placeholder = '§§MATHBLOCK' + i + '§§';
             html = html.split(placeholder).join('<div class="math-block" data-formula="' + this.escapeHtml(formula) + '"></div>');
         });
 
         // 恢复行内公式
         mathInline.forEach((formula, i) => {
-            const placeholder = '<!--MATHINLINE' + i + '-->';
+            const placeholder = '§§MATHINLINE' + i + '§§';
             html = html.split(placeholder).join('<span class="math-inline" data-formula="' + this.escapeHtml(formula) + '"></span>');
         });
 

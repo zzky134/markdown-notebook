@@ -458,12 +458,10 @@ class AICardGenerator {
             // 处理响应
             let fullResponse = '';
             const data = await response.json();
-            console.log('API response type:', typeof data);
+            console.log('API response:', data);
             console.log('API response keys:', Object.keys(data));
-            console.log('API response:', JSON.stringify(data, null, 2)); // 调试日志 - 打印完整结构
-            console.log('data.choices:', data.choices);
-            console.log('data.choices?.[0]:', data.choices?.[0]);
-            console.log('data.choices?.[0]?.message:', data.choices?.[0]?.message);
+            console.log('data.base_resp:', data.base_resp);
+            console.log('data.reply:', data.reply);
 
             // 通义千问格式
             if (data.output?.choices?.[0]?.message?.content) {

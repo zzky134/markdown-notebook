@@ -742,6 +742,9 @@ class ScheduleApp {
                 }
             }
         } else {
+            // 没有打开的笔记，显示空状态
+            document.getElementById('toolbar').style.display = 'none';
+            document.getElementById('editorContainer').style.display = 'none';
             document.getElementById('emptyState').style.display = 'flex';
         }
 

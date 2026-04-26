@@ -81,9 +81,10 @@ const AI_CONFIG = {
 
         // MiniMax
         // 文档: https://platform.minimaxi.com/document/ChatCompletion
+        // Token Plan 使用 api.minimaxi.chat/v1/chat/completions
         minimax: {
             model: 'MiniMax-M2-27B',  // MiniMax M2.7 模型
-            apiUrl: 'https://api.minimaxi.chat/v1/text/chatcompletion_v2',
+            apiUrl: 'https://api.minimaxi.chat/v1/chat/completions',
             maxTokens: 4096,
             temperature: 0.7
         }
@@ -368,10 +369,10 @@ class AICardGenerator {
                 };
 
             case 'minimax':
-                // MiniMax 使用 api_key 在 header 中
+                // MiniMax Token Plan 使用 Bearer Token 认证
                 return {
                     'Content-Type': 'application/json',
-                    'api_key': apiKey
+                    'Authorization': `Bearer ${apiKey}`
                 };
 
             default:

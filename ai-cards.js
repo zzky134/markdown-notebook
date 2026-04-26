@@ -33,15 +33,15 @@ const AI_CONFIG = {
     // ============================================
     // 方式1：直接填写（仅本地测试，不要提交到仓库！）
     // 方式2：从环境变量读取（推荐）
-    API_KEY: typeof process !== 'undefined' && process.env?.SILICONFLOW_API_KEY
-        ? process.env.SILICONFLOW_API_KEY
-        : 'sk-cknycrzjzntbclhlnsylnmhmgrvneiauuceylnmtyduterhr', // <-- 修改这里
+    API_KEY: typeof process !== 'undefined' && process.env?.MINIMAX_API_KEY
+        ? process.env.MINIMAX_API_KEY
+        : 'sk-cp-IsU-GMv7b8pGt95njiryHB4HoVAFd8M9SuDtcH9mS27Q66AQccgSJDNKeys9F2b3PzWg_xNJYfaMO3YHXVdBK1ZFvY-vUD9ZVaIvj-DR2ktEGDGPhgTLElg', // <-- 修改这里
 
     // ============================================
     // 选择 API 提供商
     // ============================================
-    // 可选值: 'siliconflow' | 'qwen' | 'doubao'
-    PROVIDER: 'siliconflow',
+    // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'minimax'
+    PROVIDER: 'minimax',
 
     // ============================================
     // 模型配置
@@ -76,6 +76,15 @@ const AI_CONFIG = {
             model: 'doubao-lite-4k',  // 或 'doubao-pro-4k'
             apiUrl: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
             maxTokens: 2048,
+            temperature: 0.7
+        },
+
+        // MiniMax
+        // 文档: https://platform.minimaxi.com/document/ChatCompletion
+        minimax: {
+            model: 'MiniMax-M2-27B',  // MiniMax M2.7 模型
+            apiUrl: 'https://api.minimaxi.chat/v1/text/chatcompletion_v2',
+            maxTokens: 4096,
             temperature: 0.7
         }
     },
@@ -306,6 +315,16 @@ class AICardGenerator {
                     top_p: this.config.GENERATION_CONFIG.topP
                 };
 
+            case 'minimax':
+                // MiniMax 格式
+                return {
+                    model: providerConfig.model,
+                    messages: messages,
+                    stream: true,
+                    temperature: providerConfig.temperature,
+                    max_tokens: providerConfig.maxTokens
+                };
+
             case 'qwen':
                 // 通义千问格式
                 return {
@@ -343,6 +362,12 @@ class AICardGenerator {
                 };
 
             case 'qwen':
+                return {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                };
+
+            case 'minimax':
                 return {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
@@ -906,7 +931,8 @@ class AIQAGeneratorUI {
         const names = {
             'siliconflow': 'SiliconFlow',
             'qwen': '通义千问',
-            'doubao': '豆包'
+            'doubao': '豆包',
+            'minimax': 'MiniMax'
         };
         return names[provider] || provider;
     }

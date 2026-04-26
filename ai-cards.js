@@ -468,6 +468,7 @@ class AICardGenerator {
                     if (done) break;
 
                     const chunk = decoder.decode(value, { stream: true });
+                    console.log('Raw chunk:', chunk); // 调试日志
                     const lines = chunk.split('\n');
 
                     for (const line of lines) {
@@ -477,7 +478,13 @@ class AICardGenerator {
                         if (line.startsWith('data: ')) {
                             try {
                                 const data = JSON.parse(line.slice(6));
-                                const token = data.choices?.[0]?.delta?.content || '';
+                                console.log('Parsed data:', data); // 调试日志
+
+                                // MiniMax 格式: choices[0].delta.content
+                                // OpenAI 格式: choices[0].delta.content
+                                const token = data.choices?.[0]?.delta?.content ||
+                                             data.choices?.[0]?.text || // 备用格式
+                                             '';
 
                                 if (token) {
                                     fullResponse += token;
@@ -486,7 +493,7 @@ class AICardGenerator {
                                     }
                                 }
                             } catch (e) {
-                                // 忽略解析错误
+                                console.log('Parse error:', e, 'Line:', line);
                             }
                         }
                     }
@@ -494,16 +501,23 @@ class AICardGenerator {
             } else {
                 // 非流式响应处理
                 const data = await response.json();
+                console.log('Non-stream response:', data); // 调试日志
 
                 // 通义千问格式
                 if (data.output?.choices?.[0]?.message?.content) {
                     fullResponse = data.output.choices[0].message.content;
                 }
-                // OpenAI 兼容格式
+                // OpenAI / MiniMax 兼容格式
                 else if (data.choices?.[0]?.message?.content) {
                     fullResponse = data.choices[0].message.content;
                 }
+                // MiniMax 可能的另一种格式
+                else if (data.choices?.[0]?.text) {
+                    fullResponse = data.choices[0].text;
+                }
             }
+
+            console.log('Full response:', fullResponse); // 调试日志
 
             return fullResponse;
 
@@ -530,22 +544,54 @@ class AICardGenerator {
      * @returns {Object|null} 解析后的问答对象 {question: string, answer: string}
      */
     parseQAResult(generatedText) {
-        if (!generatedText) {
+        if (!generatedText || generatedText.trim() === '') {
+            console.log('parseQAResult: empty text');
             return null;
         }
 
-        // 提取问题
-        const questionMatch = generatedText.match(/【问题】\s*([^\n]+)/);
-        // 提取答案（从【答案】到结束）
-        const answerMatch = generatedText.match(/【答案】\s*([\s\S]+)$/);
+        console.log('parseQAResult input:', generatedText.substring(0, 200));
 
-        if (questionMatch && answerMatch) {
-            return {
-                question: questionMatch[1].trim(),
-                answer: answerMatch[1].trim()
-            };
+        // 提取问题 - 支持多种格式
+        const questionPatterns = [
+            /【问题】\s*([^\n]+)/,
+            /问题[:：]\s*([^\n]+)/,
+            /Question[:：]\s*([^\n]+)/i,
+            /^\s*Q[:：]\s*([^\n]+)/im
+        ];
+
+        // 提取答案 - 支持多种格式
+        const answerPatterns = [
+            /【答案】\s*([\s\S]+)$/,
+            /答案[:：]\s*([\s\S]+)$/,
+            /Answer[:：]\s*([\s\S]+)$/i,
+            /A[:：]\s*([\s\S]+)$/im
+        ];
+
+        let question = null;
+        let answer = null;
+
+        for (const pattern of questionPatterns) {
+            const match = generatedText.match(pattern);
+            if (match) {
+                question = match[1].trim();
+                break;
+            }
         }
 
+        for (const pattern of answerPatterns) {
+            const match = generatedText.match(pattern);
+            if (match) {
+                answer = match[1].trim();
+                break;
+            }
+        }
+
+        if (question && answer) {
+            console.log('parseQAResult success:', { question: question.substring(0, 50), answer: answer.substring(0, 50) });
+            return { question, answer };
+        }
+
+        console.log('parseQAResult: standard parse failed, trying fallback');
         // 如果标准格式解析失败，尝试备用解析
         return this.parseQAFallback(generatedText);
     }
@@ -557,26 +603,39 @@ class AICardGenerator {
      * @returns {Object|null} 解析后的问答对象
      */
     parseQAFallback(text) {
+        console.log('parseQAFallback input:', text.substring(0, 200));
+
         // 清理文本
         let cleanedText = text
             .replace(/以下是[:：]?/gi, '')
+            .replace(/^\s*["']?|["']?\s*$/g, '') // 去除首尾引号
             .trim();
 
-        // 尝试匹配各种问题/答案格式
-        // 格式1: 【问题】... 【答案】...
-        const qaRegex = /(?:【问题】|问题[:：]|Question[:：]|Q[:：])\s*([^\n]+)(?:[\n\r]+)(?:【答案】|答案[:：]|Answer[:：]|A[:：])\s*([\s\S]+)$/i;
+        // 尝试匹配各种问题/答案格式（更宽松）
+        const qaRegex = /(?:问题|Question)[:：]?\s*([^\n]+)(?:[\n\r]+)(?:答案|Answer|解答|解析)[:：]?\s*([\s\S]+)$/i;
 
         const match = cleanedText.match(qaRegex);
         if (match) {
+            console.log('parseQAFallback: matched qaRegex');
             return {
                 question: match[1].trim(),
                 answer: match[2].trim()
             };
         }
 
+        // 如果文本很长，可能是直接返回答案，用输入的问题
+        if (cleanedText.length > 50) {
+            console.log('parseQAFallback: using full text as answer');
+            return {
+                question: '问题（请查看答案）',
+                answer: cleanedText
+            };
+        }
+
         // 如果还是失败，尝试简单分割
         const lines = cleanedText.split('\n').filter(l => l.trim());
         if (lines.length >= 2) {
+            console.log('parseQAFallback: using line split');
             // 第一行作为问题，其余作为答案
             return {
                 question: lines[0].replace(/^[\s\S]*?[:：]\s*/, '').trim() || '问题',
@@ -584,6 +643,7 @@ class AICardGenerator {
             };
         }
 
+        console.log('parseQAFallback: all methods failed');
         return null;
     }
 

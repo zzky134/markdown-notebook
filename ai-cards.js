@@ -458,7 +458,7 @@ class AICardGenerator {
             // 处理响应
             let fullResponse = '';
             const data = await response.json();
-            console.log('API response:', data); // 调试日志
+            console.log('API response:', JSON.stringify(data, null, 2)); // 调试日志 - 打印完整结构
 
             // 通义千问格式
             if (data.output?.choices?.[0]?.message?.content) {

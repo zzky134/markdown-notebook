@@ -316,11 +316,11 @@ class AICardGenerator {
                 };
 
             case 'minimax':
-                // MiniMax 格式
+                // MiniMax 格式 - 使用非流式请求
                 return {
                     model: providerConfig.model,
                     messages: messages,
-                    stream: true,
+                    stream: false,
                     temperature: providerConfig.temperature,
                     max_tokens: providerConfig.maxTokens
                 };
@@ -455,66 +455,38 @@ class AICardGenerator {
                 throw new Error(`API 请求失败: ${errorMsg}`);
             }
 
-            // 处理流式响应
+            // 处理响应
             let fullResponse = '';
+            const data = await response.json();
+            console.log('API response:', data); // 调试日志
 
-            if (requestBody.stream) {
-                // 流式输出处理
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    console.log('Raw chunk:', chunk); // 调试日志
-                    const lines = chunk.split('\n');
-
-                    for (const line of lines) {
-                        if (line.trim() === '') continue;
-                        if (line.trim() === 'data: [DONE]') continue;
-
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const data = JSON.parse(line.slice(6));
-                                console.log('Parsed data:', data); // 调试日志
-
-                                // MiniMax 格式: choices[0].delta.content
-                                // OpenAI 格式: choices[0].delta.content
-                                const token = data.choices?.[0]?.delta?.content ||
-                                             data.choices?.[0]?.text || // 备用格式
-                                             '';
-
-                                if (token) {
-                                    fullResponse += token;
-                                    if (onToken) {
-                                        onToken(token);
-                                    }
-                                }
-                            } catch (e) {
-                                console.log('Parse error:', e, 'Line:', line);
-                            }
-                        }
-                    }
-                }
-            } else {
-                // 非流式响应处理
-                const data = await response.json();
-                console.log('Non-stream response:', data); // 调试日志
-
-                // 通义千问格式
-                if (data.output?.choices?.[0]?.message?.content) {
-                    fullResponse = data.output.choices[0].message.content;
-                }
-                // OpenAI / MiniMax 兼容格式
-                else if (data.choices?.[0]?.message?.content) {
-                    fullResponse = data.choices[0].message.content;
-                }
-                // MiniMax 可能的另一种格式
-                else if (data.choices?.[0]?.text) {
-                    fullResponse = data.choices[0].text;
-                }
+            // 通义千问格式
+            if (data.output?.choices?.[0]?.message?.content) {
+                fullResponse = data.output.choices[0].message.content;
+            }
+            // OpenAI / MiniMax / SiliconFlow 兼容格式
+            else if (data.choices?.[0]?.message?.content) {
+                fullResponse = data.choices[0].message.content;
+            }
+            // MiniMax 可能的另一种格式
+            else if (data.choices?.[0]?.text) {
+                fullResponse = data.choices[0].text;
+            }
+            // 如果 data 直接是字符串
+            else if (typeof data === 'string') {
+                fullResponse = data;
+            }
+            // 如果有 data.content
+            else if (data.content) {
+                fullResponse = data.content;
+            }
+            // 如果有 data.result
+            else if (data.result) {
+                fullResponse = data.result;
+            }
+            // 如果有 data.data.choices
+            else if (data.data?.choices?.[0]?.message?.content) {
+                fullResponse = data.data.choices[0].message.content;
             }
 
             console.log('Full response:', fullResponse); // 调试日志

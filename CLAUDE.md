@@ -6,70 +6,71 @@
 **部署**: GitHub Pages (https://zzky134.github.io/markdown-notebook/)
 
 ## 核心功能
-- 基于 WebLLM 的浏览器端本地 AI 推理
+- 基于云端 API 的知识卡片生成（已迁移，不再使用本地模型）
 - 将课堂笔记转换为知识卡片（:front:: / :back:: 格式）
-- 完全离线运行，无需后端服务器
+- 支持 SiliconFlow、通义千问、豆包等多个 API 提供商
 
 ## 技术栈
 - HTML5 / CSS3 / Vanilla JavaScript
-- WebLLM (@mlc-ai/web-llm)
-- Git LFS 管理大文件
+- 云端 LLM API (SiliconFlow / 通义千问 / 豆包)
 - PWA 支持
 
 ## 关键文件位置
 ```
 markdown-notebook/
-├── ai-cards.js              # AI 核心逻辑（模型配置、提示词、解析）
+├── ai-cards.js              # AI 核心逻辑（API 调用、提示词、解析）
 ├── index.html               # 主页面（含移动端适配）
-├── models/
-│   └── llama-3.2-1b/        # Llama-3.2-1B 模型文件 (210MB)
-│       ├── params_shard_0.bin ~ params_shard_3.bin
-│       ├── tokenizer.json
-│       ├── tokenizer_config.json
-│       ├── mlc-chat-config.json
-│       └── ndarray-cache.json
+├── config.local.js          # 本地 API Key 配置文件（已添加到 .gitignore）
+├── .gitignore               # Git 忽略规则
 └── CLAUDE.md                # 本文件
 ```
 
 ## 当前配置（ai-cards.js）
 ```javascript
-MODEL_ID: 'Llama-3.2-1B-Instruct-q4f16_1-MLC'
-MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/llama-3.2-1b'
-USE_LOCAL_MODEL: true
+PROVIDER: 'siliconflow',
+MODEL: 'Qwen/Qwen2.5-7B-Instruct',
+API_KEY: 'sk-...'  // 请从 config.local.js 导入或环境变量读取
 ```
 
+## 支持的 API 提供商
+1. **SiliconFlow (推荐)** - https://siliconflow.cn
+   - 模型：Qwen2.5-7B/14B、Llama-3.3-70B、DeepSeek-V2.5
+   - 优点：速度快、价格低、国内访问好
+
+2. **通义千问** - https://dashscope.aliyun.com
+   - 模型：qwen-turbo、qwen-plus、qwen-max
+   - 优点：阿里出品，中文理解强
+
+3. **豆包** - https://www.volcengine.com/product/doubao
+   - 模型：doubao-lite、doubao-pro
+   - 优点：字节跳动出品，推理能力强
+
 ## 最近完成的任务
-1. ✅ 升级模型：Qwen2.5-0.5B → Llama-3.2-1B（推理能力更强）
-2. ✅ 解决 CORS：模型托管在 GitHub Pages，国内直接访问
-3. ✅ 优化提示词：简化格式适配小模型
-4. ✅ 移动端适配：支持安卓 Chrome，iPhone 演示模式
+1. ✅ **架构升级**：本地 WebLLM → 云端 API（解决小模型能力问题）
+2. ✅ **多提供商支持**：SiliconFlow / 通义千问 / 豆包
+3. ✅ **提示词优化**：固定【标题】/【内容】格式，卡片间用 --- 分隔
+4. ✅ **安全处理**：API Key 配置分离，添加 .gitignore 保护
+5. ✅ **异常处理**：网络错误、超时、防抖等完善处理
+6. ✅ **UI 保留**：保持原有按钮、加载状态、错误提示、卡片渲染
 
 ## 待办事项
-- [ ] 监控模型生成质量（Llama-3.2-1B 效果待验证）
-- [ ] 考虑添加更多模型选项（如 3B 模型）
-- [ ] 优化卡片渲染样式
+- [ ] 添加 API Key 本地存储功能（可选）
+- [ ] 支持用户自定义提示词模板
+- [ ] 添加更多卡片样式主题
 
-## 常见问题
-**Q: 用户需要代理吗？**  
-A: 不需要。模型从 GitHub Pages 加载，国内可直接访问。
+## 安全提示
+**⚠️ API Key 管理：**
+1. 不要将 API Key 直接提交到公开仓库
+2. 使用 `config.local.js` 管理敏感配置（已添加到 .gitignore）
+3. 生产环境建议通过构建工具注入或使用服务端代理
 
-**Q: 首次使用慢？**  
-A: 正常。需下载 210MB 模型，建议 WiFi 环境。
-
-**Q: iPhone 能用吗？**  
-A: iOS 不支持 WebGPU，只能使用演示模式。
-
-## 快速开始命令
+## 快速开始
 ```bash
-# 查看模型文件
-ls -lh models/llama-3.2-1b/
-
-# 检查配置
-grep -n "MODEL_ID\|MODEL_BASE_URL" ai-cards.js
-
 # 本地测试
 python -m http.server 8000
+
+# 配置 API Key（编辑 config.local.js 或 ai-cards.js 中的 AI_CONFIG.API_KEY）
 ```
 
 ## 上次会话日期
-2024-04-24
+2026-04-26

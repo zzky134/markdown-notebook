@@ -1,11 +1,19 @@
 /**
- * AI 本地离线知识卡片生成模块
- * 基于 WebLLM 实现浏览器端本地 LLM 推理
- * 使用 Qwen2 轻量级模型生成知识卡片
+ * AI 知识卡片生成模块（云端 API 版本）
+ * 基于 SiliconFlow / 通义千问 / 豆包等云端 API 实现知识卡片生成
  *
  * @module AICardGenerator
- * @version 1.0.0
+ * @version 2.0.0
  * @author Claude Code
+ *
+ * ============================================
+ * ⚠️ 安全提示：API Key 配置
+ * ============================================
+ * 1. 不要在代码中直接提交 API Key 到公开仓库！
+ * 2. 建议方案：
+ *    - 本地开发：使用环境变量或本地配置文件（已添加到 .gitignore）
+ *    - 生产部署：通过构建工具注入或使用服务端代理
+ * 3. 当前配置：请在下方 AI_CONFIG 中配置您的 API Key
  */
 
 // ============================================
@@ -14,167 +22,162 @@
 
 /**
  * ============================================
- * 模型本地化部署配置
+ * API 配置
  * ============================================
  *
- * 使用方式：
- * 1. 将模型文件放入仓库 /models/ 目录
- * 2. 修改 MODEL_BASE_URL 为你的 GitHub Pages 地址
- * 3. 确保模型文件路径与 modelRecord 配置匹配
- *
- * 模型文件获取：
- * - 从 HuggingFace 下载: https://huggingface.co/mlc-ai/
- * - 或从浏览器缓存导出（见文档）
- */
-
-/**
- * 模型基础配置
+ * 支持多个 API 提供商，按需切换
  */
 const AI_CONFIG = {
-    // 模型名称 - 使用 WebLLM 支持的模型 ID
-    // 推荐轻量级模型（按体积排序）:
-    // 1. Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC (~300MB) - 最轻量，推荐
-    // 2. gemma-2b-it-q4f16_1-MLC (~500MB) - Google 模型
-    // 3. Llama-3.2-1B-Instruct-q4f16_1-MLC (~600MB) - Meta 模型
-    // 4. Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC (~800MB) - 质量更好
-    // 【升级】使用 Llama-3.2-3B 模型（推理能力更强）
-    // 原模型: Llama-3.2-1B (210MB, 推理能力太弱，常识错误)
-    // 新模型: Llama-3.2-3B (~1.5GB, 推理能力更好)
-    MODEL_ID: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',
+    // ============================================
+    // 【重要】API Key 配置
+    // ============================================
+    // 方式1：直接填写（仅本地测试，不要提交到仓库！）
+    // 方式2：从环境变量读取（推荐）
+    API_KEY: typeof process !== 'undefined' && process.env?.SILICONFLOW_API_KEY
+        ? process.env.SILICONFLOW_API_KEY
+        : 'sk-cknycrzjzntbclhlnsylnmhmgrvneiauuceylnmtyduterhr', // <-- 修改这里
 
     // ============================================
-    // 【关键配置】模型文件基础 URL
+    // 选择 API 提供商
     // ============================================
-    // 【修改1】使用 WebLLM 官方 CDN 加载模型
-    // 模型: Llama-3.2-3B-Instruct-q4f16_1-MLC
-    MODEL_BASE_URL: '',  // 使用 WebLLM 官方源
-    //
-    // 备用方案：
-    // MODEL_BASE_URL: '',  // 使用 WebLLM 官方源
-    // MODEL_BASE_URL: 'https://huggingface.co/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
-    //
-    // 其他选项（备用）：
-    // 选项 2: 使用国内镜像
-    // MODEL_BASE_URL: 'https://hf-mirror.com/mlc-ai/Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC/resolve/main',
-    // 选项 3: 使用 GitHub Pages 本地模型
-    // MODEL_BASE_URL: 'https://zzky134.github.io/markdown-notebook/models/qwen2.5-coder-0.5b',
+    // 可选值: 'siliconflow' | 'qwen' | 'doubao'
+    PROVIDER: 'siliconflow',
 
-    // 【修改2】禁用本地模型加载模式
-    // true = 使用 MODEL_BASE_URL 指定的本地路径加载模型
-    // false = 使用 WebLLM 内置模型列表（从 HuggingFace 下载）
-    USE_LOCAL_MODEL: false,
+    // ============================================
+    // 模型配置
+    // ============================================
+    MODELS: {
+        // 硅基流动 (SiliconFlow) - 推荐
+        // 模型列表: https://siliconflow.cn/models
+        siliconflow: {
+            // 可选模型：
+            // - 'Qwen/Qwen2.5-7B-Instruct' (推荐，性价比高)
+            // - 'Qwen/Qwen2.5-14B-Instruct' (更强推理)
+            // - 'meta-llama/Llama-3.3-70B-Instruct' (最强效果)
+            // - 'deepseek-ai/DeepSeek-V2.5' (DeepSeek)
+            model: 'Qwen/Qwen2.5-7B-Instruct',
+            apiUrl: 'https://api.siliconflow.cn/v1/chat/completions',
+            maxTokens: 2048,
+            temperature: 0.7
+        },
 
-    // 当模型加载失败时，是否自动切换到模拟模式
-    AUTO_FALLBACK_TO_MOCK: true,
+        // 通义千问 (阿里云)
+        // 文档: https://help.aliyun.com/zh/dashscope/
+        qwen: {
+            model: 'qwen-turbo',  // 或 'qwen-plus', 'qwen-max'
+            apiUrl: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
+            maxTokens: 2048,
+            temperature: 0.7
+        },
 
-    // 生成参数配置
-    GENERATION_CONFIG: {
-        temperature: 0.1,      // 低温度，输出更确定
-        top_p: 0.5,            // 低核采样，减少随机性
-        max_tokens: 2048,      // 最大生成 token 数
+        // 豆包 (字节跳动)
+        // 文档: https://www.volcengine.com/docs/82379
+        doubao: {
+            model: 'doubao-lite-4k',  // 或 'doubao-pro-4k'
+            apiUrl: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+            maxTokens: 2048,
+            temperature: 0.7
+        }
     },
 
+    // ============================================
+    // 生成参数
+    // ============================================
+    GENERATION_CONFIG: {
+        temperature: 0.7,      // 创造性 vs 确定性平衡
+        maxTokens: 2048,       // 最大生成 token 数
+        topP: 0.9
+    },
+
+    // ============================================
     // 超时配置（毫秒）
+    // ============================================
     TIMEOUT: {
-        MODEL_LOAD: 600000,    // 模型加载超时：10分钟
-        GENERATION: 120000     // 生成超时：2分钟
+        API_REQUEST: 60000     // API 请求超时：60秒
+    },
+
+    // ============================================
+    // 防抖配置
+    // ============================================
+    DEBOUNCE_MS: 3000         // 生成按钮防抖时间
+};
+
+/**
+ * ============================================
+ * 系统提示词
+ * ============================================
+ * 指导模型将笔记内容整理成知识卡片
+ * 关键：根据内容复杂度决定卡片数量，避免过度拆分
+ */
+const SYSTEM_PROMPT = `你是一个专业的知识整理助手。请将用户提供的笔记内容整理成知识卡片。
+
+**重要原则 - 根据内容类型决定卡片数量：**
+
+1. **如果是单个问题/题目**（如数学题、问答题）：
+   - 只生成 **1张卡片**
+   - 【标题】写问题/题目本身（保留核心信息）
+   - 【内容】写答案和简要解析
+
+2. **如果是简短笔记**（几句话到一段话）：
+   - 生成 **1-2张卡片**
+   - 每张卡片聚焦一个核心要点
+
+3. **如果是长笔记/多知识点内容**：
+   - 最多生成 **3-5张卡片**
+   - 每张卡片一个独立知识点
+
+**输出格式要求：**
+- 每张卡片包含：【标题】和【内容】
+- 卡片之间用三个横线分隔：---
+- 标题简洁（10字以内），内容精炼（50-150字）
+
+**示例1 - 单个问题（1张卡片）：**
+【标题】鸡兔同笼问题：10只动物28条腿
+【内容】答案：鸡4只，兔子6只。解析：设鸡x只兔y只，x+y=10，2x+4y=28，解得x=4，y=6。
+
+**示例2 - 简短笔记（2张卡片）：**
+【标题】光合作用定义
+【内容】绿色植物利用光能将CO₂和H₂O转化为有机物并释放氧气的过程，发生在叶绿体中。
+
+---
+
+【标题】光合作用两个阶段
+【内容】光反应：在类囊体膜上进行，产生ATP和NADPH。暗反应：在基质中进行，合成葡萄糖。
+
+**示例3 - 长笔记（多张卡片）：**
+（根据实际内容生成3-5张，每张一个独立知识点）`;
+
+/**
+ * 构建用户提示词
+ * @param {string} content - 用户输入的笔记内容
+ * @returns {string} 完整的用户提示词
+ */
+function buildUserPrompt(content) {
+    // 检测内容类型，给出更具体的指示
+    const isQuestion = /问题[:：]|\?|？|题目[:：]|问[:：]/.test(content);
+    const isShortContent = content.length < 200;
+
+    let specificInstruction = '';
+    if (isQuestion) {
+        specificInstruction = '这是一个问题/题目，请只生成1张卡片：标题写问题，内容写答案和解析。';
+    } else if (isShortContent) {
+        specificInstruction = '这是简短笔记，请生成1-2张卡片即可。';
+    } else {
+        specificInstruction = '这是长笔记，请生成3-5张卡片，每张一个知识点。';
     }
-};
 
-/**
- * ============================================
- * 自定义模型记录配置
- * ============================================
- * 定义模型文件的加载路径和参数
- * 用于从 GitHub Pages 本地资源加载模型
- */
-function createCustomModelRecord(baseUrl, modelId) {
-    // 模型文件列表 - Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC
-    // 这些文件需要从 HuggingFace 下载并放入仓库 models/ 目录
-    const modelFiles = [
-        'params_shard_0.bin',
-        'params_shard_1.bin',
-        'params_shard_2.bin',
-        'params_shard_3.bin',
-        'tokenizer.json',
-        'tokenizer_config.json',
-        'mlc-chat-config.json',
-        'ndarray-cache.json'
-    ];
-
-    // 构建文件 URL 映射
-    const modelLibs = [];
-    const tokenizerFiles = [];
-
-    modelFiles.forEach(file => {
-        const url = `${baseUrl}/${file}`;
-        if (file.includes('shard') || file === 'ndarray-cache.json') {
-            modelLibs.push(url);
-        } else {
-            tokenizerFiles.push(url);
-        }
-    });
-
-    return {
-        model: modelId,
-        model_id: modelId,
-        model_lib: `${baseUrl}/model_lib.wasm`,
-        model_url: baseUrl,
-        tokenizer: `${baseUrl}/tokenizer.json`,
-        tokenizer_config: `${baseUrl}/tokenizer_config.json`,
-        chat_config: {
-            context_window_size: 4096,
-            prefill_chunk_size: 1024,
-            temperature: AI_CONFIG.GENERATION_CONFIG.temperature,
-            top_p: AI_CONFIG.GENERATION_CONFIG.top_p,
-            repetition_penalty: 1.0,
-        },
-        // 自定义加载参数
-        overrides: {
-            context_window_size: 4096,
-        }
-    };
-}
-
-/**
- * 知识卡片分隔符
- * 用于解析 AI 生成的卡片内容
- */
-const CARD_SEPARATORS = {
-    START: '---CARD_START---',
-    END: '---CARD_END---',
-    FRONT: '---FRONT---',
-    BACK: '---BACK---'
-};
-
-/**
- * 提示词模板
- * 用于指导 AI 生成知识卡片
- */
-const PROMPT_TEMPLATES = {
-    // 系统提示词 - 极简格式，小模型容易理解
-    SYSTEM: `你生成问答卡片。只输出问题和答案，格式如下：
-
-问题: [问题]
-答案: [答案]
-
-问题: [问题]
-答案: [答案]
-
-规则：
-- 必须严格使用"问题:"和"答案:"作为前缀
-- 生成3-5组问答
-- 不要输出任何其他内容`,
-
-    // 用户提示词模板
-    USER: (content) => `根据以下内容生成问答卡片：
+    return `请将以下笔记内容整理成知识卡片：
 
 ${content}
 
-只输出问题和答案，格式：
-问题: ...
-答案: ...`
-};
+${specificInstruction}
+
+要求：
+1. 用【标题】和【内容】格式输出
+2. 卡片之间用 --- 分隔
+3. 标题简洁（10字以内），内容精炼（50-150字）
+4. 不要过度拆分，保持内容完整性`;
+}
 
 // ============================================
 // 状态管理
@@ -184,23 +187,20 @@ ${content}
  * AI 生成器状态
  */
 const AIState = {
-    // 引擎实例
-    engine: null,
-
     // 加载状态
     isLoading: false,
 
-    // 模型是否已就绪
+    // 是否已就绪（API Key 已配置）
     isReady: false,
 
     // 当前生成任务
     currentGeneration: null,
 
-    // 加载进度回调
-    onProgressCallback: null,
-
     // 初始化错误信息
-    initError: null
+    initError: null,
+
+    // 上次请求时间（用于防抖）
+    lastRequestTime: 0
 };
 
 // ============================================
@@ -209,56 +209,47 @@ const AIState = {
 
 /**
  * AI 知识卡片生成器类
- * 封装 WebLLM 的初始化和推理功能
+ * 封装云端 API 调用功能
  */
 class AICardGenerator {
     constructor() {
         this.state = AIState;
         this.config = AI_CONFIG;
-        this.separators = CARD_SEPARATORS;
+        this.checkApiKey();
     }
 
     /**
-     * 检查浏览器兼容性
-     * 验证是否支持 WebGPU 或 WebGL
-     * @returns {Object} 兼容性检查结果
+     * 检查 API Key 是否已配置
      */
-    checkCompatibility() {
-        const result = {
-            compatible: false,
-            webgpu: false,
-            webgl: false,
-            message: ''
-        };
+    checkApiKey() {
+        const apiKey = this.config.API_KEY;
+        if (!apiKey || apiKey === 'your-api-key-here' || apiKey.trim() === '') {
+            this.state.isReady = false;
+            this.state.initError = 'API Key 未配置，请在 ai-cards.js 中设置您的 API Key';
+        } else {
+            this.state.isReady = true;
+            this.state.initError = null;
+        }
+    }
 
-        // 检查 WebGPU 支持
-        if (navigator.gpu) {
-            result.webgpu = true;
-            result.compatible = true;
-            result.message = '支持 WebGPU，可以获得最佳性能';
-        }
-        // 检查 WebGL 支持
-        else if (window.WebGLRenderingContext || window.WebGL2RenderingContext) {
-            result.webgl = true;
-            result.compatible = true;
-            result.message = '支持 WebGL，性能可能受限';
-        }
-        else {
-            result.message = '您的浏览器不支持 WebGPU 或 WebGL，无法运行本地 AI 模型';
-        }
-
-        return result;
+    /**
+     * 获取当前提供商配置
+     * @returns {Object} 当前选中的 API 配置
+     */
+    getProviderConfig() {
+        const provider = this.config.PROVIDER;
+        return this.config.MODELS[provider];
     }
 
     /**
      * 初始化 AI 引擎
-     * 加载 WebLLM 模型
+     * 云端 API 无需加载模型，只需检查配置
      * @param {Function} onProgress - 进度回调函数 (progress: number, message: string) => void
      * @returns {Promise<boolean>} 初始化是否成功
      */
     async initialize(onProgress = null) {
-        // 如果已经初始化，直接返回
-        if (this.state.isReady && this.state.engine) {
+        // 如果已经就绪，直接返回
+        if (this.state.isReady) {
             return true;
         }
 
@@ -270,154 +261,32 @@ class AICardGenerator {
                         clearInterval(checkInterval);
                         resolve(this.state.isReady);
                     }
-                }, 500);
+                }, 100);
             });
         }
 
-        // 检查兼容性
-        const compatibility = this.checkCompatibility();
-        if (!compatibility.compatible) {
-            this.state.initError = compatibility.message;
-            throw new Error(compatibility.message);
-        }
-
         this.state.isLoading = true;
-        this.state.onProgressCallback = onProgress;
 
         try {
-            // 动态导入 WebLLM
-            const webllm = await import(
-                'https://esm.run/@mlc-ai/web-llm@0.2.76'
-            );
-
-            // 检查导入的内容
-            console.log('WebLLM imported:', webllm);
-
-            // 获取 CreateMLCEngine 函数
-            const CreateMLCEngine = webllm.CreateMLCEngine || webllm.default?.CreateMLCEngine;
-
-            if (!CreateMLCEngine) {
-                throw new Error('无法加载 CreateMLCEngine，请检查 WebLLM 版本');
+            if (onProgress) {
+                onProgress(50, '正在检查 API 配置...');
             }
 
-            // 创建引擎 - WebLLM v0.2.x 使用新的 API
-            const engineConfig = {
-                // 初始化进度回调
-                initProgressCallback: (progress) => {
-                    console.log('WebLLM progress:', progress);
-                    const percent = progress.progress
-                        ? Math.round(progress.progress * 100)
-                        : 0;
-                    const message = progress.text || `加载中... ${percent}%`;
+            // 检查 API Key
+            this.checkApiKey();
 
-                    if (onProgress) {
-                        onProgress(percent, message);
-                    }
-                }
-            };
-
-            // 创建设置
-            const chatConfig = {
-                context_window_size: 4096,
-            };
-
-            // 【修改3】检查是否使用本地模型
-            if (this.config.USE_LOCAL_MODEL) {
-                console.log('【模型加载】使用本地模型模式');
-                console.log('【模型加载】模型基础URL:', this.config.MODEL_BASE_URL);
-                console.log('【模型加载】模型ID:', this.config.MODEL_ID);
-
-                // 【修改4】使用 WebLLM 的自定义模型列表功能
-                // 通过 appConfig 参数传入自定义模型配置
-                const customAppConfig = {
-                    model_list: [
-                        {
-                            model: this.config.MODEL_ID,
-                            model_id: this.config.MODEL_ID,
-                            // 使用与模型匹配的 wasm 文件 - Llama-3.2-3B
-                            model_lib: 'https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/main/web-llm-models/v0_2_30/Llama-3.2-3B-Instruct-q4f16_1-MLC-webgpu.wasm',
-                            overrides: {
-                                context_window_size: 4096,
-                            }
-                        }
-                    ]
-                };
-
-                // 创建引擎，传入自定义 appConfig
-                console.log('【模型加载】开始创建引擎...');
-                this.state.engine = await CreateMLCEngine(
-                    this.config.MODEL_ID,
-                    engineConfig,
-                    chatConfig,
-                    customAppConfig  // 传入自定义配置
-                );
-                console.log('【模型加载】引擎创建成功 ✓');
-            } else {
-                // 使用默认模型（从 HuggingFace 下载）
-                console.log('使用默认模型模式（从 HuggingFace 下载）');
-                this.state.engine = await CreateMLCEngine(
-                    this.config.MODEL_ID,
-                    engineConfig,
-                    chatConfig
-                );
+            if (!this.state.isReady) {
+                throw new Error(this.state.initError);
             }
-
-            this.state.isReady = true;
-            this.state.initError = null;
-
-            // 清除演示模式标志（模型成功加载）
-            window.AI_MOCK_MODE = false;
-            console.log('【模型加载】真实模型加载成功，已清除演示模式标志');
 
             if (onProgress) {
-                onProgress(100, '模型加载完成！');
+                onProgress(100, 'API 配置就绪');
             }
 
             return true;
         } catch (error) {
             this.state.initError = error.message;
             console.error('AI 引擎初始化失败:', error);
-
-            // 检查是否是网络/缓存错误
-            const isNetworkError = error.message?.includes('network') ||
-                                   error.message?.includes('Cache') ||
-                                   error.message?.includes('fetch') ||
-                                   error.message?.includes('Failed to fetch') ||
-                                   error.message?.includes('503') ||
-                                   error.message?.includes('502') ||
-                                   error.message?.includes('timeout') ||
-                                   error.message?.includes('ETIMEDOUT');
-
-            const shouldUseMock = isNetworkError ||
-                                  this.config.AUTO_FALLBACK_TO_MOCK ||
-                                  window.AI_MOCK_MODE;
-
-            if (shouldUseMock) {
-                console.warn('检测到网络错误或配置为模拟模式，切换到演示模式');
-                console.warn('错误详情:', error.message);
-
-                // 自动切换到模拟模式
-                window.AI_MOCK_MODE = true;
-                this.state.engine = this.createMockEngine();
-                this.state.isReady = true;
-                this.state.initError = null;
-
-                if (onProgress) {
-                    const reason = isNetworkError ? '网络受限' : '演示模式';
-                    onProgress(100, `已切换到${reason}（点击生成体验功能）`);
-                }
-                return true;
-            }
-
-            // 如果启用模拟模式，使用模拟引擎
-            if (window.AI_MOCK_MODE) {
-                console.warn('使用模拟模式');
-                this.state.engine = this.createMockEngine();
-                this.state.isReady = true;
-                this.state.initError = null;
-                return true;
-            }
-
             throw error;
         } finally {
             this.state.isLoading = false;
@@ -425,59 +294,89 @@ class AICardGenerator {
     }
 
     /**
-     * 创建模拟引擎（用于演示或测试）
-     * @returns {Object} 模拟引擎对象
+     * 构建 API 请求体
+     * @param {Array} messages - 消息数组
+     * @returns {Object} 请求体
      */
-    createMockEngine() {
-        return {
-            _isMockEngine: true,
-            chat: {
-                completions: {
-                    create: async ({ messages }) => {
-                        // 模拟流式输出
-                        const userMessage = messages[messages.length - 1]?.content || '';
+    buildRequestBody(messages) {
+        const provider = this.config.PROVIDER;
+        const providerConfig = this.getProviderConfig();
 
-                        // 简单的模拟响应
-                        const mockResponse = this.generateMockResponse(userMessage);
+        switch (provider) {
+            case 'siliconflow':
+            case 'doubao':
+                // OpenAI 兼容格式
+                return {
+                    model: providerConfig.model,
+                    messages: messages,
+                    stream: true,
+                    temperature: providerConfig.temperature,
+                    max_tokens: providerConfig.maxTokens,
+                    top_p: this.config.GENERATION_CONFIG.topP
+                };
 
-                        // 创建异步迭代器模拟流式输出
-                        const chunks = mockResponse.split('').map((char, i) => ({
-                            choices: [{
-                                delta: { content: char }
-                            }]
-                        }));
-
-                        return {
-                            [Symbol.asyncIterator]: async function* () {
-                                for (const chunk of chunks) {
-                                    await new Promise(r => setTimeout(r, 10));
-                                    yield chunk;
-                                }
-                            }
-                        };
+            case 'qwen':
+                // 通义千问格式
+                return {
+                    model: providerConfig.model,
+                    input: {
+                        messages: messages
+                    },
+                    parameters: {
+                        temperature: providerConfig.temperature,
+                        max_tokens: providerConfig.maxTokens,
+                        top_p: this.config.GENERATION_CONFIG.topP,
+                        result_format: 'message'
                     }
-                }
-            }
-        };
+                };
+
+            default:
+                throw new Error(`不支持的 API 提供商: ${provider}`);
+        }
     }
 
     /**
-     * 生成模拟响应
-     * @param {string} userContent - 用户输入
-     * @returns {string} 模拟的 AI 响应
+     * 构建请求头
+     * @returns {Object} 请求头
      */
-    generateMockResponse(userContent) {
-        // 提取用户输入的前 50 个字符作为主题
-        const topic = userContent.substring(0, 50).replace(/\s+/g, ' ').trim();
+    buildHeaders() {
+        const provider = this.config.PROVIDER;
+        const apiKey = this.config.API_KEY;
 
-        return `问题: 什么是${topic}？
-答案: ${topic}是一个重要的概念，需要深入理解和记忆。
+        switch (provider) {
+            case 'siliconflow':
+            case 'doubao':
+                return {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                };
 
-问题: ${topic}的核心要点是什么？
-答案: 1. 理解基本概念和定义 2. 掌握关键公式和原理 3. 能够应用到实际问题中
+            case 'qwen':
+                return {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                };
 
-问题: 学习${topic}时需要注意什么？
-答案: 重点：仔细阅读教材、多做练习、及时复习、建立知识联系。易错：不要死记硬背，要理解原理。`;
+            default:
+                throw new Error(`不支持的 API 提供商: ${provider}`);
+        }
+    }
+
+    /**
+     * 检查是否需要防抖
+     * @returns {boolean} 是否需要阻止本次请求
+     */
+    checkDebounce() {
+        const now = Date.now();
+        const timeSinceLastRequest = now - this.state.lastRequestTime;
+
+        if (timeSinceLastRequest < this.config.DEBOUNCE_MS) {
+            const waitTime = Math.ceil((this.config.DEBOUNCE_MS - timeSinceLastRequest) / 1000);
+            throw new Error(`请等待 ${waitTime} 秒后再试`);
+        }
+
+        this.state.lastRequestTime = now;
+        return false;
     }
 
     /**
@@ -487,9 +386,12 @@ class AICardGenerator {
      * @returns {Promise<string>} 生成的原始文本
      */
     async generateCards(content, onToken = null) {
-        // 确保引擎已初始化
-        if (!this.state.isReady || !this.state.engine) {
-            throw new Error('AI 引擎尚未初始化，请先调用 initialize()');
+        // 检查防抖
+        this.checkDebounce();
+
+        // 确保已初始化
+        if (!this.state.isReady) {
+            throw new Error('AI 引擎尚未初始化，请检查 API Key 配置');
         }
 
         // 验证输入
@@ -498,72 +400,108 @@ class AICardGenerator {
         }
 
         // 限制输入长度
-        const maxLength = 3000;
+        const maxLength = 8000;
         if (content.length > maxLength) {
             content = content.substring(0, maxLength) + '...';
         }
 
         // 构建消息
         const messages = [
-            { role: 'system', content: PROMPT_TEMPLATES.SYSTEM },
-            { role: 'user', content: PROMPT_TEMPLATES.USER(content) }
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: buildUserPrompt(content) }
         ];
+
+        const providerConfig = this.getProviderConfig();
+        const requestBody = this.buildRequestBody(messages);
+        const headers = this.buildHeaders();
 
         try {
             this.state.currentGeneration = true;
 
-            // 设置生成超时
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => {
-                    reject(new Error('生成超时，请稍后重试'));
-                }, this.config.TIMEOUT.GENERATION);
+            // 创建 AbortController 用于超时控制
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+            }, this.config.TIMEOUT.API_REQUEST);
+
+            const response = await fetch(providerConfig.apiUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody),
+                signal: controller.signal
             });
 
-            // 检查引擎 API 格式
-            const engine = this.state.engine;
-            let generationPromise;
+            clearTimeout(timeoutId);
 
-            // WebLLM v0.2.x 使用 engine.chat.completions.create
-            if (engine.chat?.completions?.create) {
-                generationPromise = engine.chat.completions.create({
-                    messages,
-                    stream: true,
-                    temperature: this.config.GENERATION_CONFIG.temperature,
-                    top_p: this.config.GENERATION_CONFIG.top_p,
-                    max_tokens: this.config.GENERATION_CONFIG.max_tokens,
-                });
-            }
-            // 备用 API 格式
-            else if (engine.generate) {
-                generationPromise = engine.generate(messages, {
-                    stream: true,
-                    temperature: this.config.GENERATION_CONFIG.temperature,
-                    top_p: this.config.GENERATION_CONFIG.top_p,
-                    max_tokens: this.config.GENERATION_CONFIG.max_tokens,
-                });
-            }
-            else {
-                throw new Error('不支持的引擎 API 格式');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMsg = errorData.error?.message || errorData.message || `HTTP ${response.status}`;
+                throw new Error(`API 请求失败: ${errorMsg}`);
             }
 
-            // 竞争执行
-            const stream = await Promise.race([generationPromise, timeoutPromise]);
-
+            // 处理流式响应
             let fullResponse = '';
 
-            // 流式读取输出
-            for await (const chunk of stream) {
-                const token = chunk.choices?.[0]?.delta?.content || chunk.delta?.content || '';
-                fullResponse += token;
+            if (requestBody.stream) {
+                // 流式输出处理
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
 
-                if (onToken) {
-                    onToken(token);
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.trim() === '') continue;
+                        if (line.trim() === 'data: [DONE]') continue;
+
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                const token = data.choices?.[0]?.delta?.content || '';
+
+                                if (token) {
+                                    fullResponse += token;
+                                    if (onToken) {
+                                        onToken(token);
+                                    }
+                                }
+                            } catch (e) {
+                                // 忽略解析错误
+                            }
+                        }
+                    }
+                }
+            } else {
+                // 非流式响应处理
+                const data = await response.json();
+
+                // 通义千问格式
+                if (data.output?.choices?.[0]?.message?.content) {
+                    fullResponse = data.output.choices[0].message.content;
+                }
+                // OpenAI 兼容格式
+                else if (data.choices?.[0]?.message?.content) {
+                    fullResponse = data.choices[0].message.content;
                 }
             }
 
             return fullResponse;
+
         } catch (error) {
             console.error('生成失败:', error);
+
+            // 处理特定错误类型
+            if (error.name === 'AbortError') {
+                throw new Error('请求超时，请稍后重试');
+            }
+            if (error.message?.includes('fetch') || error.message?.includes('network')) {
+                throw new Error('网络连接失败，请检查网络后重试');
+            }
+
             throw error;
         } finally {
             this.state.currentGeneration = false;
@@ -581,34 +519,30 @@ class AICardGenerator {
         }
 
         const cards = [];
-        const cardRegex = new RegExp(
-            `${this.escapeRegex(this.separators.START)}([\\s\\S]*?)${this.escapeRegex(this.separators.END)}`,
-            'g'
-        );
 
-        let match;
-        while ((match = cardRegex.exec(generatedText)) !== null) {
-            const cardContent = match[1].trim();
+        // 按 --- 分割卡片
+        const cardBlocks = generatedText.split(/---+/).map(block => block.trim()).filter(block => block.length > 0);
 
-            // 提取正面和背面
-            const frontMatch = cardContent.match(
-                new RegExp(`${this.escapeRegex(this.separators.FRONT)}([\\s\\S]*?)(?=${this.escapeRegex(this.separators.BACK)}|$)`)
-            );
-            const backMatch = cardContent.match(
-                new RegExp(`${this.escapeRegex(this.separators.BACK)}([\\s\\S]*?)(?=${this.escapeRegex(this.separators.END)}|$)`)
-            );
+        for (const block of cardBlocks) {
+            // 提取标题
+            const titleMatch = block.match(/【标题】\s*([^\n]+)/);
+            // 提取内容
+            const contentMatch = block.match(/【内容】\s*([\s\S]+)$/);
 
-            if (frontMatch && backMatch) {
-                const front = frontMatch[1].trim();
-                const back = backMatch[1].trim();
+            if (titleMatch && contentMatch) {
+                const title = titleMatch[1].trim();
+                const content = contentMatch[1].trim();
 
-                if (front && back) {
-                    cards.push({ front, back });
+                if (title && content) {
+                    cards.push({
+                        front: title,
+                        back: content
+                    });
                 }
             }
         }
 
-        // 如果标准解析失败，尝试备用解析方法
+        // 如果标准解析失败，尝试备用解析
         if (cards.length === 0) {
             return this.parseCardsFallback(generatedText);
         }
@@ -625,75 +559,41 @@ class AICardGenerator {
     parseCardsFallback(text) {
         const cards = [];
 
-        // 清理文本，移除常见的无关内容
+        // 清理文本
         let cleanedText = text
             .replace(/以下是笔记转换为知识卡片的内容[:：]?/gi, '')
             .replace(/请输出[:：]?/gi, '')
-            .replace(/共\d+组/gi, '')
             .trim();
 
-        // 格式1: 问题: ... 答案: ... (支持中英文标点)
-        const qaRegex = /(?:问题|Q|Front)[:：]\s*([\s\S]*?)(?:\n|\r\n?)+(?:答案|A|Back)[:：]\s*([\s\S]*?)(?=(?:\n|\r\n?)*(?:问题|Q|Front)[:：]|$)/gi;
+        // 尝试匹配各种标题格式
+        // 格式1: 【标题】... 【内容】...
+        const cardRegex = /(?:【标题】|标题[:：]|Title[:：])\s*([^\n]+)(?:[\n\r]+)(?:【内容】|内容[:：]|Content[:：])\s*([\s\S]*?)(?=(?:【标题】|标题[:：]|Title[:：])|$)/gi;
 
         let match;
-        while ((match = qaRegex.exec(cleanedText)) !== null) {
+        while ((match = cardRegex.exec(cleanedText)) !== null) {
             const front = match[1].trim();
             const back = match[2].trim();
 
-            // 过滤掉无效内容
-            if (front && back &&
-                front.length > 2 && back.length > 2 &&
-                !front.includes('问题:') &&
-                !back.includes('答案:')) {
+            if (front && back && front.length > 1 && back.length > 1) {
                 cards.push({ front, back });
             }
         }
 
-        // 如果还是失败，尝试按"问题:"和"答案:"分割
+        // 如果还是失败，尝试按段落分割
         if (cards.length === 0) {
-            const parts = cleanedText.split(/(?:问题|Q)[:：]/i).filter(p => p.trim());
+            const paragraphs = cleanedText.split(/\n{2,}/).map(p => p.trim()).filter(p => p.length > 0);
 
-            for (const part of parts) {
-                const qaParts = part.split(/(?:答案|A)[:：]/i);
-                if (qaParts.length >= 2) {
-                    const front = qaParts[0].trim();
-                    const back = qaParts.slice(1).join(' ').trim();
+            for (let i = 0; i < paragraphs.length - 1; i += 2) {
+                const front = paragraphs[i];
+                const back = paragraphs[i + 1];
 
-                    if (front && back && front.length > 2 && back.length > 2) {
-                        cards.push({ front, back });
-                    }
-                }
-            }
-        }
-
-        // 最后尝试：按段落分割，奇数行为问题，偶数行为答案
-        if (cards.length === 0) {
-            const lines = cleanedText.split(/\n+/).map(l => l.trim()).filter(l => l.length > 0);
-            for (let i = 0; i < lines.length - 1; i++) {
-                const line = lines[i];
-                const nextLine = lines[i + 1];
-
-                // 如果当前行以问号结尾，可能是问题
-                if (line.endsWith('？') || line.endsWith('?')) {
-                    cards.push({
-                        front: line,
-                        back: nextLine
-                    });
-                    i++; // 跳过下一行
+                if (front && back) {
+                    cards.push({ front, back });
                 }
             }
         }
 
         return cards;
-    }
-
-    /**
-     * 转义正则表达式特殊字符
-     * @param {string} string - 需要转义的字符串
-     * @returns {string} 转义后的字符串
-     */
-    escapeRegex(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     /**
@@ -706,25 +606,18 @@ class AICardGenerator {
             return '';
         }
 
-        return cards.map((card, index) => {
+        return cards.map((card) => {
             return `:front:: ${card.front}\n:back:: ${card.back}`;
         }).join('\n\n');
     }
 
     /**
      * 释放资源
-     * 卸载模型，释放内存
+     * 云端 API 无需释放资源
      */
     async dispose() {
-        if (this.state.engine) {
-            try {
-                await this.state.engine.unload();
-            } catch (e) {
-                console.error('释放资源失败:', e);
-            }
-            this.state.engine = null;
-            this.state.isReady = false;
-        }
+        // 云端 API 无需释放资源
+        this.state.isReady = false;
     }
 
     /**
@@ -737,28 +630,20 @@ class AICardGenerator {
             isReady: this.state.isReady,
             hasError: !!this.state.initError,
             errorMessage: this.state.initError,
-            isMockMode: this.state.engine?._isMockEngine || false
+            provider: this.config.PROVIDER,
+            model: this.getProviderConfig().model
         };
     }
 
     /**
-     * 重置引擎状态，强制下次重新初始化
-     * 用于从演示模式切换回真实模型
+     * 重置引擎状态
      */
     async reset() {
-        if (this.state.engine) {
-            try {
-                await this.dispose();
-            } catch (e) {
-                console.error('重置时释放资源失败:', e);
-            }
-        }
         this.state.isReady = false;
         this.state.isLoading = false;
         this.state.initError = null;
-        this.state.engine = null;
-        window.AI_MOCK_MODE = false;
-        console.log('【重置】AI 引擎状态已重置，下次将尝试加载真实模型');
+        this.state.currentGeneration = false;
+        this.checkApiKey();
     }
 }
 
@@ -825,16 +710,19 @@ class AICardGeneratorUI {
         // 生成按钮 - 使用防抖
         let generateTimeout = null;
         this.elements.generateBtn?.addEventListener('click', () => {
-            if (generateTimeout) return;
+            if (generateTimeout) {
+                this.showError('请稍后再试，防止重复请求');
+                return;
+            }
 
             this.handleGenerate();
 
-            // 3 秒防抖
+            // 防抖
             this.elements.generateBtn.disabled = true;
             generateTimeout = setTimeout(() => {
                 generateTimeout = null;
                 this.updateGenerateButtonState();
-            }, 3000);
+            }, this.ai.config.DEBOUNCE_MS);
         });
 
         // 插入按钮
@@ -852,10 +740,10 @@ class AICardGeneratorUI {
             this.handleGenerate();
         });
 
-        // 切换真实模型按钮
-        this.elements.resetModelBtn?.addEventListener('click', () => {
-            this.handleResetModel();
-        });
+        // 重置按钮（隐藏，云端 API 不需要）
+        if (this.elements.resetModelBtn) {
+            this.elements.resetModelBtn.style.display = 'none';
+        }
 
         // 关闭按钮
         this.elements.closeBtn?.addEventListener('click', () => {
@@ -909,41 +797,27 @@ class AICardGeneratorUI {
             this.updateUIState('loading');
             this.generatedCards = [];
 
-            // 检查兼容性
-            const compatibility = this.ai.checkCompatibility();
-            if (!compatibility.compatible) {
-                throw new Error(compatibility.message);
-            }
-
-            // 重置模拟模式标志，确保每次都能尝试加载真实模型
-            if (window.AI_MOCK_MODE) {
-                console.log('【生成】检测到之前的模拟模式标志，重置后尝试加载真实模型');
-                window.AI_MOCK_MODE = false;
-            }
-
-            // 初始化 AI（如果尚未初始化）
+            // 初始化 AI（检查配置）
             if (!this.ai.state.isReady) {
                 console.log('开始初始化 AI 引擎...');
                 await this.ai.initialize((progress, message) => {
-                    console.log(`加载进度: ${progress}% - ${message}`);
+                    console.log(`初始化进度: ${progress}% - ${message}`);
                     this.updateProgress(progress, message);
                 });
                 console.log('AI 引擎初始化完成');
             }
 
-            // 检查是否成功加载了真实模型
-            const isMock = this.isMockMode();
-            console.log(`【生成】当前模式: ${isMock ? '演示模式' : '真实模型模式'}`);
-
-            this.updateProgress(0, '正在生成知识卡片...');
+            this.updateProgress(30, '正在生成知识卡片...');
 
             // 生成卡片
             console.log('开始生成卡片...');
             const result = await this.ai.generateCards(content, (token) => {
-                // 流式输出回调（可选，用于实时显示）
+                // 流式输出回调
                 console.log('生成 token:', token);
             });
             console.log('生成完成，原始结果:', result);
+
+            this.updateProgress(80, '正在解析卡片...');
 
             // 解析卡片
             this.generatedCards = this.ai.parseCards(result);
@@ -961,6 +835,8 @@ class AICardGeneratorUI {
                     return;
                 }
             }
+
+            this.updateProgress(100, '生成完成！');
 
             // 显示结果
             this.renderCards();
@@ -1028,42 +904,6 @@ class AICardGeneratorUI {
     }
 
     /**
-     * 处理切换真实模型
-     * 重置引擎并尝试加载真实模型
-     */
-    async handleResetModel() {
-        try {
-            this.updateUIState('loading');
-            this.updateProgress(0, '正在重置模型状态...');
-
-            // 重置引擎
-            await this.ai.reset();
-
-            this.updateProgress(50, '正在尝试加载真实模型...');
-
-            // 重新初始化
-            await this.ai.initialize((progress, message) => {
-                this.updateProgress(progress, message);
-            });
-
-            // 检查是否成功加载真实模型
-            const isMock = this.isMockMode();
-            if (isMock) {
-                this.showError('真实模型加载失败，仍处于演示模式。请检查网络连接或浏览器兼容性。');
-                this.updateUIState('error');
-            } else {
-                this.showSuccess('真实模型加载成功！');
-                // 重新生成卡片
-                this.handleGenerate();
-            }
-        } catch (error) {
-            console.error('切换模型失败:', error);
-            this.showError(error.message || '切换模型失败');
-            this.updateUIState('error');
-        }
-    }
-
-    /**
      * 渲染生成的卡片
      */
     renderCards() {
@@ -1075,42 +915,35 @@ class AICardGeneratorUI {
                     <span class="ai-card-number">卡片 ${index + 1}</span>
                 </div>
                 <div class="ai-card-front">
-                    <div class="ai-card-label">正面</div>
+                    <div class="ai-card-label">标题</div>
                     <div class="ai-card-content">${this.escapeHtml(card.front)}</div>
                 </div>
                 <div class="ai-card-back">
-                    <div class="ai-card-label">背面</div>
+                    <div class="ai-card-label">内容</div>
                     <div class="ai-card-content">${this.formatBackContent(card.back)}</div>
                 </div>
             </div>
         `).join('');
 
-        // 更新卡片计数 - 检查是否使用真实模型
+        // 更新卡片计数
         if (this.elements.cardCount) {
-            const isMockMode = this.isMockMode();
-            const mockBadge = isMockMode ?
-                ' <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">演示模式</span>' : '';
-            this.elements.cardCount.innerHTML = `共生成 ${this.generatedCards.length} 张卡片${mockBadge}`;
-        }
-
-        // 显示/隐藏"切换真实模型"按钮
-        if (this.elements.resetModelBtn) {
-            const isMockMode = this.isMockMode();
-            this.elements.resetModelBtn.style.display = isMockMode ? 'inline-flex' : 'none';
+            const providerName = this.getProviderDisplayName();
+            this.elements.cardCount.innerHTML = `共生成 ${this.generatedCards.length} 张卡片 <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${providerName}</span>`;
         }
     }
 
     /**
-     * 检查当前是否处于模拟模式
-     * @returns {boolean}
+     * 获取提供商显示名称
+     * @returns {string}
      */
-    isMockMode() {
-        // 检查引擎是否为模拟引擎（通过检查是否有特定的模拟标记）
-        if (this.ai.state.engine && this.ai.state.engine._isMockEngine) {
-            return true;
-        }
-        // 备用：检查全局变量
-        return !!window.AI_MOCK_MODE;
+    getProviderDisplayName() {
+        const provider = this.ai.config.PROVIDER;
+        const names = {
+            'siliconflow': 'SiliconFlow',
+            'qwen': '通义千问',
+            'doubao': '豆包'
+        };
+        return names[provider] || provider;
     }
 
     /**
@@ -1222,14 +1055,12 @@ class AICardGeneratorUI {
             // 添加更友好的错误提示
             let helpText = '';
 
-            if (message.includes('WebGPU') || message.includes('WebGL')) {
-                helpText = '<br><small style="color: var(--text-secondary);">请使用 Chrome 114+、Edge 114+ 或 Safari 17+ 浏览器</small>';
-            } else if (message.includes('503') || message.includes('502')) {
-                helpText = '<br><small style="color: var(--text-secondary);">GitHub Pages 服务暂时不可用，已自动切换到演示模式</small>';
-            } else if (message.includes('加载') || message.includes('Load')) {
-                helpText = '<br><small style="color: var(--text-secondary);">模型首次加载需要下载约 300MB 数据，请耐心等待</small>';
-            } else if (message.includes('timeout') || message.includes('超时')) {
-                helpText = '<br><small style="color: var(--text-secondary);">网络连接较慢，请检查网络后重试</small>';
+            if (message.includes('API Key') || message.includes('配置')) {
+                helpText = '<br><small style="color: var(--text-secondary);">请在 ai-cards.js 中配置您的 API Key</small>';
+            } else if (message.includes('网络') || message.includes('fetch') || message.includes('timeout')) {
+                helpText = '<br><small style="color: var(--text-secondary);">请检查网络连接后重试</small>';
+            } else if (message.includes('防抖') || message.includes('稍后再试')) {
+                helpText = '<br><small style="color: var(--text-secondary);">请等待几秒后再试</small>';
             }
 
             this.elements.statusText.innerHTML = `<span class="ai-error-text">${this.escapeHtml(message)}</span>${helpText}`;
@@ -1276,8 +1107,7 @@ class AICardGeneratorUI {
                     </p>
                     <pre style="background: #f8f9fa; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; max-height: 300px; overflow-y: auto;">${this.escapeHtml(rawText)}</pre>
                     <p style="margin-top: 12px; font-size: 13px; color: var(--text-secondary);">
-                        提示：当前使用的是 ${this.isMockMode() ? '演示模式（模拟数据）' : '本地 AI 模型'}。
-                        ${this.isMockMode() ? '点击"切换真实模型"按钮尝试加载真实模型。' : '模型可能输出格式不正确，请尝试重新生成。'}
+                        提示：您可以手动复制内容并调整格式。
                     </p>
                 </div>
             </div>
@@ -1286,11 +1116,6 @@ class AICardGeneratorUI {
         // 更新卡片计数
         if (this.elements.cardCount) {
             this.elements.cardCount.innerHTML = '生成失败 <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">原始输出</span>';
-        }
-
-        // 显示/隐藏"切换真实模型"按钮
-        if (this.elements.resetModelBtn) {
-            this.elements.resetModelBtn.style.display = this.isMockMode() ? 'inline-flex' : 'none';
         }
 
         this.updateUIState('success');
@@ -1310,11 +1135,9 @@ class AICardGeneratorUI {
         this.elements.inputArea && (this.elements.inputArea.value = '');
         this.elements.inputArea?.focus();
 
-        // 检查兼容性
-        const compatibility = this.ai.checkCompatibility();
-        if (!compatibility.compatible) {
-            this.showError(compatibility.message);
-            this.elements.generateBtn && (this.elements.generateBtn.disabled = true);
+        // 检查 API Key 配置
+        if (!this.ai.state.isReady) {
+            this.showError(this.ai.state.initError || 'API Key 未配置');
         }
     }
 
@@ -1360,4 +1183,4 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // 确保全局变量已定义
-console.log('ai-cards.js loaded, aiCardGeneratorUI:', typeof window.aiCardGeneratorUI);
+console.log('ai-cards.js (云端 API 版本) loaded, aiCardGeneratorUI:', typeof window.aiCardGeneratorUI);

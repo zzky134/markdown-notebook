@@ -716,21 +716,23 @@ class ScheduleApp {
         document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
         const navSchedule = document.getElementById('navSchedule');
         if (navSchedule) navSchedule.classList.add('active');
+
+        // 切换侧边栏按钮：隐藏"课表"，显示"返回笔记"
+        const scheduleBtn = document.getElementById('scheduleActionBtn');
+        const backBtn = document.getElementById('backToNotesBtn');
+        if (scheduleBtn) scheduleBtn.style.display = 'none';
+        if (backBtn) backBtn.style.display = 'block';
     }
 
     // 切换回笔记视图
     switchToNotes() {
-        console.log('switchToNotes called, currentNoteId:', app.currentNoteId);
-
         // 停止倒计时
         this.renderer.stopCountdown();
 
         // 隐藏课表
         const scheduleView = document.getElementById('scheduleView');
-        console.log('scheduleView element:', scheduleView);
         if (scheduleView) {
             scheduleView.style.display = 'none';
-            console.log('scheduleView hidden');
         }
 
         // 显示笔记界面
@@ -750,7 +752,6 @@ class ScheduleApp {
             }
         } else {
             // 没有打开的笔记，显示空状态
-            console.log('No current note, showing empty state');
             document.getElementById('toolbar').style.display = 'none';
             document.getElementById('editorContainer').style.display = 'none';
             document.getElementById('emptyState').style.display = 'flex';
@@ -760,7 +761,12 @@ class ScheduleApp {
         document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
         const navNotes = document.getElementById('navNotes');
         if (navNotes) navNotes.classList.add('active');
-        console.log('switchToNotes completed');
+
+        // 切换侧边栏按钮：显示"课表"，隐藏"返回笔记"
+        const scheduleBtn = document.getElementById('scheduleActionBtn');
+        const backBtn = document.getElementById('backToNotesBtn');
+        if (scheduleBtn) scheduleBtn.style.display = 'block';
+        if (backBtn) backBtn.style.display = 'none';
     }
 
     // 上一周

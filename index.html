@@ -2284,12 +2284,20 @@
                     </svg>
                 </button>
             </div>
-            <div class="sidebar-actions">
+            <div class="sidebar-actions" id="scheduleActionBtn">
                 <button class="btn btn-secondary" onclick="scheduleApp.showSchedule()" style="width: 100%; justify-content: center;">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                     我的课表
+                </button>
+            </div>
+            <div class="sidebar-actions" id="backToNotesBtn" style="display: none;">
+                <button class="btn btn-primary" onclick="scheduleApp.switchToNotes()" style="width: 100%; justify-content: center;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    返回笔记
                 </button>
             </div>
             <div class="sidebar-actions" style="padding-top: 0;">
@@ -4102,15 +4110,12 @@ $$
 
         // 切换移动端视图
         MarkdownNotebookApp.prototype.switchMobileView = function(view) {
-            console.log('switchMobileView called with:', view);
             document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('nav' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
 
             const mobileTabs = document.getElementById('mobileTabs');
-            console.log('mobileTabs:', mobileTabs, 'scheduleApp:', scheduleApp);
 
             if (view === 'notes') {
-                console.log('Switching to notes view');
                 if (mobileTabs) mobileTabs.classList.remove('hidden');
                 if (scheduleApp) scheduleApp.switchToNotes();
                 if (isMobile()) this.updateMobileTabUI();

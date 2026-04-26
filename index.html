@@ -2301,11 +2301,11 @@
                 </button>
             </div>
             <div class="sidebar-actions" style="padding-top: 0;">
-                <button class="btn btn-secondary" onclick="if(typeof aiCardGeneratorUI!=='undefined'){aiCardGeneratorUI.openModal()}else{alert('AI模块加载中，请稍后重试')}" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;"
+                <button class="btn btn-secondary" onclick="if(typeof aiCardGeneratorUI!=='undefined'){aiCardGeneratorUI.openModal()}else{alert('AI模块加载中，请稍后重试')}" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
                     </svg>
-                    AI 生成卡片
+                    AI 答疑
                 </button>
             </div>
             <div class="sidebar-actions" id="pwaInstallBtn" style="display: none; padding-top: 0;">
@@ -2476,30 +2476,26 @@
         </div>
     </div>
 
-    <!-- AI 知识卡片生成模态框 -->
+    <!-- AI 答疑模态框 -->
     <div class="modal" id="aiCardModal">
         <div class="modal-content ai-card-modal">
             <div class="ai-modal-header">
                 <div class="ai-modal-title">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
                     </svg>
-                    AI 知识卡片生成
+                    AI 答疑
                 </div>
                 <button class="close-btn" id="aiCloseBtn">&times;</button>
             </div>
 
-            <div class="ai-modal-desc">
-                使用本地 AI 模型将笔记转换为知识卡片。所有处理在浏览器内完成，无需联网。
-            </div>
-
             <!-- 输入区域 -->
             <div class="ai-input-section">
-                <label class="ai-section-label">输入课堂笔记</label>
+                <label class="ai-section-label">输入你的问题</label>
                 <textarea
                     class="ai-textarea"
                     id="aiCardInput"
-                    placeholder="请粘贴你的课堂笔记、学习材料或任何需要整理的内容...
+                    placeholder="请输入你想问的问题，AI会为你详细解答..."
 
 例如：
 JavaScript 是一种轻量级的解释型编程语言。它是一门基于原型、多范式的动态脚本语言，支持面向对象、命令式和声明式（如函数式编程）风格。
@@ -2510,7 +2506,7 @@ JavaScript 在网页开发中主要用于：
 3. 发送网络请求
 4. 存储本地数据"
                 ></textarea>
-                <div class="ai-input-hint">建议输入 100-3000 字的笔记内容，AI 将自动生成 3-10 张知识卡片</div>
+                <div class="ai-input-hint">输入你的问题，AI 会给出详细的解答和解释</div>
             </div>
 
             <!-- 生成按钮 -->
@@ -2518,7 +2514,7 @@ JavaScript 在网页开发中主要用于：
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <span class="ai-btn-text">生成知识卡片</span>
+                <span class="ai-btn-text">获取答案</span>
             </button>
 
             <!-- 状态显示区域 -->
@@ -2532,7 +2528,7 @@ JavaScript 在网页开发中主要用于：
             <!-- 结果区域 -->
             <div class="ai-result-area" id="aiResultArea">
                 <div class="ai-result-header">
-                    <span class="ai-result-title">生成结果</span>
+                    <span class="ai-result-title">解答结果</span>
                     <span class="ai-card-count" id="aiCardCount"></span>
                 </div>
                 <div class="ai-cards-container" id="aiCardsContainer">
@@ -2555,7 +2551,7 @@ JavaScript 在网页开发中主要用于：
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        重新生成
+                        重新获取
                     </button>
                     <button class="btn btn-secondary" id="aiResetModelBtn" style="display: none;">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">

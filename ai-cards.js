@@ -1,9 +1,9 @@
 /**
- * AI 知识卡片生成模块（云端 API 版本）
- * 基于 SiliconFlow / 通义千问 / 豆包等云端 API 实现知识卡片生成
+ * AI 答疑模块（云端 API 版本）
+ * 基于 SiliconFlow / 通义千问 / 豆包等云端 API 实现问题解答功能
  *
- * @module AICardGenerator
- * @version 2.0.0
+ * @module AIQAGenerator
+ * @version 2.1.0
  * @author Claude Code
  *
  * ============================================
@@ -106,78 +106,68 @@ const AI_CONFIG = {
  * ============================================
  * 系统提示词
  * ============================================
- * 指导模型将笔记内容整理成知识卡片
- * 关键：根据内容复杂度决定卡片数量，避免过度拆分
+ * 指导模型回答用户问题，提供详细解答
  */
-const SYSTEM_PROMPT = `你是一个专业的知识整理助手。请将用户提供的笔记内容整理成知识卡片。
+const SYSTEM_PROMPT = `你是一个专业的学习助手，擅长解答各类学科问题。请根据用户的问题提供详细、清晰的解答。
 
-**重要原则 - 根据内容类型决定卡片数量：**
+**回答原则：**
 
-1. **如果是单个问题/题目**（如数学题、问答题）：
-   - 只生成 **1张卡片**
-   - 【标题】写问题/题目本身（保留核心信息）
-   - 【内容】写答案和简要解析
-
-2. **如果是简短笔记**（几句话到一段话）：
-   - 生成 **1-2张卡片**
-   - 每张卡片聚焦一个核心要点
-
-3. **如果是长笔记/多知识点内容**：
-   - 最多生成 **3-5张卡片**
-   - 每张卡片一个独立知识点
+1. **直接回答**：首先给出问题的直接答案
+2. **详细解释**：提供必要的背景知识、原理说明或推导过程
+3. **结构化呈现**：使用清晰的结构组织答案，便于理解
+4. **举例说明**：适当举例帮助理解复杂概念
 
 **输出格式要求：**
-- 每张卡片包含：【标题】和【内容】
-- 卡片之间用三个横线分隔：---
-- 标题简洁（10字以内），内容精炼（50-150字）
+- 【问题】用户提出的问题（简要概括）
+- 【答案】详细解答内容
+- 如果涉及多个要点，使用分点说明
+- 数学/物理题需要展示解题步骤
 
-**示例1 - 单个问题（1张卡片）：**
-【标题】鸡兔同笼问题：10只动物28条腿
-【内容】答案：鸡4只，兔子6只。解析：设鸡x只兔y只，x+y=10，2x+4y=28，解得x=4，y=6。
+**示例1 - 数学问题：**
+【问题】鸡兔同笼：10只动物28条腿，求鸡兔各几只？
+【答案】
+设鸡有x只，兔有y只
+根据题意列方程组：
+x + y = 10  （总头数）
+2x + 4y = 28  （总腿数）
 
-**示例2 - 简短笔记（2张卡片）：**
-【标题】光合作用定义
-【内容】绿色植物利用光能将CO₂和H₂O转化为有机物并释放氧气的过程，发生在叶绿体中。
+解得：
+由①得 x = 10 - y
+代入②：2(10-y) + 4y = 28
+20 - 2y + 4y = 28
+2y = 8
+y = 4
 
----
+所以：兔子4只，鸡6只
 
-【标题】光合作用两个阶段
-【内容】光反应：在类囊体膜上进行，产生ATP和NADPH。暗反应：在基质中进行，合成葡萄糖。
+**示例2 - 概念解释：**
+【问题】什么是光合作用？
+【答案】
+光合作用是绿色植物、藻类和某些细菌利用光能将二氧化碳和水转化为有机物并释放氧气的过程。
 
-**示例3 - 长笔记（多张卡片）：**
-（根据实际内容生成3-5张，每张一个独立知识点）`;
+关键要点：
+1. 场所：主要在叶绿体中进行
+2. 条件：需要光能
+3. 原料：CO₂ 和 H₂O
+4. 产物：有机物（如葡萄糖）和 O₂
+5. 意义：将光能转化为化学能储存，是生态系统能量流动的基础`;
 
 /**
  * 构建用户提示词
- * @param {string} content - 用户输入的笔记内容
+ * @param {string} content - 用户输入的问题
  * @returns {string} 完整的用户提示词
  */
 function buildUserPrompt(content) {
-    // 检测内容类型，给出更具体的指示
-    const isQuestion = /问题[:：]|\?|？|题目[:：]|问[:：]/.test(content);
-    const isShortContent = content.length < 200;
-
-    let specificInstruction = '';
-    if (isQuestion) {
-        specificInstruction = '这是一个问题/题目，请只生成1张卡片：标题写问题，内容写答案和解析。';
-    } else if (isShortContent) {
-        specificInstruction = '这是简短笔记，请生成1-2张卡片即可。';
-    } else {
-        specificInstruction = '这是长笔记，请生成3-5张卡片，每张一个知识点。';
-    }
-
-    return `请将以下笔记内容整理成知识卡片：
+    return `请回答以下问题：
 
 ${content}
 
-${specificInstruction}
-
 要求：
-1. 用【标题】和【内容】格式输出
-2. 卡片之间用 --- 分隔
-3. 标题简洁（10字以内），内容精炼（50-150字）
-4. 不要过度拆分，保持内容完整性`;
-}
+1. 用【问题】和【答案】格式输出
+2. 【问题】简要概括用户的问题
+3. 【答案】提供详细、完整的解答
+4. 如果是理科题目，需要展示完整的解题步骤
+5. 如果是概念性问题，需要解释清楚原理和背景`;
 
 // ============================================
 // 状态管理
@@ -380,12 +370,12 @@ class AICardGenerator {
     }
 
     /**
-     * 生成知识卡片
-     * @param {string} content - 输入的笔记内容
+     * 生成问题答案
+     * @param {string} content - 输入的问题
      * @param {Function} onToken - 流式输出回调 (token: string) => void
      * @returns {Promise<string>} 生成的原始文本
      */
-    async generateCards(content, onToken = null) {
+    async generateAnswer(content, onToken = null) {
         // 检查防抖
         this.checkDebounce();
 
@@ -509,106 +499,79 @@ class AICardGenerator {
     }
 
     /**
-     * 解析生成的文本为卡片数组
+     * 解析生成的文本为问答对象
      * @param {string} generatedText - AI 生成的原始文本
-     * @returns {Array<{front: string, back: string}>} 解析后的卡片数组
+     * @returns {Object|null} 解析后的问答对象 {question: string, answer: string}
      */
-    parseCards(generatedText) {
+    parseQAResult(generatedText) {
         if (!generatedText) {
-            return [];
+            return null;
         }
 
-        const cards = [];
+        // 提取问题
+        const questionMatch = generatedText.match(/【问题】\s*([^\n]+)/);
+        // 提取答案（从【答案】到结束）
+        const answerMatch = generatedText.match(/【答案】\s*([\s\S]+)$/);
 
-        // 按 --- 分割卡片
-        const cardBlocks = generatedText.split(/---+/).map(block => block.trim()).filter(block => block.length > 0);
-
-        for (const block of cardBlocks) {
-            // 提取标题
-            const titleMatch = block.match(/【标题】\s*([^\n]+)/);
-            // 提取内容
-            const contentMatch = block.match(/【内容】\s*([\s\S]+)$/);
-
-            if (titleMatch && contentMatch) {
-                const title = titleMatch[1].trim();
-                const content = contentMatch[1].trim();
-
-                if (title && content) {
-                    cards.push({
-                        front: title,
-                        back: content
-                    });
-                }
-            }
+        if (questionMatch && answerMatch) {
+            return {
+                question: questionMatch[1].trim(),
+                answer: answerMatch[1].trim()
+            };
         }
 
-        // 如果标准解析失败，尝试备用解析
-        if (cards.length === 0) {
-            return this.parseCardsFallback(generatedText);
-        }
-
-        return cards;
+        // 如果标准格式解析失败，尝试备用解析
+        return this.parseQAFallback(generatedText);
     }
 
     /**
-     * 备用卡片解析方法
-     * 当标准分隔符解析失败时使用
+     * 备用问答解析方法
+     * 当标准格式解析失败时使用
      * @param {string} text - AI 生成的文本
-     * @returns {Array<{front: string, back: string}>} 解析后的卡片数组
+     * @returns {Object|null} 解析后的问答对象
      */
-    parseCardsFallback(text) {
-        const cards = [];
-
+    parseQAFallback(text) {
         // 清理文本
         let cleanedText = text
-            .replace(/以下是笔记转换为知识卡片的内容[:：]?/gi, '')
-            .replace(/请输出[:：]?/gi, '')
+            .replace(/以下是[:：]?/gi, '')
             .trim();
 
-        // 尝试匹配各种标题格式
-        // 格式1: 【标题】... 【内容】...
-        const cardRegex = /(?:【标题】|标题[:：]|Title[:：])\s*([^\n]+)(?:[\n\r]+)(?:【内容】|内容[:：]|Content[:：])\s*([\s\S]*?)(?=(?:【标题】|标题[:：]|Title[:：])|$)/gi;
+        // 尝试匹配各种问题/答案格式
+        // 格式1: 【问题】... 【答案】...
+        const qaRegex = /(?:【问题】|问题[:：]|Question[:：]|Q[:：])\s*([^\n]+)(?:[\n\r]+)(?:【答案】|答案[:：]|Answer[:：]|A[:：])\s*([\s\S]+)$/i;
 
-        let match;
-        while ((match = cardRegex.exec(cleanedText)) !== null) {
-            const front = match[1].trim();
-            const back = match[2].trim();
-
-            if (front && back && front.length > 1 && back.length > 1) {
-                cards.push({ front, back });
-            }
+        const match = cleanedText.match(qaRegex);
+        if (match) {
+            return {
+                question: match[1].trim(),
+                answer: match[2].trim()
+            };
         }
 
-        // 如果还是失败，尝试按段落分割
-        if (cards.length === 0) {
-            const paragraphs = cleanedText.split(/\n{2,}/).map(p => p.trim()).filter(p => p.length > 0);
-
-            for (let i = 0; i < paragraphs.length - 1; i += 2) {
-                const front = paragraphs[i];
-                const back = paragraphs[i + 1];
-
-                if (front && back) {
-                    cards.push({ front, back });
-                }
-            }
+        // 如果还是失败，尝试简单分割
+        const lines = cleanedText.split('\n').filter(l => l.trim());
+        if (lines.length >= 2) {
+            // 第一行作为问题，其余作为答案
+            return {
+                question: lines[0].replace(/^[\s\S]*?[:：]\s*/, '').trim() || '问题',
+                answer: lines.slice(1).join('\n').trim()
+            };
         }
 
-        return cards;
+        return null;
     }
 
     /**
-     * 将卡片转换为 Markdown 格式
-     * @param {Array<{front: string, back: string}>} cards - 卡片数组
-     * @returns {string} Markdown 格式的卡片文本
+     * 将问答转换为 Markdown 格式
+     * @param {Object} qa - 问答对象 {question: string, answer: string}
+     * @returns {string} Markdown 格式的问答文本
      */
-    cardsToMarkdown(cards) {
-        if (!cards || cards.length === 0) {
+    qaToMarkdown(qa) {
+        if (!qa || !qa.question || !qa.answer) {
             return '';
         }
 
-        return cards.map((card) => {
-            return `:front:: ${card.front}\n:back:: ${card.back}`;
-        }).join('\n\n');
+        return `:front:: ${qa.question}\n:back:: ${qa.answer}`;
     }
 
     /**
@@ -655,11 +618,11 @@ class AICardGenerator {
  * AI 卡片生成器 UI 控制器
  * 处理用户界面交互
  */
-class AICardGeneratorUI {
+class AIQAGeneratorUI {
     constructor(aiGenerator) {
         this.ai = aiGenerator;
         this.elements = {};
-        this.generatedCards = [];
+        this.generatedQA = null;
     }
 
     /**
@@ -789,13 +752,13 @@ class AICardGeneratorUI {
         const content = this.elements.inputArea?.value.trim();
 
         if (!content) {
-            this.showError('请输入笔记内容');
+            this.showError('请输入问题');
             return;
         }
 
         try {
             this.updateUIState('loading');
-            this.generatedCards = [];
+            this.generatedQA = null;
 
             // 初始化 AI（检查配置）
             if (!this.ai.state.isReady) {
@@ -807,44 +770,44 @@ class AICardGeneratorUI {
                 console.log('AI 引擎初始化完成');
             }
 
-            this.updateProgress(30, '正在生成知识卡片...');
+            this.updateProgress(30, '正在获取答案...');
 
-            // 生成卡片
-            console.log('开始生成卡片...');
-            const result = await this.ai.generateCards(content, (token) => {
+            // 生成答案
+            console.log('开始生成答案...');
+            const result = await this.ai.generateAnswer(content, (token) => {
                 // 流式输出回调
                 console.log('生成 token:', token);
             });
             console.log('生成完成，原始结果:', result);
 
-            this.updateProgress(80, '正在解析卡片...');
+            this.updateProgress(80, '正在解析答案...');
 
-            // 解析卡片
-            this.generatedCards = this.ai.parseCards(result);
-            console.log('解析后的卡片:', this.generatedCards);
+            // 解析问答
+            this.generatedQA = this.ai.parseQAResult(result);
+            console.log('解析后的问答:', this.generatedQA);
 
-            if (this.generatedCards.length === 0) {
+            if (!this.generatedQA) {
                 // 如果标准解析失败，尝试备用方法
                 console.log('标准解析失败，尝试备用解析...');
                 console.log('原始生成内容:', JSON.stringify(result));
-                this.generatedCards = this.ai.parseCardsFallback(result);
+                this.generatedQA = this.ai.parseQAFallback(result);
 
-                if (this.generatedCards.length === 0) {
+                if (!this.generatedQA) {
                     // 显示原始内容供用户查看
                     this.showRawResult(result);
                     return;
                 }
             }
 
-            this.updateProgress(100, '生成完成！');
+            this.updateProgress(100, '获取完成！');
 
             // 显示结果
-            this.renderCards();
+            this.renderQA();
             this.updateUIState('success');
 
         } catch (error) {
-            console.error('生成失败:', error);
-            this.showError(error.message || '生成失败，请稍后重试');
+            console.error('获取失败:', error);
+            this.showError(error.message || '获取失败，请稍后重试');
             this.updateUIState('error');
         }
     }
@@ -853,9 +816,9 @@ class AICardGeneratorUI {
      * 处理插入到编辑器
      */
     handleInsert() {
-        if (this.generatedCards.length === 0) return;
+        if (!this.generatedQA) return;
 
-        const markdown = this.ai.cardsToMarkdown(this.generatedCards);
+        const markdown = this.ai.qaToMarkdown(this.generatedQA);
 
         // 调用全局 app 的插入功能
         if (window.app && typeof window.app.insertAICards === 'function') {
@@ -882,9 +845,9 @@ class AICardGeneratorUI {
      * 处理复制到剪贴板
      */
     async handleCopy() {
-        if (this.generatedCards.length === 0) return;
+        if (!this.generatedQA) return;
 
-        const markdown = this.ai.cardsToMarkdown(this.generatedCards);
+        const markdown = this.ai.qaToMarkdown(this.generatedQA);
 
         try {
             await navigator.clipboard.writeText(markdown);
@@ -904,31 +867,32 @@ class AICardGeneratorUI {
     }
 
     /**
-     * 渲染生成的卡片
+     * 渲染问答结果
      */
-    renderCards() {
-        if (!this.elements.cardsContainer) return;
+    renderQA() {
+        if (!this.elements.cardsContainer || !this.generatedQA) return;
 
-        this.elements.cardsContainer.innerHTML = this.generatedCards.map((card, index) => `
+        this.elements.cardsContainer.innerHTML = `
             <div class="ai-card-item">
                 <div class="ai-card-header">
-                    <span class="ai-card-number">卡片 ${index + 1}</span>
+                    <span class="ai-card-number">问题</span>
                 </div>
                 <div class="ai-card-front">
-                    <div class="ai-card-label">标题</div>
-                    <div class="ai-card-content">${this.escapeHtml(card.front)}</div>
+                    <div class="ai-card-content" style="font-weight: 600; font-size: 16px;">${this.escapeHtml(this.generatedQA.question)}</div>
+                </div>
+                <div class="ai-card-header" style="margin-top: 16px;">
+                    <span class="ai-card-number">答案</span>
                 </div>
                 <div class="ai-card-back">
-                    <div class="ai-card-label">内容</div>
-                    <div class="ai-card-content">${this.formatBackContent(card.back)}</div>
+                    <div class="ai-card-content">${this.formatAnswerContent(this.generatedQA.answer)}</div>
                 </div>
             </div>
-        `).join('');
+        `;
 
-        // 更新卡片计数
+        // 更新结果标题
         if (this.elements.cardCount) {
             const providerName = this.getProviderDisplayName();
-            this.elements.cardCount.innerHTML = `共生成 ${this.generatedCards.length} 张卡片 <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${providerName}</span>`;
+            this.elements.cardCount.innerHTML = `AI 解答 <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${providerName}</span>`;
         }
     }
 
@@ -947,11 +911,11 @@ class AICardGeneratorUI {
     }
 
     /**
-     * 格式化背面内容（支持简单的 Markdown）
+     * 格式化答案内容（支持简单的 Markdown）
      * @param {string} content - 原始内容
      * @returns {string} HTML 格式内容
      */
-    formatBackContent(content) {
+    formatAnswerContent(content) {
         // 简单的 Markdown 转换
         let html = this.escapeHtml(content);
 
@@ -1140,6 +1104,7 @@ class AICardGeneratorUI {
             this.showError(this.ai.state.initError || 'API Key 未配置');
         }
     }
+    }
 
     /**
      * 关闭模态框
@@ -1166,7 +1131,7 @@ class AICardGeneratorUI {
 
 // 创建全局实例
 const aiCardGenerator = new AICardGenerator();
-const aiCardGeneratorUI = new AICardGeneratorUI(aiCardGenerator);
+const aiCardGeneratorUI = new AIQAGeneratorUI(aiCardGenerator);
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -1179,8 +1144,8 @@ window.aiCardGeneratorUI = aiCardGeneratorUI;
 
 // 兼容 CommonJS
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { AICardGenerator, AICardGeneratorUI, aiCardGenerator, aiCardGeneratorUI };
+    module.exports = { AICardGenerator, AIQAGeneratorUI, aiCardGenerator, aiCardGeneratorUI };
 }
 
 // 确保全局变量已定义
-console.log('ai-cards.js (云端 API 版本) loaded, aiCardGeneratorUI:', typeof window.aiCardGeneratorUI);
+console.log('ai-cards.js (AI Q&A 版本) loaded, aiCardGeneratorUI:', typeof window.aiCardGeneratorUI);

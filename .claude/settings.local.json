@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(python *)",
+      "Bash(pkill -f \"python -m http.server\")",
+      "Bash(taskkill /F /IM python.exe)",
+      "Bash(start /b python -m http.server 8080)"
     ]
   }
 }

@@ -732,6 +732,10 @@ class ScheduleApp {
             document.getElementById('toolbar').style.display = 'flex';
             document.getElementById('editorContainer').style.display = 'flex';
             document.getElementById('emptyState').style.display = 'none';
+            // 在非移动端显示预览面板
+            if (!isMobile()) {
+                document.getElementById('previewPane').style.display = 'flex';
+            }
         } else {
             document.getElementById('emptyState').style.display = 'flex';
         }

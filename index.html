@@ -3042,8 +3042,14 @@ $$
                     // 渲染 Markdown
                     let html = marked.parse(processedContent);
 
+                    // 调试：输出 HTML 查看占位符
+                    console.log('Before restore:', html.substring(0, 500));
+
                     // 恢复数学公式
                     html = this.restoreAndRenderMath(html, mathBlocks, mathInline);
+
+                    // 调试：输出恢复后的 HTML
+                    console.log('After restore:', html.substring(0, 500));
 
                     preview.innerHTML = html;
 

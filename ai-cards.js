@@ -85,7 +85,7 @@ const AI_CONFIG = {
             model: 'kimi-k2.5',  // Kimi K2.5 模型
             apiUrl: 'https://api.moonshot.cn/v1/chat/completions',
             maxTokens: 4096,
-            temperature: 0.7
+            temperature: 1  // K2.5 只支持 temperature = 1
         }
     },
 

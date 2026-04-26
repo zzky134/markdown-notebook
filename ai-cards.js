@@ -35,13 +35,13 @@ const AI_CONFIG = {
     // 方式2：从环境变量读取（推荐）
     API_KEY: typeof process !== 'undefined' && process.env?.MINIMAX_API_KEY
         ? process.env.MINIMAX_API_KEY
-        : 'sk-cp-IsU-GMv7b8pGt95njiryHB4HoVAFd8M9SuDtcH9mS27Q66AQccgSJDNKeys9F2b3PzWg_xNJYfaMO3YHXVdBK1ZFvY-vUD9ZVaIvj-DR2ktEGDGPhgTLElg', // <-- 修改这里
+        : 'sk-xhrBfb1VOc2X4FKeoCSl5yvOsnPAQ74GIRp5obeqcgf7M2lM', // <-- 修改这里
 
     // ============================================
     // 选择 API 提供商
     // ============================================
-    // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'minimax'
-    PROVIDER: 'minimax',
+    // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'moonshot'
+    PROVIDER: 'moonshot',
 
     // ============================================
     // 模型配置
@@ -79,12 +79,11 @@ const AI_CONFIG = {
             temperature: 0.7
         },
 
-        // MiniMax
-        // 文档: https://platform.minimaxi.com/document/ChatCompletion
-        // Token Plan 使用 api.minimaxi.chat/v1/chat/completions
-        minimax: {
-            model: 'MiniMax-M2-27B',  // MiniMax M2.7 模型
-            apiUrl: 'https://api.minimaxi.chat/v1/chat/completions',
+        // Moonshot (Kimi)
+        // 文档: https://platform.moonshot.cn/docs/api/chat
+        moonshot: {
+            model: 'kimi-k2.5',  // Kimi K2.5 模型
+            apiUrl: 'https://api.moonshot.cn/v1/chat/completions',
             maxTokens: 4096,
             temperature: 0.7
         }
@@ -316,8 +315,8 @@ class AICardGenerator {
                     top_p: this.config.GENERATION_CONFIG.topP
                 };
 
-            case 'minimax':
-                // MiniMax 格式 - 使用非流式请求
+            case 'moonshot':
+                // Moonshot (Kimi) 格式 - OpenAI 兼容
                 return {
                     model: providerConfig.model,
                     messages: messages,
@@ -368,8 +367,8 @@ class AICardGenerator {
                     'Authorization': `Bearer ${apiKey}`
                 };
 
-            case 'minimax':
-                // MiniMax Token Plan 使用 Bearer Token 认证
+            case 'moonshot':
+                // Moonshot (Kimi) 使用 Bearer Token 认证
                 return {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
@@ -979,7 +978,7 @@ class AIQAGeneratorUI {
             'siliconflow': 'SiliconFlow',
             'qwen': '通义千问',
             'doubao': '豆包',
-            'minimax': 'MiniMax'
+            'moonshot': 'Kimi'
         };
         return names[provider] || provider;
     }

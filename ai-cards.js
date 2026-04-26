@@ -961,11 +961,52 @@ class AIQAGeneratorUI {
             </div>
         `;
 
+        // 渲染数学公式
+        this.renderMathInContainer(this.elements.cardsContainer);
+
         // 更新结果标题
         if (this.elements.cardCount) {
             const providerName = this.getProviderDisplayName();
             this.elements.cardCount.innerHTML = `AI 解答 <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${providerName}</span>`;
         }
+    }
+
+    /**
+     * 在容器中渲染数学公式
+     * @param {HTMLElement} container - 容器元素
+     */
+    renderMathInContainer(container) {
+        if (!container || typeof katex === 'undefined') return;
+
+        // 渲染块级公式
+        container.querySelectorAll('.math-block').forEach(el => {
+            try {
+                const formula = el.getAttribute('data-formula');
+                if (formula) {
+                    katex.render(formula, el, {
+                        throwOnError: false,
+                        displayMode: true
+                    });
+                }
+            } catch (e) {
+                console.error('块级公式渲染失败:', e);
+            }
+        });
+
+        // 渲染行内公式
+        container.querySelectorAll('.math-inline').forEach(el => {
+            try {
+                const formula = el.getAttribute('data-formula');
+                if (formula) {
+                    katex.render(formula, el, {
+                        throwOnError: false,
+                        displayMode: false
+                    });
+                }
+            } catch (e) {
+                console.error('行内公式渲染失败:', e);
+            }
+        });
     }
 
     /**
@@ -984,11 +1025,27 @@ class AIQAGeneratorUI {
     }
 
     /**
-     * 格式化答案内容（支持简单的 Markdown）
+     * 格式化答案内容（支持简单的 Markdown 和数学公式）
      * @param {string} content - 原始内容
      * @returns {string} HTML 格式内容
      */
     formatAnswerContent(content) {
+        // 保护数学公式
+        const mathBlocks = [];
+        const mathInline = [];
+
+        // 保护块级公式 $$
+        content = content.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+            mathBlocks.push(formula.trim());
+            return '\n\n___MATH_BLOCK_' + (mathBlocks.length - 1) + '___\n\n';
+        });
+
+        // 保护行内公式 $（但不匹配 $$）
+        content = content.replace(/(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)/g, (match, formula) => {
+            mathInline.push(formula.trim());
+            return '___MATH_INLINE_' + (mathInline.length - 1) + '___';
+        });
+
         // 简单的 Markdown 转换
         let html = this.escapeHtml(content);
 
@@ -1005,6 +1062,24 @@ class AIQAGeneratorUI {
 
         // 换行
         html = html.replace(/\n/g, '<br>');
+
+        // 恢复块级公式
+        mathBlocks.forEach((formula, i) => {
+            const placeholder = '___MATH_BLOCK_' + i + '___';
+            html = html.replace(
+                new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+                '<div class="math-block" data-formula="' + this.escapeHtml(formula) + '"></div>'
+            );
+        });
+
+        // 恢复行内公式
+        mathInline.forEach((formula, i) => {
+            const placeholder = '___MATH_INLINE_' + i + '___';
+            html = html.replace(
+                new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+                '<span class="math-inline" data-formula="' + this.escapeHtml(formula) + '"></span>'
+            );
+        });
 
         return html;
     }

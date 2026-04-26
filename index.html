@@ -2960,8 +2960,10 @@ $$
                 // 恢复块级公式
                 mathBlocks.forEach((formula, i) => {
                     const placeholder = '___MATH_BLOCK_' + i + '___';
+                    // 使用字符串替换，避免正则表达式特殊字符问题
+                    const placeholderRegex = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     html = html.replace(
-                        new RegExp('<p>?' + placeholder + '</p>?', 'g'),
+                        new RegExp('<p>?' + placeholderRegex + '</p>?', 'g'),
                         '<div class="math-block" data-formula="' + this.escapeHtml(formula) + '"></div>'
                     );
                 });
@@ -2969,8 +2971,10 @@ $$
                 // 恢复行内公式
                 mathInline.forEach((formula, i) => {
                     const placeholder = '___MATH_INLINE_' + i + '___';
+                    // 使用字符串替换，避免正则表达式特殊字符问题
+                    const placeholderRegex = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     html = html.replace(
-                        new RegExp(placeholder, 'g'),
+                        new RegExp(placeholderRegex, 'g'),
                         '<span class="math-inline" data-formula="' + this.escapeHtml(formula) + '"></span>'
                     );
                 });

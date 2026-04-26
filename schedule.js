@@ -733,8 +733,13 @@ class ScheduleApp {
             document.getElementById('editorContainer').style.display = 'flex';
             document.getElementById('emptyState').style.display = 'none';
             // 在非移动端显示预览面板
-            if (!isMobile()) {
+            if (typeof isMobile === 'function' && !isMobile()) {
                 document.getElementById('previewPane').style.display = 'flex';
+            } else if (typeof isMobile === 'function' && isMobile()) {
+                // 在移动端，根据当前标签页显示编辑器或预览
+                if (app && app.updateMobileTabUI) {
+                    app.updateMobileTabUI();
+                }
             }
         } else {
             document.getElementById('emptyState').style.display = 'flex';

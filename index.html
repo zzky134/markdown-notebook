@@ -3024,6 +3024,11 @@ $$
                     // 保护数学公式
                     const { content: protectedContent, mathBlocks, mathInline } = this.protectMath(content);
 
+                    // 调试：检查保护后的内容
+                    console.log('Protected content:', protectedContent.substring(0, 200));
+                    console.log('Math blocks:', mathBlocks);
+                    console.log('Math inline:', mathInline);
+
                     // 配置 marked
                     marked.setOptions({
                         highlight: function(code, lang) {
@@ -3043,13 +3048,13 @@ $$
                     let html = marked.parse(processedContent);
 
                     // 调试：输出 HTML 查看占位符
-                    console.log('Before restore:', html.substring(0, 500));
+                    console.log('Before restore HTML:', html);
 
                     // 恢复数学公式
                     html = this.restoreAndRenderMath(html, mathBlocks, mathInline);
 
                     // 调试：输出恢复后的 HTML
-                    console.log('After restore:', html.substring(0, 500));
+                    console.log('After restore HTML:', html);
 
                     preview.innerHTML = html;
 

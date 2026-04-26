@@ -3067,33 +3067,12 @@ $$
 
             // 处理知识卡片标记
             processCardMarkers(content) {
-                // 先保护数学公式不被处理
-                const mathBlocks = [];
-                const mathInline = [];
-
-                // 保护块级公式 $$
-                content = content.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
-                    mathBlocks.push(match);
-                    return '___MATH_BLOCK_' + (mathBlocks.length - 1) + '___';
-                });
-
-                // 保护行内公式 $（但不匹配 $$）
-                content = content.replace(/(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)/g, (match) => {
-                    mathInline.push(match);
-                    return '___MATH_INLINE_' + (mathInline.length - 1) + '___';
-                });
+                // 注意：数学公式已经在 protectMath 中被保护为占位符
+                // 这里直接处理卡片标记，不要碰数学公式占位符
 
                 // 在预览中高亮显示卡片标记
                 content = content.replace(/:front::(.*?)($|\n)/g, '<span class="knowledge-card-marker">🎴 问题:</span>$1$2');
                 content = content.replace(/:back::(.*?)($|\n)/g, '<span class="knowledge-card-marker" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">💡 答案:</span>$1$2');
-
-                // 恢复数学公式
-                mathBlocks.forEach((math, i) => {
-                    content = content.replace('___MATH_BLOCK_' + i + '___', math);
-                });
-                mathInline.forEach((math, i) => {
-                    content = content.replace('___MATH_INLINE_' + i + '___', math);
-                });
 
                 return content;
             }

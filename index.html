@@ -4102,12 +4102,15 @@ $$
 
         // 切换移动端视图
         MarkdownNotebookApp.prototype.switchMobileView = function(view) {
+            console.log('switchMobileView called with:', view);
             document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('nav' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
 
             const mobileTabs = document.getElementById('mobileTabs');
+            console.log('mobileTabs:', mobileTabs, 'scheduleApp:', scheduleApp);
 
             if (view === 'notes') {
+                console.log('Switching to notes view');
                 if (mobileTabs) mobileTabs.classList.remove('hidden');
                 if (scheduleApp) scheduleApp.switchToNotes();
                 if (isMobile()) this.updateMobileTabUI();

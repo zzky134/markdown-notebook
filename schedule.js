@@ -732,8 +732,9 @@ class ScheduleApp {
             document.getElementById('toolbar').style.display = 'flex';
             document.getElementById('editorContainer').style.display = 'flex';
             document.getElementById('emptyState').style.display = 'none';
-            // 在非移动端显示预览面板
+            // 在非移动端显示编辑器面板和预览面板
             if (typeof isMobile === 'function' && !isMobile()) {
+                document.getElementById('editorPane').style.display = 'flex';
                 document.getElementById('previewPane').style.display = 'flex';
             } else if (typeof isMobile === 'function' && isMobile()) {
                 // 在移动端，根据当前标签页显示编辑器或预览

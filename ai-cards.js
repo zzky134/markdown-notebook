@@ -453,7 +453,11 @@ class AICardGenerator {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                const errorMsg = errorData.error?.message || errorData.message || `HTTP ${response.status}`;
+                console.error('API error response:', errorData);
+                const errorMsg = errorData.error?.message ||
+                                errorData.base_resp?.status_msg ||
+                                errorData.message ||
+                                `HTTP ${response.status}`;
                 throw new Error(`API 请求失败: ${errorMsg}`);
             }
 
@@ -461,6 +465,12 @@ class AICardGenerator {
             let fullResponse = '';
             const data = await response.json();
             console.log('API response:', data);
+
+            // 检查 MiniMax 错误响应
+            if (data.base_resp?.status_code !== 0 && data.base_resp?.status_code !== undefined) {
+                throw new Error(`MiniMax API 错误: ${data.base_resp.status_msg} (code: ${data.base_resp.status_code})`);
+            }
+
             console.log('API response keys:', Object.keys(data));
             console.log('data.base_resp:', data.base_resp);
             console.log('data.reply:', data.reply);

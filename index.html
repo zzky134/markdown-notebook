@@ -1847,7 +1847,9 @@
             .sidebar {
                 position: fixed;
                 left: -280px;
-                height: 100vh;
+                height: calc(100vh - 56px);
+                bottom: 56px;
+                top: auto;
                 z-index: 1000;
                 transition: left 0.3s;
                 box-shadow: 2px 0 8px rgba(0,0,0,0.15);

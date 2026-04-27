@@ -33,9 +33,9 @@ const AI_CONFIG = {
     // ============================================
     // 方式1：直接填写（仅本地测试，不要提交到仓库！）
     // 方式2：从环境变量读取（推荐）
-    API_KEY: typeof process !== 'undefined' && process.env?.MINIMAX_API_KEY
-        ? process.env.MINIMAX_API_KEY
-        : 'sk-cp-IsU-GMv7b8pGt95njiryHB4HoVAFd8M9SuDtcH9mS27Q66AQccgSJDNKeys9F2b3PzWg_xNJYfaMO3YHXVdBK1ZFvY-vUD9ZVaIvj-DR2ktEGDGPhgTLElg', // <-- 修改这里
+    API_KEY: typeof process !== 'undefined' && process.env?.MOONSHOT_API_KEY
+        ? process.env.MOONSHOT_API_KEY
+        : 'sk-xhrBfb1VOc2X4FKeoCSl5yvOsnPAQ74GIRp5obeqcgf7M2lM', // <-- 修改这里
 
     // ============================================
     // 选择 API 提供商

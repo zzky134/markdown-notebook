@@ -4586,6 +4586,22 @@ $$
             });
         }
 
+        // 检查 PWA 安装条件
+        function checkPWAInstallable() {
+            const checks = {
+                https: window.location.protocol === 'https:',
+                manifest: !!document.querySelector('link[rel="manifest"]'),
+                serviceWorker: 'serviceWorker' in navigator,
+                notStandalone: !window.matchMedia('(display-mode: standalone)').matches &&
+                               !window.navigator.standalone
+            };
+
+            const allPassed = Object.values(checks).every(v => v);
+            console.log('PWA Install Check:', checks);
+
+            return { allPassed, checks };
+        }
+
         // 处理 PWA 安装提示
         let deferredPrompt;
         let isPWAInstalled = false;
@@ -4616,17 +4632,35 @@ $$
         async function installPWA() {
             console.log('尝试安装 PWA, deferredPrompt:', deferredPrompt);
 
+            // 检查安装条件
+            const { allPassed, checks } = checkPWAInstallable();
+
+            // iOS Safari 特殊处理
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+
+            if (isIOS && isSafari) {
+                alert('iOS Safari 安装方法：\n\n1. 点击底部分享按钮（方框+向上箭头）\n2. 选择"添加到主屏幕"\n3. 点击"添加"');
+                return;
+            }
+
             if (!deferredPrompt) {
-                // 检查是否满足安装条件
-                const manifestLink = document.querySelector('link[rel="manifest"]');
-                const swSupported = 'serviceWorker' in navigator;
+                let message = '暂无法自动安装。\n\n';
 
-                let message = '暂无法安装。\n';
-                if (!manifestLink) message += '- 缺少 manifest 文件\n';
-                if (!swSupported) message += '- 浏览器不支持 Service Worker\n';
-                if (window.location.protocol !== 'https:') message += '- 需要使用 HTTPS\n';
+                if (!checks.https) message += '❌ 需要使用 HTTPS\n';
+                if (!checks.manifest) message += '❌ 缺少 manifest 文件\n';
+                if (!checks.serviceWorker) message += '❌ 浏览器不支持 Service Worker\n';
+                if (!checks.notStandalone) message += '❌ 已在 PWA 模式中运行\n';
 
-                alert(message + '\n请尝试刷新页面，或使用 Chrome/Edge/Safari 浏览器。');
+                if (allPassed) {
+                    message += '\n✅ 所有条件已满足\n\n';
+                    message += 'Chrome/Edge 用户：\n';
+                    message += '1. 点击浏览器菜单（右上角三个点）\n';
+                    message += '2. 选择"安装应用"或"添加到主屏幕"\n\n';
+                    message += '如果仍无法安装，请尝试清除浏览器缓存后刷新页面。';
+                }
+
+                alert(message);
                 return;
             }
 
@@ -4661,19 +4695,31 @@ $$
         // PWA 调试信息（开发调试用）
         window.addEventListener('load', () => {
             setTimeout(() => {
+                const { allPassed, checks } = checkPWAInstallable();
                 const debugInfo = {
                     'User Agent': navigator.userAgent.substring(0, 50) + '...',
                     'Display Mode': window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
                     'Service Worker': 'serviceWorker' in navigator ? 'supported' : 'not supported',
-                    'HTTPS': window.location.protocol === 'https:' ? 'yes' : 'no',
-                    'Manifest': document.querySelector('link[rel="manifest"]') ? 'found' : 'missing',
-                    'BeforeInstallPrompt': typeof deferredPrompt !== 'undefined' ? 'captured' : 'not captured'
+                    'HTTPS': checks.https ? 'yes' : 'no',
+                    'Manifest': checks.manifest ? 'found' : 'missing',
+                    'Not Standalone': checks.notStandalone ? 'yes' : 'no (already PWA)',
+                    'All Checks Passed': allPassed ? 'YES ✓' : 'NO ✗',
+                    'BeforeInstallPrompt Captured': deferredPrompt ? 'YES ✓' : 'NO (will use manual install)'
                 };
                 console.log('=== PWA Debug Info ===');
                 Object.entries(debugInfo).forEach(([key, value]) => {
                     console.log(`${key}: ${value}`);
                 });
                 console.log('=====================');
+
+                // 如果所有条件满足但没有 deferredPrompt，显示手动安装按钮
+                if (allPassed && !deferredPrompt) {
+                    const installBtn = document.getElementById('pwaInstallBtn');
+                    if (installBtn && !isPWAInstalled) {
+                        installBtn.style.display = 'flex';
+                        console.log('显示手动安装按钮');
+                    }
+                }
             }, 2000);
         });
 

@@ -350,13 +350,14 @@ class AICardGenerator {
                 };
 
             case 'minimax':
-                // MiniMax 格式
+                // MiniMax Token Plan 格式 - 使用 messages 数组，role 只能是 user/assistant
+                // 将 system prompt 作为第一条 user 消息
+                const minimaxMessages = [
+                    { role: 'user', content: messages[0].content + '\n\n' + messages[1].content }
+                ];
                 return {
                     model: providerConfig.model,
-                    messages: messages,
-                    stream: false,
-                    temperature: providerConfig.temperature,
-                    max_tokens: providerConfig.maxTokens
+                    messages: minimaxMessages
                 };
 
             default:

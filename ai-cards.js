@@ -41,7 +41,7 @@ const AI_CONFIG = {
     // 选择 API 提供商
     // ============================================
     // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'moonshot' | 'minimax'
-    PROVIDER: 'minimax',
+    PROVIDER: 'moonshot',
 
     // ============================================
     // 模型配置

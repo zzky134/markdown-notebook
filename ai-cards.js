@@ -35,13 +35,13 @@ const AI_CONFIG = {
     // 方式2：从环境变量读取（推荐）
     API_KEY: typeof process !== 'undefined' && process.env?.MINIMAX_API_KEY
         ? process.env.MINIMAX_API_KEY
-        : 'sk-xhrBfb1VOc2X4FKeoCSl5yvOsnPAQ74GIRp5obeqcgf7M2lM', // <-- 修改这里
+        : 'sk-cp-IsU-GMv7b8pGt95njiryHB4HoVAFd8M9SuDtcH9mS27Q66AQccgSJDNKeys9F2b3PzWg_xNJYfaMO3YHXVdBK1ZFvY-vUD9ZVaIvj-DR2ktEGDGPhgTLElg', // <-- 修改这里
 
     // ============================================
     // 选择 API 提供商
     // ============================================
-    // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'moonshot'
-    PROVIDER: 'moonshot',
+    // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'moonshot' | 'minimax'
+    PROVIDER: 'minimax',
 
     // ============================================
     // 模型配置
@@ -86,6 +86,15 @@ const AI_CONFIG = {
             apiUrl: 'https://api.moonshot.cn/v1/chat/completions',
             maxTokens: 4096,
             temperature: 1  // K2.5 只支持 temperature = 1
+        },
+
+        // MiniMax
+        // 文档: https://platform.minimaxi.com/document/ChatCompletion
+        minimax: {
+            model: 'MiniMax-M2.7',  // MiniMax M2.7 模型 (token plan)
+            apiUrl: 'https://api.minimaxi.chat/v1/text/chatcompletion_v2',
+            maxTokens: 2048,
+            temperature: 0.7
         }
     },
 
@@ -340,6 +349,16 @@ class AICardGenerator {
                     }
                 };
 
+            case 'minimax':
+                // MiniMax 格式
+                return {
+                    model: providerConfig.model,
+                    messages: messages,
+                    stream: false,
+                    temperature: providerConfig.temperature,
+                    max_tokens: providerConfig.maxTokens
+                };
+
             default:
                 throw new Error(`不支持的 API 提供商: ${provider}`);
         }
@@ -369,6 +388,13 @@ class AICardGenerator {
 
             case 'moonshot':
                 // Moonshot (Kimi) 使用 Bearer Token 认证
+                return {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                };
+
+            case 'minimax':
+                // MiniMax 使用 Bearer Token 认证
                 return {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
@@ -1019,7 +1045,8 @@ class AIQAGeneratorUI {
             'siliconflow': 'SiliconFlow',
             'qwen': '通义千问',
             'doubao': '豆包',
-            'moonshot': 'Kimi'
+            'moonshot': 'Kimi',
+            'minimax': 'MiniMax'
         };
         return names[provider] || provider;
     }

@@ -2114,6 +2114,16 @@
                 -webkit-overflow-scrolling: touch;
             }
 
+            /* 为底部导航栏留出空间 */
+            .notebook-list, .editor-container, .preview-content, .cards-container, .schedule-container, .stats-container {
+                padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+            }
+
+            /* 移动端主内容区域底部间距 */
+            .main-content {
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
+
             /* 文本输入框字体大小优化，防止 iOS 缩放 */
             input, textarea {
                 font-size: 16px;

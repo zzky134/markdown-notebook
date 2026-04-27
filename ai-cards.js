@@ -394,10 +394,10 @@ class AICardGenerator {
                 };
 
             case 'minimax':
-                // MiniMax 使用 Bearer Token 认证
+                // MiniMax Token Plan 使用 MiniMax-API-Key header 认证
                 return {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
+                    'MiniMax-API-Key': apiKey
                 };
 
             default:

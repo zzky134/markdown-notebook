@@ -1183,30 +1183,8 @@ class ScheduleApp {
             }
         };
     }
-    importCSV() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.csv';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const result = this.manager.importFromCSV(event.target.result);
-                if (result.success) {
-                    alert(`成功导入 ${result.added} 门课程`);
-                    this.renderer.refresh();
-                } else {
-                    alert(`导入完成，但有错误：\n${result.errors.join('\n')}`);
-                    if (result.added > 0) this.renderer.refresh();
-                }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
-    }
-
+    // 导出 CSV
     // 导出 CSV
     exportCSV() {
         const csv = this.manager.exportToCSV();

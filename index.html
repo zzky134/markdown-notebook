@@ -4414,7 +4414,7 @@ $$
                 
                 // 保护代码块中的内容
                 const codeBlocks = [];
-                content = content.replace(//g, (match) => {
+                content = content.replace(/```[\s\S]*?```/g, (match) => {
                     codeBlocks.push(match);
                     return `<!--CODEBLOCK${codeBlocks.length - 1}-->`;
                 });

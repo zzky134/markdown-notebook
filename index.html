@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,7 +10,10 @@
     <meta name="description" content="一个简单易用的 Markdown 笔记应用，支持知识卡片、实时预览和离线使用">
     <link rel="manifest" href="/markdown-notebook/manifest.json">
     <link rel="apple-touch-icon" href="/markdown-notebook/icons/icon-192x192.png">
-    <title>Markdown笔记工具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Markdown Notebook</title>
     <!-- Marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Prism.js for syntax highlighting -->
@@ -35,27 +38,88 @@
         }
 
         :root {
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-color: #f8fafc;
-            --sidebar-bg: #ffffff;
-            --editor-bg: #ffffff;
-            --preview-bg: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --hover-bg: #f1f5f9;
-            --card-bg: #ffffff;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            /* Awwwards color scheme - refined and restrained */
+            --primary: #0a0a0a;
+            --primary-light: #1a1a1a;
+            --accent: #ff3b30;
+            --accent-hover: #e6352b;
+            
+            /* Background color scale */
+            --bg-primary: #fafafa;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #ffffff;
+            --bg-elevated: #ffffff;
+            
+            /* Text color scale */
+            --text-primary: #0a0a0a;
+            --text-secondary: #6b6b6b;
+            --text-tertiary: #9a9a9a;
+            --text-inverse: #ffffff;
+            
+            /* Borders - thinner and more refined */
+            --border-light: rgba(0, 0, 0, 0.06);
+            --border-medium: rgba(0, 0, 0, 0.1);
+            --border-strong: rgba(0, 0, 0, 0.15);
+            
+            /* Shadows - softer and more natural */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.12);
+            
+            /* Border radius - more restrained */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+            
+            /* Spacing system - 8px base */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-10: 40px;
+            --space-12: 48px;
+            
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+            
+            /* Legacy variable compatibility */
+            --primary-color: var(--primary);
+            --primary-hover: var(--primary-light);
+            --bg-color: var(--bg-primary);
+            --sidebar-bg: var(--bg-tertiary);
+            --editor-bg: var(--bg-tertiary);
+            --preview-bg: var(--bg-tertiary);
+            --text-primary: var(--text-primary);
+            --text-secondary: var(--text-secondary);
+            --border-color: var(--border-medium);
+            --hover-bg: var(--bg-secondary);
+            --card-bg: var(--bg-tertiary);
+            --shadow: var(--shadow-md);
+            --shadow-lg: var(--shadow-lg);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg-color);
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
             color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         .app-container {
@@ -63,17 +127,17 @@
             height: 100vh;
         }
 
-        /* 侧边栏 */
+        /* Sidebar - Awwwards minimalist style */
         .sidebar {
-            width: 280px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
+            width: 300px;
+            background: var(--bg-tertiary);
+            border-right: 1px solid var(--border-light);
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             overflow-y: auto;
             max-height: 100vh;
-            transition: width 0.3s ease;
+            transition: width var(--transition-slow);
         }
 
         .sidebar[data-collapsed="true"] {
@@ -181,18 +245,26 @@
         }
 
         .sidebar-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--border-light);
             position: relative;
         }
 
         .sidebar-title {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--space-4);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: var(--space-2);
+            color: var(--text-primary);
+        }
+        
+        .sidebar-title svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
         }
 
         .sidebar-title svg {
@@ -295,7 +367,7 @@
         .sidebar-tools .settings-btn:hover {
             color: var(--text-primary);
         }
-        /* 工具箱切换按钮样式 */
+        /* Toolbox toggle button styles */
         .toolbox-toggle {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
@@ -331,7 +403,7 @@
             display: block !important;
         }
 
-        /* 我的课表按钮样式 */
+        /* My Schedule button styles */
         .sidebar-tools .schedule-btn {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
@@ -341,7 +413,7 @@
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         }
 
-        /* 返回笔记按钮样式 */
+        /* Back to notes button styles */
         .sidebar-tools .back-to-notes-btn {
             background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
             color: white;
@@ -507,7 +579,7 @@
             overflow: hidden;
         }
 
-        /* 顶部工具栏 */
+        /* Top toolbar */
         .toolbar {
             height: 56px;
             background: var(--sidebar-bg);
@@ -683,7 +755,7 @@
             overflow-wrap: break-word;
         }
 
-        /* Markdown 预览样式 */
+        /* Markdown preview styles */
         .preview-content h1 {
             font-size: 28px;
             margin: 24px 0 16px;
@@ -804,7 +876,7 @@
             white-space: pre-wrap;
         }
 
-        /* 知识卡片标记样式 */
+        /* Knowledge card marker styles */
         .knowledge-card-marker {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -815,7 +887,7 @@
             margin: 0 4px;
         }
 
-        /* 数学公式样式 */
+        /* Math formula styles */
         .math-block {
             margin: 20px 0;
             overflow-x: auto;
@@ -830,7 +902,7 @@
             font-size: 1em;
         }
 
-        /* 卡片复习模式 */
+        /* Review模式 */
         .card-review-modal {
             position: fixed;
             top: 0;
@@ -996,7 +1068,7 @@
             text-align: center;
         }
 
-        /* 下拉菜单 */
+        /* Dropdown menu */
         .dropdown {
             position: relative;
         }
@@ -1041,7 +1113,7 @@
             border-radius: 0 0 8px 8px;
         }
 
-        /* 笔记本选择弹窗 */
+        /* Notebook selection modal */
         .modal {
             position: fixed;
             top: 0;
@@ -1114,7 +1186,7 @@
             font-size: 16px;
         }
 
-        /* 帮助提示 */
+        /* Help tooltip */
         .help-tooltip {
             position: fixed;
             bottom: 20px;
@@ -1139,7 +1211,7 @@
             border-radius: 3px;
         }
 
-        /* 模板库样式 */
+        /* Template library styles */
         .template-library-modal {
             width: 700px;
             max-width: 90vw;
@@ -1244,7 +1316,7 @@
             border-radius: 50%;
         }
 
-        /* 模板预览模态框 */
+        /* Template preview modal */
         .template-preview-modal {
             width: 600px;
             max-width: 90vw;
@@ -1274,9 +1346,9 @@
             gap: 12px;
         }
 
-        /* ==================== AI 知识卡片生成模块样式 ==================== */
+        /* ==================== AI Knowledge Card Generator Styles ==================== */
 
-        /* AI 卡片生成模态框 */
+        /* AI card generator modal */
         .ai-card-modal {
             width: 700px;
             max-width: 90vw;
@@ -1285,7 +1357,7 @@
             padding: 24px;
         }
 
-        /* 模态框头部 */
+        /* Modal header */
         .ai-modal-header {
             display: flex;
             justify-content: space-between;
@@ -1314,7 +1386,7 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        /* 输入区域 */
+        /* Input area */
         .ai-input-section {
             margin-bottom: 16px;
         }
@@ -1365,7 +1437,7 @@
             margin-top: 6px;
         }
 
-        /* API Key 输入行 */
+        /* API Key input row */
         .ai-apikey-row {
             display: flex;
             gap: 8px;
@@ -1405,7 +1477,7 @@
             opacity: 0.9;
         }
 
-        /* 生成按钮 */
+        /* Generate button */
         .ai-generate-btn {
             width: 100%;
             padding: 14px 24px;
@@ -1439,7 +1511,7 @@
             background: linear-gradient(135deg, #a78bfa 0%, #a78bfa 100%);
         }
 
-        /* 加载状态动画 */
+        /* Loading state animation */
         .ai-generate-btn.loading .ai-btn-text::after {
             content: '';
             animation: ai-loading-dots 1.5s infinite;
@@ -1520,7 +1592,7 @@
             border-radius: 12px;
         }
 
-        /* 卡片容器 */
+        /* Card container */
         .ai-cards-container {
             max-height: 350px;
             overflow-y: auto;
@@ -1542,7 +1614,7 @@
             border-radius: 3px;
         }
 
-        /* 单个卡片项 */
+        /* Single card item */
         .ai-card-item {
             background: var(--bg-color);
             border: 1px solid var(--border-color);
@@ -1610,7 +1682,7 @@
             font-family: 'Consolas', 'Monaco', monospace;
         }
 
-        /* 结果操作按钮 */
+        /* Result action buttons */
         .ai-result-actions {
             display: flex;
             gap: 10px;
@@ -1654,7 +1726,7 @@
             background: #ef4444;
         }
 
-        /* 移动端适配 */
+        /* Mobile adaptation */
         @media (max-width: 768px) {
             .ai-card-modal {
                 width: 100%;
@@ -1689,7 +1761,7 @@
             }
         }
 
-        /* ==================== 课表模块样式 ==================== */
+        /* ==================== Schedule Module Styles ==================== */
         .schedule-view {
             flex: 1;
             overflow-y: auto;
@@ -1802,7 +1874,7 @@
             background: var(--border-color);
         }
 
-        /* 课表网格 */
+        /* Schedule grid */
         .schedule-grid-wrapper {
             background: var(--card-bg);
             border-radius: 12px;
@@ -1861,7 +1933,7 @@
             background: rgba(245, 158, 11, 0.1);
         }
 
-        /* 课程卡片 */
+        /* Course card */
         .course-cell {
             min-height: 60px;
             padding: 8px;
@@ -1926,7 +1998,7 @@
             border: 2px solid #f59e0b;
         }
 
-        /* 工具栏 */
+        /* Toolbar */
         .schedule-toolbar {
             display: flex;
             gap: 12px;
@@ -1934,7 +2006,7 @@
             justify-content: center;
         }
 
-        /* 课程表单 */
+        /* Course form */
         .course-modal {
             width: 500px;
             max-width: 90vw;
@@ -1993,7 +2065,7 @@
             background: #dc2626;
         }
 
-        /* 课表移动端适配 */
+        /* Schedule mobile adaptation */
         @media (max-width: 768px) {
             .schedule-view {
                 padding: 12px;
@@ -2082,7 +2154,7 @@
                 justify-content: center;
             }
 
-            /* 课表移动端 dropdown 优化 */
+            /* Schedule mobile dropdown optimization */
             .schedule-toolbar .dropdown {
                 width: 100%;
                 position: relative;
@@ -2105,7 +2177,7 @@
                 display: block;
             }
 
-            /* 课表工具栏移动端适配 */
+            /* Schedule toolbar mobile adaptation */
             .schedule-toolbar {
                 flex-wrap: wrap;
                 gap: 8px;
@@ -2118,7 +2190,7 @@
             }
         }
 
-        /* 模板库移动端适配 */
+        /* Template library mobile adaptation */
         @media (max-width: 768px) {
             .template-library-modal,
             .template-preview-modal {
@@ -2146,7 +2218,7 @@
             }
         }
 
-        /* 响应式 */
+        /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
@@ -2222,7 +2294,7 @@
                 font-size: 15px;
             }
 
-            /* 移动端底部导航 */
+            /* Mobile bottom navigation */
             .mobile-nav {
                 display: flex !important;
                 position: fixed;
@@ -2262,7 +2334,7 @@
                 height: 22px;
             }
 
-            /* 移动端顶部菜单按钮 */
+            /* Mobile top menu button */
             .mobile-menu-btn {
                 display: flex !important;
                 position: fixed;
@@ -2284,7 +2356,7 @@
                 padding-bottom: 56px;
             }
 
-            /* 移动端标签切换 */
+            /* Mobile tab switching */
             .mobile-tabs {
                 display: flex;
                 position: fixed;
@@ -2320,7 +2392,7 @@
                 border-bottom-color: var(--primary-color);
             }
 
-            /* 调整主内容区域 */
+            /* Adjust main content area */
             .main-content {
                 padding-top: 48px;
             }
@@ -2329,7 +2401,7 @@
                 margin-top: 0;
             }
 
-            /* 移动端隐藏编辑/预览分栏，改为全屏 */
+            /* Mobile: hide edit/preview split, use fullscreen */
             .editor-pane,
             .preview-pane {
                 display: none;
@@ -2348,7 +2420,7 @@
                 text-align: center;
             }
 
-            /* 卡片复习移动端适配 */
+            /* Review mobile adaptation */
             .card-review-container {
                 width: 100%;
                 max-width: 100%;
@@ -2368,7 +2440,7 @@
                 font-size: 18px;
             }
 
-            /* 统计信息移动端 */
+            /* Stats mobile */
             .stats {
                 font-size: 11px;
                 gap: 8px;
@@ -2384,7 +2456,7 @@
             }
         }
 
-        /* 桌面端隐藏移动元素 */
+        /* Hide mobile elements on desktop */
         @media (min-width: 769px) {
             .mobile-nav,
             .mobile-menu-btn,
@@ -2393,13 +2465,13 @@
             }
         }
 
-        /* 触摸优化 - 确保移动端按钮足够大 */
+        /* Touch optimization - ensure mobile buttons are large enough */
         @media (max-width: 768px) {
             .notebook-header, .note-item, .btn, .mobile-nav-btn, .mobile-tab, .btn-icon, .delete-btn {
                 min-height: 44px;
             }
 
-            /* 卡片触摸优化 */
+            /* Card touch optimization */
             .flashcard {
                 cursor: pointer;
                 -webkit-tap-highlight-color: transparent;
@@ -2410,12 +2482,12 @@
                 -webkit-user-select: none;
             }
 
-            /* 防止双击缩放 */
+            /* Prevent double-tap zoom */
             * {
                 touch-action: manipulation;
             }
 
-            /* 平滑滚动 */
+            /* Smooth scroll */
             .notebook-list, .editor-textarea, .preview-content {
                 -webkit-overflow-scrolling: touch;
             }
@@ -2425,23 +2497,23 @@
                 padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
             }
 
-            /* 移动端主内容区域底部间距 */
+            /* Mobile main content bottom spacing */
             .main-content {
                 padding-bottom: env(safe-area-inset-bottom, 0px);
             }
 
-            /* 文本输入框字体大小优化，防止 iOS 缩放 */
+            /* Text input font size optimization to prevent iOS zoom */
             input, textarea {
                 font-size: 16px;
             }
 
-            /* 侧边栏滚动优化 */
+            /* Sidebar scroll optimization */
             .sidebar {
                 -webkit-overflow-scrolling: touch;
                 overscroll-behavior: contain;
             }
 
-            /* 下拉菜单移动端优化 */
+            /* Dropdown menu mobile optimization */
             .dropdown-menu {
                 position: fixed;
                 top: auto;
@@ -2452,7 +2524,7 @@
                 max-width: 300px;
             }
 
-            /* 模态框移动端优化 */
+            /* Modal mobile optimization */
             .modal-content {
                 width: 90%;
                 margin: 20px;
@@ -2468,57 +2540,57 @@
                 max-width: none;
             }
 
-            /* 笔记本卡片按钮触摸优化 */
+            /* Notebook card button touch optimization */
             .notebook-card-btn {
                 min-height: 28px;
                 padding: 6px 10px;
             }
 
-            /* 笔记列表项触摸优化 */
+            /* Note list item touch optimization */
             .note-item {
                 padding: 12px;
             }
 
-            /* 删除按钮在移动端始终显示 */
+            /* Delete button always visible on mobile */
             .note-item .delete-btn {
                 opacity: 1;
                 padding: 8px;
             }
 
-            /* 搜索框移动端优化 */
+            /* Search box mobile optimization */
             .search-box input {
                 font-size: 16px;
             }
 
-            /* 笔记本标题栏触摸优化 */
+            /* Notebook title bar touch optimization */
             .notebook-header {
                 padding: 12px;
             }
 
-            /* 编辑器标题输入框移动端样式 */
+            /* Editor title input mobile styles */
             .note-title-input {
                 font-size: 18px;
                 padding: 8px;
             }
 
-            /* 标签输入移动端优化 */
+            /* Tag input mobile optimization */
             .tag-input {
                 font-size: 14px;
                 width: 100px;
             }
 
-            /* 统计信息移动端优化 */
+            /* Stats mobile optimization */
             .stats {
                 white-space: nowrap;
             }
 
-            /* 卡片复习移动端触摸优化 */
+            /* Review mobile touch optimization */
             .card-btn {
                 min-height: 44px;
                 padding: 12px 24px;
             }
 
-            /* 关闭按钮触摸优化 */
+            /* Close button touch optimization */
             .close-review {
                 min-height: 44px;
                 min-width: 44px;
@@ -2549,8 +2621,8 @@
             }
         }
 
-        /* ========== 统计模态框样式 ========== */
-        /* 设置模态框 */
+        /* ========== Stats Modal Styles ========== */
+        /* Settings modal */
         .settings-modal {
             max-width: 600px;
             width: 90%;
@@ -2781,7 +2853,7 @@
             padding: 24px;
         }
 
-        /* 统计卡片网格 */
+        /* Stats card grid */
         .stats-cards {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -2905,7 +2977,7 @@
             line-height: 1.6;
         }
 
-        /* 移动端适配 */
+        /* Mobile adaptation */
         @media (max-width: 768px) {
             .stats-cards {
                 grid-template-columns: repeat(2, 1fr);
@@ -2968,25 +3040,25 @@
     </style>
 </head>
 <body>
-    <!-- 移动端侧边栏遮罩 -->
+    <!-- Mobile sidebar overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="app.closeSidebar()"></div>
 
-    <!-- 移动端菜单按钮 -->
+    <!-- Mobile menu button -->
     <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="app.toggleSidebar()" title="打开菜单">
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
     </button>
 
-    <!-- 移动端顶部标签切换 -->
+    <!-- Mobile top tab switching -->
     <div class="mobile-tabs" id="mobileTabs">
-        <button class="mobile-tab active" id="editTab" onclick="app.switchMobileTab('edit')">编辑</button>
-        <button class="mobile-tab" id="previewTab" onclick="app.switchMobileTab('preview')">预览</button>
+        <button class="mobile-tab active" id="editTab" onclick="app.switchMobileTab('edit')">Edit</button>
+        <button class="mobile-tab" id="previewTab" onclick="app.switchMobileTab('preview')">Preview</button>
     </div>
 
     <div class="app-container">
-        <!-- 侧边栏 -->
-        <!-- 可伸缩工具箱侧边栏 -->
+        <!-- Sidebar -->
+        <!-- Collapsible toolbox sidebar -->
         <aside class="sidebar" id="sidebar" data-collapsed="false">
             <div class="sidebar-header">
                 <div class="sidebar-title">
@@ -2995,8 +3067,8 @@
                     </svg>
                     <span class="sidebar-title-text">我的笔记</span>
                 </div>
-                <!-- 收起/展开按钮 -->
-                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="app.toggleSidebarCollapse()" title="收起工具栏">
+                <!-- Collapse/expand button -->
+                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="app.toggleSidebarCollapse()" title="Collapse sidebar">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
                     </svg>
@@ -3005,59 +3077,59 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                    <input type="text" id="searchInput" placeholder="搜索笔记...">
+                    <input type="text" id="searchInput" placeholder="Search notes...">
                 </div>
             </div>
 
-            <!-- 主要操作按钮 -->
+            <!-- Primary action buttons -->
             <div class="sidebar-actions main-actions">
                 <button class="btn btn-primary" onclick="app.createNote()">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    <span class="btn-text">新建笔记</span>
+                    <span class="btn-text">New Note</span>
                 </button>
-                <button class="btn-icon" onclick="app.createNotebook()" title="新建笔记本">
+                <button class="btn-icon" onclick="app.createNotebook()" title="New Note本">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
                     </svg>
                 </button>
-                <button class="btn-icon" onclick="app.openTemplateLibrary()" title="模板库">
+                <button class="btn-icon" onclick="app.openTemplateLibrary()" title="Template Library">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
                     </svg>
                 </button>
             </div>
 
-            <!-- 工具箱区域 -->
+            <!-- Toolbox area -->
             <div class="sidebar-tools-container">
-                <!-- 工具箱切换按钮 -->
+                <!-- Toolbox toggle button -->
                 <div class="sidebar-actions toolbox-toggle">
                     <button class="btn btn-secondary toolbox-btn" onclick="app.toggleToolbox()" id="toolboxBtn">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                         </svg>
-                        <span class="btn-text">工具箱</span>
+                        <span class="btn-text">Toolbox</span>
                         <svg class="toolbox-arrow" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
                 </div>
 
-                <!-- 工具箱展开内容 -->
+                <!-- Toolbox expanded content -->
                 <div class="sidebar-tools" id="sidebarTools" style="display: none;">
                     <div class="sidebar-actions" id="scheduleActionBtn">                        <button class="btn btn-secondary schedule-btn" onclick="scheduleApp.showSchedule()">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
-                            <span class="btn-text">我的课表</span>
+                            <span class="btn-text">My Schedule</span>
                         </button>
                     </div>
                     <div class="sidebar-actions" id="backToNotesBtn" style="display: none;">                        <button class="btn btn-secondary back-to-notes-btn" onclick="scheduleApp.switchToNotes()">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            <span class="btn-text">返回笔记</span>
+                            <span class="btn-text">Back to Notes</span>
                         </button>
                     </div>
                     <div class="sidebar-actions">
@@ -3065,7 +3137,7 @@
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
                             </svg>
-                            <span class="btn-text">AI 答疑</span>
+                            <span class="btn-text">Ask AI</span>
                         </button>
                     </div>
                     <div class="sidebar-actions">
@@ -3090,7 +3162,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span class="btn-text">设置</span>
+                            <span class="btn-text">Settings</span>
                         </button>
                     </div>
                 </div>
@@ -3124,7 +3196,7 @@
             <!-- 工具栏 -->
             <div class="toolbar" id="toolbar" style="display: none;">
                 <div class="toolbar-left">
-                    <input type="text" class="note-title-input" id="noteTitle" placeholder="笔记标题">
+                    <input type="text" class="note-title-input" id="noteTitle" placeholder="Note title">
                     <div class="tag-input-container">
                         <div class="tags-display" id="tagsDisplay"></div>
                         <input type="text" class="tag-input" id="tagInput" placeholder="+ 标签">
@@ -3140,14 +3212,14 @@
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 4px;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                             </svg>
-                            卡片复习
+                            Review
                         </button>
                         <div class="dropdown" id="aiDropdown">
                             <button class="btn btn-secondary" onclick="app.toggleDropdown('aiDropdown')">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 4px;">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                                 </svg>
-                                问 AI
+                                Ask AI
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -3163,7 +3235,7 @@
                                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
                                     </svg>
-                                    Agent 批量整理
+                                    Batch Organize
                                 </div>
                             </div>
                         </div>
@@ -3199,13 +3271,13 @@
                 </div>
             </div>
 
-            <!-- 编辑器 -->
+            <!-- Editor -->
             <div class="editor-container" id="editorContainer">
                 <div class="empty-state" id="emptyState">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
-                    <p>选择一个笔记开始编辑，或创建新笔记</p>
+                    <p>Select a note to start editing，或创建新笔记</p>
                 </div>
                 <div class="editor-pane" id="editorPane" style="display: none;">
                     <div class="editor-header">
@@ -3217,21 +3289,21 @@
                             保存
                         </button>
                     </div>
-                    <textarea class="editor-textarea" id="editor" placeholder="开始编写 Markdown...
+                    <textarea class="editor-textarea" id="editor" placeholder="Start writing Markdown...
 
-知识卡片标记示例：
+Knowledge Card Syntax:
 :front:: JavaScript 是什么？
 :back:: 一种轻量级、解释型的编程语言"></textarea>
                 </div>
                 <div class="preview-pane" id="previewPane" style="display: none;">
-                    <div class="editor-header">实时预览</div>
+                    <div class="editor-header">Live Preview</div>
                     <div class="preview-content" id="preview"></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- 卡片复习模态框 -->
+    <!-- Review模态框 -->
     <div class="card-review-modal" id="cardReviewModal">
         <div class="card-review-container">
             <div class="card-review-header">
@@ -3239,7 +3311,7 @@
                 <button class="close-review" onclick="app.closeCardReview()">&times;</button>
             </div>
             <div id="cardContainer">
-                <!-- 卡片内容动态生成 -->
+                <!-- Card content dynamically generated -->
             </div>
             <div class="card-controls">
                 <button class="card-btn card-btn-prev" onclick="app.prevCard()">上一张</button>
@@ -3248,52 +3320,52 @@
         </div>
     </div>
 
-    <!-- 新建笔记本模态框 -->
+    <!-- New Note本模态框 -->
     <div class="modal" id="notebookModal">
         <div class="modal-content">
-            <div class="modal-title">新建笔记本</div>
-            <input type="text" class="modal-input" id="notebookNameInput" placeholder="笔记本名称">
+            <div class="modal-title">Create Notebook</div>
+            <input type="text" class="modal-input" id="notebookNameInput" placeholder="Notebook name">
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="app.closeModal('notebookModal')">取消</button>
-                <button class="btn btn-primary" onclick="app.confirmCreateNotebook()">创建</button>
+                <button class="btn btn-primary" onclick="app.confirmCreateNotebook()">Create</button>
             </div>
         </div>
     </div>
 
-    <!-- 模板库模态框 -->
+    <!-- Template Library Modal -->
     <div class="modal" id="templateLibraryModal">
         <div class="modal-content template-library-modal">
             <div class="template-library-header">
-                <div class="modal-title">📚 模板库</div>
+                <div class="modal-title">Templates</div>
                 <button class="close-btn" onclick="app.closeModal('templateLibraryModal')">&times;</button>
             </div>
             <div class="template-library-desc">
-                选择合适的模板，快速开始你的笔记
+                Choose a template to quickly start your notes
             </div>
             <div class="template-grid" id="templateGrid">
-                <!-- 模板卡片动态生成 -->
+                <!-- Template cards dynamically generated -->
             </div>
         </div>
     </div>
 
-    <!-- 模板预览/确认模态框 -->
+    <!-- Template preview/confirm modal -->
     <div class="modal" id="templatePreviewModal">
         <div class="modal-content template-preview-modal">
             <div class="template-library-header">
-                <div class="modal-title" id="previewTemplateTitle">模板预览</div>
+                <div class="modal-title" id="previewTemplateTitle">Preview</div>
                 <button class="close-btn" onclick="app.closeModal('templatePreviewModal')">&times;</button>
             </div>
             <div class="template-preview-content" id="templatePreviewContent">
-                <!-- 模板内容预览 -->
+                <!-- Template content preview -->
             </div>
             <div class="template-preview-actions">
                 <button class="btn btn-secondary" onclick="app.closeModal('templatePreviewModal')">取消</button>
-                <button class="btn btn-primary" onclick="app.insertTemplateContent()">使用此模板</button>
+                <button class="btn btn-primary" onclick="app.insertTemplateContent()">Use This Template</button>
             </div>
         </div>
     </div>
 
-    <!-- 设置模态框 -->
+    <!-- Settings modal -->
     <div class="modal" id="settingsModal">
         <div class="modal-content settings-modal">
             <div class="modal-header">
@@ -3313,10 +3385,10 @@
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
                         </svg>
-                        AI 答疑配置
+                        AI Q&A Settings
                     </h3>
 
-                    <!-- 厂商选择 -->
+                    <!-- Provider selection -->
                     <!-- 模型名称输入 -->
                     <div class="settings-item">
                         <label class="settings-label">模型名称</label>
@@ -3345,7 +3417,7 @@
                     <div class="settings-item">
                         <label class="settings-label">API Key</label>
                         <div class="apikey-input-wrapper">
-                            <input type="password" id="settingsApiKey" class="settings-input" placeholder="请输入您的 API Key">
+                            <input type="password" id="settingsApiKey" class="settings-input" placeholder="Enter your API key">
                             <button class="apikey-toggle" onclick="app.toggleApiKeyVisibility()">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -3375,7 +3447,7 @@
         </div>
     </div>
 
-    <!-- AI 答疑模态框 -->
+    <!-- AI Q&A Modal -->
     <div class="modal" id="aiCardModal">
         <div class="modal-content ai-card-modal">
             <div class="ai-modal-header">
@@ -3383,18 +3455,18 @@
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
                     </svg>
-                    AI 答疑
+                    AI Q&A
                 </div>
                 <button class="close-btn" id="aiCloseBtn">&times;</button>
             </div>
 
             <!-- 输入区域 -->
             <div class="ai-input-section">
-                <label class="ai-section-label">输入你的问题</label>
+                <label class="ai-section-label">Your question</label>
                 <textarea
                     class="ai-textarea"
                     id="aiCardInput"
-                    placeholder="请输入你想问的问题，AI会为你详细解答..."
+                    placeholder="What would you like to know?"
 
 例如：
 JavaScript 是一种轻量级的解释型编程语言。它是一门基于原型、多范式的动态脚本语言，支持面向对象、命令式和声明式（如函数式编程）风格。
@@ -3405,7 +3477,7 @@ JavaScript 在网页开发中主要用于：
 3. 发送网络请求
 4. 存储本地数据"
                 ></textarea>
-                <div class="ai-input-hint">输入你的问题，AI 会给出详细的解答和解释</div>
+                <div class="ai-input-hint">AI will provide detailed answers and explanations</div>
             </div>
 
             <!-- 生成按钮 -->
@@ -3413,7 +3485,7 @@ JavaScript 在网页开发中主要用于：
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
-                <span class="ai-btn-text">获取答案</span>
+                <span class="ai-btn-text">Get Answer</span>
             </button>
 
             <!-- 状态显示区域 -->
@@ -3427,18 +3499,18 @@ JavaScript 在网页开发中主要用于：
             <!-- 结果区域 -->
             <div class="ai-result-area" id="aiResultArea">
                 <div class="ai-result-header">
-                    <span class="ai-result-title">解答结果</span>
+                    <span class="ai-result-title">Answer</span>
                     <span class="ai-card-count" id="aiCardCount"></span>
                 </div>
                 <div class="ai-cards-container" id="aiCardsContainer">
-                    <!-- 卡片动态生成 -->
+                    <!-- Cards dynamically generated -->
                 </div>
                 <div class="ai-result-actions">
                     <button class="btn btn-secondary" id="aiCopyBtn">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
-                        复制
+                        Copy
                     </button>
                     <button class="btn btn-primary" id="aiInsertBtn">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3463,7 +3535,7 @@ JavaScript 在网页开发中主要用于：
         </div>
     </div>
 
-    <!-- 统计模态框 -->
+    <!-- Stats modal -->
     <div class="modal" id="statsModal">
         <div class="modal-content stats-modal">
             <div class="stats-modal-header">
@@ -3476,7 +3548,7 @@ JavaScript 在网页开发中主要用于：
                 <button class="close-btn" onclick="app.closeModal('statsModal')">&times;</button>
             </div>
             <div class="stats-content" id="statsContent">
-                <!-- 统计卡片 -->
+                <!-- Stats cards -->
                 <div class="stats-cards">
                     <div class="stat-card">
                         <div class="stat-card-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
@@ -3497,7 +3569,7 @@ JavaScript 在网页开发中主要用于：
                         </div>
                         <div class="stat-card-info">
                             <div class="stat-card-value" id="statsTotalCards">0</div>
-                            <div class="stat-card-label">知识卡片</div>
+                            <div class="stat-card-label">Knowledge Cards</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -3519,7 +3591,7 @@ JavaScript 在网页开发中主要用于：
                         </div>
                         <div class="stat-card-info">
                             <div class="stat-card-value" id="statsMasteryRate">0%</div>
-                            <div class="stat-card-label">掌握率</div>
+                            <div class="stat-card-label">Mastery Rate</div>
                         </div>
                     </div>
                 </div>
@@ -3543,7 +3615,7 @@ JavaScript 在网页开发中主要用于：
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
                             </svg>
-                            卡片掌握情况
+                            Card Mastery
                         </div>
                         <div class="stats-chart-wrapper">
                             <canvas id="masteryChart"></canvas>
@@ -3551,7 +3623,7 @@ JavaScript 在网页开发中主要用于：
                     </div>
                 </div>
 
-                <!-- 学习建议 -->
+                <!-- Study tips -->
                 <div class="stats-tips" id="statsTips">
                     <div class="stats-tips-title">
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3572,9 +3644,9 @@ JavaScript 在网页开发中主要用于：
 
     <!-- 帮助提示 -->
     <div class="help-tooltip" id="helpTooltip">
-        <strong>知识卡片标记：</strong><br>
-        <code>:front:: 问题内容</code><br>
-        <code>:back:: 答案内容</code>
+        <strong>Knowledge Card Markers:</strong><br>
+        <code>:front:: Question</code><br>
+        <code>:back:: Answer</code>
     </div>
 
     <!-- 移动端底部导航 -->
@@ -3612,7 +3684,7 @@ JavaScript 在网页开发中主要用于：
     </nav>
 
     <script>
-        // 应用程序主类
+        // Application main class
         class MarkdownNotebookApp {
             constructor() {
                 this.notebooks = [];
@@ -3635,38 +3707,38 @@ JavaScript 在网页开发中主要用于：
                 this.loadSidebarState();
                 this.loadToolboxState();
 
-                // 如果没有笔记本，创建一个默认的
+                // If no notebooks, create a default one
                 if (this.notebooks.length === 0) {
                     this.createDefaultData();
                 }
             }
 
-            // 创建默认数据
+            // Create default data
             createDefaultData() {
                 const defaultNotebook = {
                     id: Date.now().toString(),
                     name: '默认笔记本',
                     notes: [{
                         id: (Date.now() + 1).toString(),
-                        title: '欢迎使用 Markdown 笔记',
-                        content: `# 欢迎使用 Markdown 笔记工具
+                        title: 'Welcome to Markdown Notebook',
+                        content: `# Welcome to Markdown Notebook
 
-这是一个简单易用的浏览器端笔记应用。
+A clean & powerful browser-based note-taking app.
 
-## 功能特点
+## Features
 
-- **左右分栏编辑**：左侧编写 Markdown，右侧实时预览
-- **笔记管理**：支持多个笔记本和笔记
-- **知识卡片**：使用特殊标记创建复习卡片
-- **自动保存**：所有数据保存在浏览器本地
+- **Split-pane editing**: Write Markdown on the left, preview live on the right
+- **Notebook management**: Organize with multiple notebooks
+- **Knowledge cards**: Create flashcards with special syntax for review
+- **Auto-save**: All data stored locally in your browser
 
-## 知识卡片示例
+## Knowledge Card Examples
 
-:front:: 什么是 Markdown？
-:back:: Markdown 是一种轻量级标记语言，用简单的符号表示格式。
+:front:: What is Markdown?
+:back:: Markdown is a lightweight markup language that uses simple symbols for formatting.
 
-:front:: 如何创建代码块？
-:back:: 使用三个反引号 \`\`\` 包裹代码，可指定语言实现语法高亮。
+:front:: How to create code blocks?
+:back:: Wrap code with three backticks \`\`\` , optionally specify the language for syntax highlighting.
 
 \`\`\`javascript
 function hello() {
@@ -3685,10 +3757,10 @@ $$
 \\sum_{i=1}^{n} x_i = x_1 + x_2 + \\cdots + x_n
 $$
 
-## 开始使用
+## Getting Started
 
-点击左侧"新建笔记"按钮开始创建你的第一条笔记吧！`,
-                        tags: ['入门', '示例'],
+Click the "New Note" button on the left to create your first note!`,
+                        tags: ['getting-started', 'example'],
                         updatedAt: Date.now()
                     }]
                 };
@@ -3715,7 +3787,7 @@ $$
                 }
             }
 
-            // 加载侧边栏状态
+            // Load sidebar state
             loadSidebarState() {
                 const collapsed = localStorage.getItem('sidebarCollapsed');
                 if (collapsed === 'true') {
@@ -3726,7 +3798,7 @@ $$
                 }
             }
 
-            // 工具箱展开/收起
+            // Toolbox expand/collapse
             toggleToolbox() {
                 const tools = document.getElementById('sidebarTools');
                 const btn = document.getElementById('toolboxBtn');
@@ -3750,7 +3822,7 @@ $$
                 }
             }
 
-            // 加载工具箱状态
+            // Load toolbox state
             loadToolboxState() {
                 const expanded = localStorage.getItem('toolboxExpanded');
                 const tools = document.getElementById('sidebarTools');
@@ -3770,10 +3842,10 @@ $$
             }
 
 
-            // ========== AI 答疑按钮处理 ==========
+            // ========== AI Q&A Button Handler ==========
 
             handleAIBtnClick() {
-                // 检查是否配置了 API Key
+                // Check if API Key is configured
                 const saved = localStorage.getItem('ai-cards-config');
                 let hasConfig = false;
 
@@ -3787,21 +3859,21 @@ $$
                 }
 
                 if (!hasConfig) {
-                    // 未配置，提示用户先配置
+                    // Not configured, prompt user to configure first
                     alert('请先配置 API Key\n\n点击"设置"按钮，选择模型厂商并输入您的 API Key');
                     this.openSettingsModal();
                     return;
                 }
 
-                // 已配置，打开 AI 答疑
+                // Configured, open AI Q&A
                 if (typeof aiCardGeneratorUI !== 'undefined') {
                     aiCardGeneratorUI.openModal();
                 } else {
-                    alert('AI 模块加载中，请稍后重试');
+                    alert('AI module loading, please try again later');
                 }
             }
 
-            // ========== 设置模态框 ==========
+            // ========== Settings modal ==========
 
             openSettingsModal() {
                 this.loadSettingsToModal();
@@ -3820,13 +3892,13 @@ $$
                     }
                 }
 
-                // 加载 API Key
+                // Load API Key
                 const apiKeyInput = document.getElementById('settingsApiKey');
                 if (apiKeyInput && config.apiKey) {
                     apiKeyInput.value = config.apiKey;
                 }
 
-                // 选中厂商并设置 tempProvider
+                // Select provider and set tempProvider
                 this.tempProvider = config.provider || 'moonshot';
                 document.querySelectorAll('.provider-btn').forEach(btn => {
                     btn.classList.remove('active');
@@ -3835,7 +3907,7 @@ $$
                     }
                 });
 
-                // 更新状态显示
+                // Update status display
                 this.updateConfigStatus(config);
             }
 
@@ -3845,9 +3917,9 @@ $$
                 });
                 document.querySelector(`.provider-btn[data-provider="${provider}"]`).classList.add('active');
 
-                // 临时保存选择
+                // Temporarily save selection
                 this.tempProvider = provider;
-                // 自动填充默认模型
+                // Auto-fill default model
                 const defaultModels = {
                     'moonshot': 'kimi-k2.5',
                     'siliconflow': 'Qwen/Qwen2.5-7B-Instruct',
@@ -3899,11 +3971,11 @@ $$
                 const provider = this.tempProvider || document.querySelector('.provider-btn.active')?.dataset?.provider || 'moonshot';
 
                 if (!apiKey) {
-                    alert('请输入 API Key');
+                    alert('Please enter API Key');
                     return;
                 }
 
-                // 保存配置
+                // Save config
                 const config = {
                     apiKey: apiKey,
                     provider: provider,
@@ -3912,7 +3984,7 @@ $$
 
                 localStorage.setItem('ai-cards-config', JSON.stringify(config));
 
-                // 同时更新 ai-cards.js 中的配置
+                // Also update config in ai-cards.js
                 if (typeof aiCardGenerator !== 'undefined') {
                     aiCardGenerator.setApiKey(apiKey);
                     aiCardGenerator.setProvider(provider);
@@ -3922,9 +3994,9 @@ $$
                 this.closeModal('settingsModal');
             }
 
-            // 绑定事件
+            // Bind events
             bindEvents() {
-                // 编辑器输入事件
+                // Editor input event
                 const editor = document.getElementById('editor');
                 editor.addEventListener('input', () => {
                     this.debounce(() => {
@@ -3934,7 +4006,7 @@ $$
                     }, 300);
                 });
 
-                // 标题输入事件
+                // Title input event
                 const titleInput = document.getElementById('noteTitle');
                 titleInput.addEventListener('input', () => {
                     this.debounce(() => {
@@ -3943,7 +4015,7 @@ $$
                     }, 300);
                 });
 
-                // 标签输入事件
+                // Tag input event
                 const tagInput = document.getElementById('tagInput');
                 tagInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
@@ -3960,14 +4032,14 @@ $$
                     this.renderNotebookList();
                 });
 
-                // 点击外部关闭下拉菜单
+                // Click outside to close dropdown
                 document.addEventListener('click', (e) => {
                     if (!e.target.closest('.dropdown')) {
                         document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
                     }
                 });
 
-                // 保存按钮事件委托（因为按钮是动态显示的）
+                // Save button event delegation (button is dynamically shown)
                 document.addEventListener('click', (e) => {
                     const saveBtn = e.target.closest('#saveBtn');
                     if (saveBtn) {
@@ -3993,7 +4065,7 @@ $$
                 this.debounceTimer = setTimeout(fn, delay);
             }
 
-            // 加载数据
+            // Load data
             loadData() {
                 try {
                     const data = localStorage.getItem('markdownNotebook');
@@ -4006,7 +4078,7 @@ $$
                 }
             }
 
-            // 保存数据
+            // Save data
             saveData() {
                 try {
                     console.log('[AskAI] saveData: saving', this.notebooks?.length, 'notebooks');
@@ -4018,7 +4090,7 @@ $$
                 }
             }
 
-            // 创建笔记本
+            // Create notebook
             createNotebook() {
                 document.getElementById('notebookModal').classList.add('active');
                 document.getElementById('notebookNameInput').focus();
@@ -4042,16 +4114,16 @@ $$
                 document.getElementById('notebookNameInput').value = '';
             }
 
-            // 创建笔记
+            // Create note
             createNote(notebookId = null) {
-                // 如果没有指定笔记本，使用当前选中的笔记本，如果没有则使用第一个
+                // If no notebook specified, use current or first
                 if (!notebookId) {
                     if (this.currentNotebookId) {
                         notebookId = this.currentNotebookId;
                     } else if (this.notebooks.length > 0) {
                         notebookId = this.notebooks[0].id;
                     } else {
-                        alert('请先创建笔记本');
+                        alert('Please create a notebook first');
                         return;
                     }
                 }
@@ -4074,11 +4146,11 @@ $$
                 this.renderNotebookList();
                 this.openNote(notebookId, note.id);
 
-                // 更新统计数据
+                // Update stats data
                 this.updateStatsOnNoteCreated();
             }
 
-            // 打开笔记
+            // Open note
             openNote(notebookId, noteId) {
                 this.currentNotebookId = notebookId;
                 this.currentNoteId = noteId;
@@ -4087,7 +4159,7 @@ $$
                 const note = notebook.notes.find(n => n.id === noteId);
                 if (!note) return;
 
-                // 显示编辑器
+                // Show editor
                 document.getElementById('emptyState').style.display = 'none';
                 document.getElementById('toolbar').style.display = 'flex';
                 document.getElementById('editorPane').style.display = 'flex';
@@ -4097,20 +4169,20 @@ $$
                 document.getElementById('noteTitle').value = note.title;
                 document.getElementById('editor').value = note.content;
 
-                // 渲染标签
+                // Render tags
                 this.renderTags(note.tags);
 
-                // 强制更新预览（使用setTimeout确保DOM已更新）
+                // Force update preview (use setTimeout to ensure DOM is updated)
                 setTimeout(() => {
                     this.updatePreview();
                     this.updateStats();
                 }, 0);
 
-                // 更新列表选中状态
+                // Update list selection state
                 this.renderNotebookList();
             }
 
-            // 保存当前笔记
+            // Save current note
             saveCurrentNote() {
                 if (!this.currentNoteId || !this.currentNotebookId) {
                     console.log('保存失败：未选中笔记');
@@ -4130,10 +4202,10 @@ $$
 
                 this.saveData();
                 this.showSaveFeedback();
-                console.log('笔记已保存:', note.title);
+                console.log('Note saved:', note.title);
             }
 
-            // 显示保存成功反馈
+            // Show save success feedback
             showSaveFeedback() {
                 const btn = document.querySelector('.save-btn');
                 if (!btn) return;
@@ -4153,18 +4225,18 @@ $$
                 }, 1500);
             }
 
-            // 删除笔记
+            // Delete note
             deleteNote(notebookId, noteId, event) {
                 event.stopPropagation();
-                if (!confirm('确定要删除这条笔记吗？')) return;
+                if (!confirm('确定要Delete这条笔记吗？')) return;
 
                 const notebook = this.notebooks.find(n => n.id === notebookId);
                 const noteIndex = notebook.notes.findIndex(n => n.id === noteId);
                 
-                // 保存相邻笔记的ID（用于删除后自动切换）
+                // Save adjacent note ID for auto-switch after delete
                 let nextNoteId = null;
                 if (noteIndex >= 0) {
-                    // 优先选择下一条，没有则选上一条
+                    // Prefer next, otherwise previous
                     if (noteIndex < notebook.notes.length - 1) {
                         nextNoteId = notebook.notes[noteIndex + 1].id;
                     } else if (noteIndex > 0) {
@@ -4176,10 +4248,10 @@ $$
 
                 if (this.currentNoteId === noteId) {
                     if (nextNoteId) {
-                        // 自动切换到相邻笔记
+                        // Auto switch to adjacent note
                         this.openNote(notebookId, nextNoteId);
                     } else {
-                        // 没有相邻笔记才关闭编辑器
+                        // Only close editor if no adjacent notes
                         this.closeEditor();
                     }
                 }
@@ -4188,7 +4260,7 @@ $$
                 this.renderNotebookList();
             }
 
-            // 关闭编辑器
+            // Close editor
             closeEditor() {
                 this.currentNoteId = null;
                 this.currentNotebookId = null;
@@ -4199,38 +4271,38 @@ $$
                 this.renderNotebookList();
             }
 
-            // 预处理数学公式，防止被marked解析
+            // Preprocess math formulas to prevent marked parsing
             protectMath(content) {
                 const mathBlocks = [];
                 const mathInline = [];
 
-                // 保护块级公式 $$
+                // Protect block formulas $$
                 content = content.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
                     mathBlocks.push(formula.trim());
-                    // 使用 HTML 注释作为占位符，避免被 marked 解析
+                    // Use HTML comments as placeholders to avoid marked parsing
                     return '\n\n<!--MATHBLOCK' + (mathBlocks.length - 1) + '-->\n\n';
                 });
 
-                // 保护行内公式 $（但不匹配 $$）
+                // Protect inline formulas $ (but not $$)
                 content = content.replace(/(?<!\$)\$(?!\$)([^\$\n]+?)\$(?!\$)/g, (match, formula) => {
                     mathInline.push(formula.trim());
-                    // 使用 HTML 注释作为占位符，避免被 marked 解析
+                    // Use HTML comments as placeholders to avoid marked parsing
                     return '<!--MATHINLINE' + (mathInline.length - 1) + '-->';
                 });
 
                 return { content, mathBlocks, mathInline };
             }
 
-            // 恢复数学公式并渲染
+            // Restore math formulas and render
             restoreAndRenderMath(html, mathBlocks, mathInline) {
-                // 恢复块级公式 - 使用 HTML 注释占位符
+                // Restore block formulas - use HTML comment placeholders
                 mathBlocks.forEach((formula, i) => {
                     const placeholder = '<!--MATHBLOCK' + i + '-->';
                     const replacement = '<div class="math-block" data-formula="' + this.escapeHtml(formula) + '"></div>';
                     html = html.split(placeholder).join(replacement);
                 });
 
-                // 恢复行内公式
+                // Restore inline formulas
                 mathInline.forEach((formula, i) => {
                     const placeholder = '<!--MATHINLINE' + i + '-->';
                     const replacement = '<span class="math-inline" data-formula="' + this.escapeHtml(formula) + '"></span>';
@@ -4247,9 +4319,9 @@ $$
                 return div.innerHTML;
             }
 
-            // 渲染数学公式
+            // Render math formulas
             renderMathWithKatex(element) {
-                // 渲染块级公式
+                // Render block formulas
                 element.querySelectorAll('.math-block').forEach(el => {
                     try {
                         const formula = el.getAttribute('data-formula');
@@ -4262,7 +4334,7 @@ $$
                     }
                 });
 
-                // 渲染行内公式
+                // Render inline formulas
                 element.querySelectorAll('.math-inline').forEach(el => {
                     try {
                         const formula = el.getAttribute('data-formula');
@@ -4276,24 +4348,24 @@ $$
                 });
             }
 
-            // 更新预览
+            // Update preview
             updatePreview() {
                 const content = document.getElementById('editor').value;
                 const preview = document.getElementById('preview');
 
                 if (!preview) return;
 
-                // 清空内容时也要清空预览
+                // Clear preview when content is empty
                 if (!content) {
                     preview.innerHTML = '';
                     return;
                 }
 
                 try {
-                    // 保护数学公式
+                    // Protect math formulas
                     const { content: protectedContent, mathBlocks, mathInline } = this.protectMath(content);
 
-                    // 配置 marked
+                    // Configure marked
                     marked.setOptions({
                         highlight: function(code, lang) {
                             if (lang && Prism.languages[lang]) {
@@ -4305,43 +4377,43 @@ $$
                         gfm: true
                     });
 
-                    // 处理知识卡片标记
+                    // Process knowledge card markers
                     let processedContent = this.processCardMarkers(protectedContent);
 
-                    // 渲染 Markdown
+                    // Render Markdown
                     let html = marked.parse(processedContent);
 
-                    // 恢复数学公式
+                    // Restore math formulas
                     html = this.restoreAndRenderMath(html, mathBlocks, mathInline);
 
                     preview.innerHTML = html;
 
-                    // 高亮代码块
+                    // Highlight code blocks
                     preview.querySelectorAll('pre code').forEach((block) => {
                         Prism.highlightElement(block);
                     });
 
-                    // 使用KaTeX渲染数学公式
+                    // Render math formulas with KaTeX
                     this.renderMathWithKatex(preview);
                 } catch (e) {
-                    console.error('预览渲染失败:', e);
+                    console.error('Preview render failed:', e);
                     preview.innerHTML = '<p style="color: #ef4444;">渲染失败，请检查Markdown语法</p>';
                 }
             }
 
-            // 处理知识卡片标记
+            // Process knowledge card markers
             processCardMarkers(content) {
-                // 注意：数学公式已经在 protectMath 中被保护为占位符
-                // 这里直接处理卡片标记，不要碰数学公式占位符
+                // Note: Math formulas are protected as placeholders in protectMath
+                // Process card markers directly, dont touch math placeholders
 
-                // 在预览中高亮显示卡片标记
-                content = content.replace(/:front::(.*?)($|\n)/g, '<span class="knowledge-card-marker">🎴 问题:</span>$1$2');
-                content = content.replace(/:back::(.*?)($|\n)/g, '<span class="knowledge-card-marker" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">💡 答案:</span>$1$2');
+                // Highlight card markers in preview
+                content = content.replace(/:front::(.*?)($|\n)/g, '<span class="knowledge-card-marker">🎴 Front:</span>$1$2');
+                content = content.replace(/:back::(.*?)($|\n)/g, '<span class="knowledge-card-marker" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">💡 Back:</span>$1$2');
 
                 return content;
             }
 
-            // 渲染数学公式
+            // Render math formulas
             renderMath(element) {
                 if (typeof renderMathInElement !== 'undefined') {
                     renderMathInElement(element, {
@@ -4354,7 +4426,7 @@ $$
                 }
             }
 
-            // 统计笔记本中的卡片数量
+            // Count cards in notebook
             countNotebookCards(notes) {
                 let count = 0;
                 notes.forEach(note => {
@@ -4364,8 +4436,8 @@ $$
                 return count;
             }
 
-            // 提取知识卡片
-            // 提取知识卡片
+            // Extract knowledge cards
+            // Extract knowledge cards
             extractCards(content, noteId = '') {
                 if (!content) return [];
                 const cards = [];
@@ -4400,13 +4472,13 @@ $$
                 }
                 return 'card_' + Math.abs(hash).toString(36);
             }
-            // 开始笔记本卡片复习
+            // Start notebook review
             startNotebookCardReview(notebookId, event) {
                 event.stopPropagation();
                 const notebook = this.notebooks.find(n => n.id === notebookId);
                 if (!notebook) return;
 
-                // 收集笔记本中所有笔记的卡片
+                // Collect all cards from notebook notes
                 this.cards = [];
                 notebook.notes.forEach(note => {
                     const noteCards = this.extractCards(note.content, note.id);
@@ -4419,7 +4491,7 @@ $$
                 });
 
                 if (this.cards.length === 0) {
-                    alert('该笔记本中没有找到知识卡片');
+                    alert('No knowledge cards found in this notebook');
                     return;
                 }
 
@@ -4428,10 +4500,10 @@ $$
                 document.getElementById('cardReviewModal').classList.add('active');
             }
 
-            // 开始卡片复习
+            // Start Review
             startCardReview() {
                 if (!this.currentNoteId) {
-                    alert('请先打开一个笔记');
+                    alert('Please open a note first');
                     return;
                 }
 
@@ -4451,23 +4523,23 @@ $$
                 this.renderCard();
                 document.getElementById('cardReviewModal').classList.add('active');
 
-                // 更新复习统计
+                // Update review stats
                 this.updateStatsOnReview();
             }
 
-            // 关闭卡片复习
+            // Close review
             closeCardReview() {
                 document.getElementById('cardReviewModal').classList.remove('active');
             }
 
-            // 问 AI 分析当前笔记（直接返回结果，无需用户输入）
+            // Ask AI to analyze current note (returns result directly, no user input needed)
             async askAIAboutNote() {
                 if (!this.currentNoteId) {
-                    alert('请先打开一个笔记');
+                    alert('Please open a note first');
                     return;
                 }
 
-                // 检查是否配置了 API Key
+                // Check if API Key is configured
                 const saved = localStorage.getItem('ai-cards-config');
                 let hasConfig = false;
                 let config = null;
@@ -4482,26 +4554,26 @@ $$
                 }
 
                 if (!hasConfig) {
-                    alert('请先配置 API Key，请选择模型厂商并输入您的 API Key');
+                    alert("Please configure API Key first. Select a provider and enter your API Key");
                     this.openSettingsModal();
                     return;
                 }
 
-                // 获取笔记内容
+                // Get note content
                 const notebook = this.notebooks.find(n => n.id === this.currentNotebookId);
                 const note = notebook.notes.find(n => n.id === this.currentNoteId);
                 
-                // 检查 AI 模块是否就绪
+                // Check if AI module is ready
                 if (typeof aiCardGenerator === 'undefined' || !aiCardGenerator.state.isReady) {
-                    alert('AI 模块尚未就绪，请检查 API Key 配置');
+                    alert("AI module not ready. Please check API Key configuration");
                     return;
                 }
 
-                // 打开 AI 模态框并设置为加载状态
+                // Open AI modal and set loading state
                 if (typeof aiCardGeneratorUI !== 'undefined') {
                     aiCardGeneratorUI.openModal();
                     
-                    // 隐藏输入框区域（只保留进度条）
+                    // Hide input area (keep only progress bar)
                     const inputArea = document.getElementById('aiCardInput');
                     const generateBtn = document.getElementById('aiGenerateBtn');
                     if (inputArea) {
@@ -4513,15 +4585,15 @@ $$
                     
                     aiCardGeneratorUI.updateUIState('loading');
                     
-                    // 更新状态文本
+                    // Update status text
                     const statusText = document.getElementById('aiStatusText');
                     if (statusText) {
-                        statusText.textContent = '正在分析笔记内容...';
+                        statusText.textContent = 'Analyzing note content...';
                     }
                 }
 
-                // 构建分析提示词
-                const prompt = `请分析以下笔记内容，总结主要知识点和学习要点：
+                // Build analysis prompt
+                const prompt = `Please analyze the following note content and summarize the key knowledge points and learning highlights:
 
 ${note.content}
 
@@ -4531,18 +4603,18 @@ ${note.content}
 3. 学习建议和记忆方法`;
                 
                 try {
-                    // 调用 AI 生成答案
+                    // Call AI to generate answer
                     const result = await aiCardGenerator.generateAnswer(prompt);
                     
-                    // 显示结果
+                    // Show result
                     if (typeof aiCardGeneratorUI !== 'undefined') {
-                        // 设置成功状态（这会隐藏输入框，显示结果区域）
+                        // Set success state (hides input, shows result area)
                         aiCardGeneratorUI.updateUIState('success');
                         
-                        // 在结果区域显示分析结果
+                        // Display analysis result in result area
                         const cardsContainer = document.getElementById('aiCardsContainer');
                         if (cardsContainer) {
-                            // 使用 marked 渲染 Markdown
+                            // Render Markdown with marked
                             const htmlContent = typeof marked !== 'undefined' 
                                 ? marked.parse(result) 
                                 : '<pre>' + result.replace(/</g, '&lt;') + '</pre>';
@@ -4553,51 +4625,51 @@ ${note.content}
                             `;
                         }
                         
-                        // 更新卡片计数
+                        // Update card count
                         const cardCount = document.getElementById('aiCardCount');
                         if (cardCount) {
-                            cardCount.textContent = 'AI 分析结果';
+                            cardCount.textContent = 'AI Analysis Result';
                         }
                         
-                        // 恢复插入按钮（允许将分析结果插入笔记）
+                        // Restore insert button (allow inserting analysis result)
                         const insertBtn = document.getElementById('aiInsertBtn');
                         if (insertBtn) {
                             insertBtn.disabled = false;
-                            insertBtn.textContent = '插入笔记';
-                            // 保存分析结果以便插入
+                            insertBtn.textContent = 'Insert';
+                            // Save analysis result for insertion
                             this.lastAIAnalysis = result;
-                            // 使用标志位区分是问AI模式还是普通模式
+                            // Use flag to distinguish Ask AI mode from normal mode
                             insertBtn.dataset.mode = 'analysis';
                         }
                         
-                        // 设置复制按钮功能
+                        // Setup Copy button
                         const copyBtn = document.getElementById('aiCopyBtn');
                         if (copyBtn) {
                             copyBtn.dataset.mode = 'analysis';
                         }
                         
-                        // 设置重新生成按钮
+                        // Setup Regenerate button
                         const regenerateBtn = document.getElementById('aiRegenerateBtn');
                         if (regenerateBtn) {
                             regenerateBtn.onclick = () => {
-                                // 重新调用问AI
+                                // Re-call Ask AI
                                 this.askAIAboutNote();
                             };
                         }
                         
-                        // 设置关闭按钮恢复输入框
+                        // Setup close button to restore input
                         const closeBtn = document.getElementById('aiCloseBtn');
                         if (closeBtn) {
                             closeBtn.onclick = () => {
                                 this.restoreAIModalInput();
-                                // 清除标志位
+                                // Clear flag
                                 if (insertBtn) insertBtn.dataset.mode = '';
                                 if (copyBtn) copyBtn.dataset.mode = '';
                                 aiCardGeneratorUI.closeModal();
                             };
                         }
                         
-                        // 确保结果容器可以滚动
+                        // Ensure result container is scrollable
                         const resultContainer = document.getElementById('aiCardsContainer');
                         if (resultContainer) {
                             resultContainer.style.maxHeight = '400px';
@@ -4605,21 +4677,21 @@ ${note.content}
                         }
                     }
                     
-                    this.showToast('AI 分析完成！');
+                    this.showToast('AI analysis complete!');
                 } catch (error) {
                     console.error('AI 分析失败:', error);
                     if (typeof aiCardGeneratorUI !== 'undefined') {
                         aiCardGeneratorUI.updateUIState('error');
                         const statusText = document.getElementById('aiStatusText');
                         if (statusText) {
-                            statusText.textContent = '分析失败: ' + error.message;
+                            statusText.textContent = 'Analysis failed: ' + error.message;
                         }
                     }
                     alert('AI 分析失败: ' + error.message);
                 }
             }
 
-            // 恢复 AI 模态框的输入框（在关闭时调用）
+            // Restore AI modal input (called on close)
             restoreAIModalInput() {
                 const inputArea = document.getElementById('aiCardInput');
                 const generateBtn = document.getElementById('aiGenerateBtn');
@@ -4632,11 +4704,11 @@ ${note.content}
                 }
             }
 
-            // 将 AI 分析结果插入到当前笔记
+            // Insert AI analysis result into current note
             insertAIAnalysisToNote(analysis) {
                 console.log('[AskAI] insertAIAnalysisToNote called, currentNoteId:', this.currentNoteId);
                 if (!this.currentNoteId) {
-                    alert('请先打开一个笔记');
+                    alert('Please open a note first');
                     return;
                 }
                 
@@ -4645,8 +4717,8 @@ ${note.content}
                 
                 console.log('[AskAI] Found note:', note?.title, 'content length:', note?.content?.length);
                 
-                // 在笔记末尾添加分析结果
-                const timestamp = new Date().toLocaleString('zh-CN');
+                // Add analysis result at end of note
+                const timestamp = new Date().toLocaleString('en-US');
                 const analysisSection = `
 
 ---
@@ -4668,25 +4740,25 @@ ${analysis}
                 this.updatePreview();
                 console.log('[AskAI] updatePreview called');
                 
-                // 如果编辑器是可见的，更新内容
+                // If editor is visible, update content
                 const editor = document.getElementById('editor');
                 console.log('[AskAI] Looking for editor:', !!editor, 'editor display:', editor?.style?.display);
                 if (editor) {
                     editor.value = note.content;
                     console.log('[AskAI] Editor updated, new length:', editor.value.length);
-                    // 触发 input 事件以更新预览
+                    // Trigger input event to update preview
                     editor.dispatchEvent(new Event('input', { bubbles: true }));
                     console.log('[AskAI] Editor input event dispatched');
                 }
                 
-                this.showToast('AI 分析结果已插入笔记');
+                this.showToast('AI 分析结果已Insert');
                 aiCardGeneratorUI.closeModal();
                 this.restoreAIModalInput();
             }
 
-            // Agent 批量整理所有笔记
+            // Batch Organize所有笔记
             async agentBatchProcess() {
-                // 检查是否配置了 API Key
+                // Check if API Key is configured
                 const saved = localStorage.getItem('ai-cards-config');
                 let hasConfig = false;
                 
@@ -4700,18 +4772,18 @@ ${analysis}
                 }
                 
                 if (!hasConfig) {
-                    alert('请先配置 API Key，请选择模型厂商并输入您的 API Key');
+                    alert("Please configure API Key first. Select a provider and enter your API Key");
                     this.openSettingsModal();
                     return;
                 }
                 
-                // 检查 AI 模块是否就绪
+                // Check if AI module is ready
                 if (typeof aiCardGenerator === 'undefined' || !aiCardGenerator.state.isReady) {
-                    alert('AI 模块尚未就绪，请检查 API Key 配置');
+                    alert("AI module not ready. Please check API Key configuration");
                     return;
                 }
                 
-                // 收集所有笔记内容
+                // Collect all note content
                 let allNotesContent = '';
                 let noteCount = 0;
                 
@@ -4730,7 +4802,7 @@ ${note.content}
                 });
                 
                 if (noteCount === 0) {
-                    alert('没有找到任何笔记内容');
+                    alert('No note content found');
                     return;
                 }
                 
@@ -4738,11 +4810,11 @@ ${note.content}
                     return;
                 }
                 
-                // 显示进度模态框
+                // Show progress modal
                 if (typeof aiCardGeneratorUI !== 'undefined') {
                     aiCardGeneratorUI.openModal();
                     
-                    // 隐藏输入框区域（只保留进度条）
+                    // Hide input area (keep only progress bar)
                     const inputArea = document.getElementById('aiCardInput');
                     const generateBtn = document.getElementById('aiGenerateBtn');
                     if (inputArea) {
@@ -4754,18 +4826,18 @@ ${note.content}
                     
                     aiCardGeneratorUI.updateUIState('loading');
                     
-                    // 更新状态文本
+                    // Update status text
                     const statusText = document.getElementById('aiStatusText');
                     if (statusText) {
-                        statusText.textContent = `正在批量整理 ${noteCount} 条笔记，请稍候...`;
+                        statusText.textContent = `Organizing ${noteCount} notes in batch, please wait...`;
                     }
                 } else {
-                    this.showToast(`正在批量处理 ${noteCount} 条笔记...`);
+                    this.showToast(`Processing ${noteCount} notes in batch...`);
                 }
                 
                 try {
                     // 构建批量整理提示词
-                    const prompt = `请对以下所有笔记内容进行批量整理和归纳总结：
+                    const prompt = `Please organize and summarize all the following note content in batch:
 
 ${allNotesContent}
 
@@ -4776,24 +4848,24 @@ ${allNotesContent}
 4. 给出学习建议和记忆方法
 5. 如有重复内容，进行合并整理`;
                     
-                    // 调用 AI 生成答案
+                    // Call AI to generate answer
                     const result = await aiCardGenerator.generateAnswer(prompt);
                     
-                    // 关闭 AI 模态框
+                    // Close AI modal
                     if (typeof aiCardGeneratorUI !== 'undefined') {
                         aiCardGeneratorUI.closeModal();
-                        // 恢复输入框
+                        // Restore input
                         this.restoreAIModalInput();
                     }
                     
-                    // 在第一个笔记本中创建新笔记
+                    // Create new note in first notebook
                     const targetNotebook = this.notebooks[0];
                     const newNote = {
                         id: Date.now().toString(),
-                        title: 'Agent批量结果',
-                        content: `# Agent 批量整理结果
+                        title: 'Agent Batch Results',
+                        content: `# Batch Organize结果
 
-生成时间：${new Date().toLocaleString('zh-CN')}
+生成时间：${new Date().toLocaleString('en-US')}
 整理笔记数：${noteCount}
 
 ---
@@ -4807,17 +4879,17 @@ ${result}`,
                     targetNotebook.notes.unshift(newNote);
                     this.saveData();
                     
-                    // 自动打开新创建的笔记
+                    // Auto open newly created note
                     this.openNote(targetNotebook.id, newNote.id);
                     
-                    this.showToast('Agent 批量整理完成！');
+                    this.showToast('Batch Organize完成！');
                 } catch (error) {
-                    console.error('Agent 批量整理失败:', error);
-                    alert('Agent 批量整理失败: ' + error.message);
+                    console.error('Batch Organize失败:', error);
+                    alert('Batch Organize失败: ' + error.message);
                 }
             }
 
-            // 渲染卡片
+            // Render cards
             renderCard() {
                 const container = document.getElementById('cardContainer');
                 const counter = document.getElementById('cardCounter');
@@ -4837,11 +4909,11 @@ ${result}`,
                 const card = this.cards[this.currentCardIndex];
                 const showSource = card.noteTitle ? `<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">来自: ${card.noteTitle}</div>` : '';
                 
-                // 检查卡片掌握状态
+                // Check card mastery status
                 const stats = this.loadStatsData();
                 const isMastered = stats.cardMastery && stats.cardMastery[card.id];
                 
-                // 处理数学公式
+                // Process math formulas
                 const processedFront = this.processMathInCard(card.front);
                 const processedBack = this.processMathInCard(card.back);
                 
@@ -4849,16 +4921,16 @@ ${result}`,
                     <div class="flashcard" id="flashcard" onclick="app.flipCard()">
                         <div class="flashcard-inner">
                             <div class="flashcard-front">
-                                <button class="card-master-star ${isMastered ? 'mastered' : ''}" onclick="app.toggleCardMastery(event, '${card.id}')" title="${isMastered ? '已掌握' : '标记为已掌握'}">
+                                <button class="card-master-star ${isMastered ? 'mastered' : ''}" onclick="app.toggleCardMastery(event, '${card.id}')" title="${isMastered ? 'Mastered' : 'Mark as mastered'}">
                                     ★
                                 </button>
-                                <div class="card-label">问题</div>
+                                <div class="card-label">Front</div>
                                 ${showSource}
                                 <div class="card-content">${processedFront}</div>
-                                <div class="card-hint">点击翻转查看答案</div>
+                                <div class="card-hint">Click to flip and reveal</div>
                             </div>
                             <div class="flashcard-back">
-                                <div class="card-label">答案</div>
+                                <div class="card-label">Back</div>
                                 <div class="card-content">${processedBack}</div>
                                 <div class="card-hint">点击翻回</div>
                             </div>
@@ -4866,11 +4938,11 @@ ${result}`,
                     </div>
                 `;
                 
-                // 渲染KaTeX公式
+                // Render KaTeX formulas
                 this.renderCardMath(container);
             }
             
-            // 处理卡片中的数学公式
+            // Process math formulas in cards
             processMathInCard(content) {
                 if (!content) return content;
                 
@@ -4881,12 +4953,12 @@ ${result}`,
                     return `<!--CODEBLOCK${codeBlocks.length - 1}-->`;
                 });
                 
-                // 处理行内公式 $...$
+                // Process inline formulas $...$
                 content = content.replace(/\$([^$]+)\$/g, (match, formula) => {
                     return `<span class="math-inline" data-formula="${formula}"></span>`;
                 });
                 
-                // 处理块级公式 $$...$$
+                // Process block formulas $$...$$
                 content = content.replace(/\$$([\s\S]*?)\$$/g, (match, formula) => {
                     return `<div class="math-block" data-formula="${formula}"></div>`;
                 });
@@ -4899,11 +4971,11 @@ ${result}`,
                 return content;
             }
             
-            // 渲染卡片中的数学公式
+            // Render cards中的数学公式
             renderCardMath(container) {
                 if (typeof katex === 'undefined') return;
                 
-                // 渲染行内公式
+                // Render inline formulas
                 container.querySelectorAll('.math-inline').forEach(el => {
                     const formula = el.dataset.formula;
                     if (formula) {
@@ -4915,7 +4987,7 @@ ${result}`,
                     }
                 });
                 
-                // 渲染块级公式
+                // Render block formulas
                 container.querySelectorAll('.math-block').forEach(el => {
                     const formula = el.dataset.formula;
                     if (formula) {
@@ -4928,7 +5000,7 @@ ${result}`,
                 });
             }
 
-            // 删除重复的 renderNotebookCard，统一使用 renderCard
+            // Remove duplicate renderNotebookCard, use renderCard uniformly
 
             // 翻转卡片
             flipCard() {
@@ -4936,7 +5008,7 @@ ${result}`,
                 flashcard.classList.toggle('flipped');
             }
 
-            // 切换卡片掌握状态
+            // Toggle card mastery status
             toggleCardMastery(event, cardId) {
                 event.stopPropagation();
                 
@@ -4948,10 +5020,10 @@ ${result}`,
                 const isCurrentlyMastered = stats.cardMastery[cardId];
                 const newMasteredState = !isCurrentlyMastered;
                 
-                // 更新掌握状态
+                // Update mastery status
                 stats.cardMastery[cardId] = newMasteredState;
                 
-                // 更新掌握数量
+                // Update mastery count
                 if (newMasteredState) {
                     stats.masteredCards++;
                 } else {
@@ -4961,16 +5033,16 @@ ${result}`,
                 stats.lastUpdated = Date.now();
                 this.saveStatsData(stats);
                 
-                // 更新UI
+                // Update UI
                 const starBtn = event.currentTarget;
                 starBtn.classList.toggle('mastered', newMasteredState);
-                starBtn.title = newMasteredState ? '已掌握' : '标记为已掌握';
+                starBtn.title = newMasteredState ? 'Mastered' : 'Mark as mastered';
                 
-                // 显示提示
+                // Show toast
                 this.showToast(newMasteredState ? '已标记为掌握' : '已取消掌握标记');
             }
 
-            // 显示提示
+            // Show toast
             showToast(message) {
                 const toast = document.createElement('div');
                 toast.style.cssText = `
@@ -4994,7 +5066,7 @@ ${result}`,
                 }, 2000);
             }
 
-            // 上一张卡片
+            // Previous card
             prevCard() {
                 if (this.currentCardIndex > 0) {
                     this.currentCardIndex--;
@@ -5002,7 +5074,7 @@ ${result}`,
                 }
             }
 
-            // 下一张卡片
+            // Next card
             nextCard() {
                 if (this.currentCardIndex < this.cards.length - 1) {
                     this.currentCardIndex++;
@@ -5010,7 +5082,7 @@ ${result}`,
                 }
             }
 
-            // 渲染笔记本列表
+            // Render notebook list
             renderNotebookList() {
                 const container = document.getElementById('notebookList');
                 container.innerHTML = '';
@@ -5044,7 +5116,7 @@ ${result}`,
                                 ${notebook.name}
                             </div>
                             ${cardCount > 0 ? `
-                            <button class="notebook-card-btn" onclick="app.startNotebookCardReview('${notebook.id}', event)" title="复习 ${cardCount} 张卡片">
+                            <button class="notebook-card-btn" onclick="app.startNotebookCardReview('${notebook.id}', event)" title="Review \${cardCount} cards">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                                 </svg>
@@ -5063,7 +5135,7 @@ ${result}`,
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${note.title}</span>
-                                    <button class="delete-btn" onclick="app.deleteNote('${notebook.id}', '${note.id}', event)" title="删除">
+                                    <button class="delete-btn" onclick="app.deleteNote('${notebook.id}', '${note.id}', event)" title="Delete">
                                         <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
@@ -5088,7 +5160,7 @@ ${result}`,
                 this.renderNotebookList();
             }
 
-            // 渲染标签
+            // Render tags
             renderTags(tags) {
                 const container = document.getElementById('tagsDisplay');
                 container.innerHTML = tags.map(tag => `
@@ -5125,7 +5197,7 @@ ${result}`,
                 this.saveData();
             }
 
-            // 更新统计
+            // Update stats
             updateStats() {
                 const content = document.getElementById('editor').value;
                 const charCount = content.length;
@@ -5136,10 +5208,10 @@ ${result}`,
                 document.getElementById('readTime').textContent = `${readTime} 分钟阅读`;
             }
 
-            // 导出笔记
+            // Export
             exportNote(format) {
                 if (!this.currentNoteId) {
-                    alert('请先打开一个笔记');
+                    alert('Please open a note first');
                     return;
                 }
 
@@ -5147,11 +5219,11 @@ ${result}`,
                 const note = notebook.notes.find(n => n.id === this.currentNoteId);
 
                 if (format === 'md') {
-                    // 导出为 Markdown
+                    // Export as Markdown
                     const blob = new Blob([note.content], { type: 'text/markdown' });
                     this.downloadFile(blob, `${note.title}.md`);
                 } else if (format === 'html') {
-                    // 导出为 HTML
+                    // Export as HTML
                     const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
@@ -5188,37 +5260,37 @@ ${result}`,
                     const blob = new Blob([htmlContent], { type: 'text/html' });
                     this.downloadFile(blob, `${note.title}.html`);
                 } else if (format === 'image') {
-                    // 导出为图片（移动端）
+                    // Export as image (mobile)
                     this.exportImageMobile(note);
                 }
 
                 this.toggleDropdown('exportDropdown');
             }
 
-            // 导出为 PDF - 使用浏览器打印功能
+            // Export as PDF - use browser print
             async exportToPDF(note) {
-                // 获取编辑器内容
+                // Get editor content
                 const content = document.getElementById('editor').value;
                 if (!content || content.trim() === '') {
-                    alert('笔记内容为空，请先编辑笔记');
+                    alert('Note content is empty, please edit first');
                     return;
                 }
 
-                // 桌面端：使用浏览器打印功能
-                // 创建打印窗口
+                // Desktop: use browser print function
+                // Create print window
                 const printWindow = window.open('', '_blank', 'width=800,height=600');
                 if (!printWindow) {
-                    alert('请允许弹出窗口以导出 PDF');
+                    alert('Please allow popups to export PDF');
                     return;
                 }
 
-                // 渲染 Markdown 内容
+                // Render Markdown 内容
                 let htmlContent = '';
                 try {
-                    // 保护数学公式
+                    // Protect math formulas
                     const { content: protectedContent, mathBlocks, mathInline } = this.protectMath(content);
 
-                    // 配置 marked
+                    // Configure marked
                     marked.setOptions({
                         highlight: function(code, lang) {
                             if (lang && Prism.languages[lang]) {
@@ -5230,21 +5302,21 @@ ${result}`,
                         gfm: true
                     });
 
-                    // 处理知识卡片标记
+                    // Process knowledge card markers
                     let processedContent = protectedContent.replace(/:front::(.*?)($|\n)/g, '<span class="knowledge-card-marker">问题:</span>$1$2');
                     processedContent = processedContent.replace(/:back::(.*?)($|\n)/g, '<span class="knowledge-card-marker" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">答案:</span>$1$2');
 
-                    // 渲染 Markdown
+                    // Render Markdown
                     htmlContent = marked.parse(processedContent);
 
-                    // 恢复数学公式
+                    // Restore math formulas
                     htmlContent = this.restoreAndRenderMath(htmlContent, mathBlocks, mathInline);
                 } catch (e) {
                     console.error('Markdown 渲染失败:', e);
                     htmlContent = `<p>渲染失败: ${e.message}</p>`;
                 }
 
-                // 构建打印页面 HTML
+                // Build print page HTML
                 const printHTML = `
 <!DOCTYPE html>
 <html>
@@ -5308,17 +5380,17 @@ ${result}`,
 <body>
     <div class="no-print" style="margin-bottom: 20px; padding: 15px; background: #e0e7ff; border-radius: 8px; text-align: center;">
         <p style="margin: 0; color: #4f46e5; font-weight: 500;">
-            按 Ctrl+P (或 Cmd+P) 保存为 PDF | 目标打印机选择"另存为 PDF"
+            Press Ctrl+P (or Cmd+P) to save as PDF | Select "Save as PDF" as destination
         </p>
         <button onclick="window.print()" style="margin-top: 10px; padding: 8px 20px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-            立即打印 / 保存 PDF
+            Print Now / Save PDF
         </button>
     </div>
     <h1>${this.escapeHtml(note.title)}</h1>
     ${htmlContent}
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
     <script>
-        // 渲染数学公式
+        // Render math formulas
         document.querySelectorAll('.math-block').forEach(function(el) {
             try {
                 var formula = el.getAttribute('data-formula');
@@ -5343,24 +5415,24 @@ ${result}`,
 </body>
 </html>`;
 
-                // 写入内容到新窗口
+                // Write content to new window
                 printWindow.document.write(printHTML);
                 printWindow.document.close();
             }
 
-            // 移动端导出为图片
+            // Mobile export as image
             async exportImageMobile(note, content) {
-                // 检查 html2canvas 库
+                // Check html2canvas library
                 if (typeof html2canvas === 'undefined') {
                     try {
                         await this.loadHtml2CanvasLibrary();
                     } catch (err) {
-                        alert('图片库加载失败，请检查网络连接');
+                        alert("Image library failed to load. Please check network connection");
                         return;
                     }
                 }
 
-                // 显示加载提示
+                // Show loading toast
                 const loadingDiv = document.createElement('div');
                 loadingDiv.style.cssText = `
                     position: fixed;
@@ -5397,18 +5469,18 @@ ${result}`,
                 document.body.appendChild(loadingDiv);
 
                 try {
-                    // 临时切换到预览标签
+                    // Temporarily switch to preview tab
                     const originalTab = this.mobileCurrentTab;
                     this.switchMobileTab('preview');
                     await new Promise(resolve => setTimeout(resolve, 500));
 
-                    // 获取预览元素
+                    // Get preview element
                     const previewElement = document.getElementById('preview');
                     if (!previewElement) {
                         throw new Error('预览元素不存在');
                     }
 
-                    // 创建一个包装容器
+                    // Create a wrapper container
                     const wrapper = document.createElement('div');
                     wrapper.style.cssText = `
                         position: fixed;
@@ -5420,7 +5492,7 @@ ${result}`,
                         z-index: -9999;
                     `;
 
-                    // 添加标题
+                    // Add title
                     const titleHTML = `
                         <h1 style="font-size: 22px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; color: #1e293b; font-weight: 600;">
                             ${this.escapeHtml(note.title)}
@@ -5435,10 +5507,10 @@ ${result}`,
                     wrapper.appendChild(contentClone);
                     document.body.appendChild(wrapper);
 
-                    // 等待渲染
+                    // Wait for render
                     await new Promise(resolve => setTimeout(resolve, 300));
 
-                    // 使用 html2canvas 捕获
+                    // Use html2canvas capture
                     const canvas = await html2canvas(wrapper, {
                         scale: 2,
                         useCORS: true,
@@ -5449,7 +5521,7 @@ ${result}`,
                         height: wrapper.scrollHeight
                     });
 
-                    // 转换为图片并下载
+                    // Convert to image and download
                     const imgData = canvas.toDataURL('image/png');
                     const link = document.createElement('a');
                     link.href = imgData;
@@ -5464,7 +5536,7 @@ ${result}`,
                     // 恢复原始标签
                     this.switchMobileTab(originalTab);
 
-                    // 延迟移除加载提示
+                    // Delay remove loading toast
                     setTimeout(() => {
                         if (loadingDiv.parentNode) {
                             loadingDiv.parentNode.removeChild(loadingDiv);
@@ -5473,14 +5545,14 @@ ${result}`,
 
                 } catch (err) {
                     console.error('图片生成失败:', err);
-                    alert('图片生成失败: ' + (err.message || '请重试'));
+                    alert('Image generation failed: ' + (err.message || 'Please try again'));
                     if (loadingDiv.parentNode) {
                         loadingDiv.parentNode.removeChild(loadingDiv);
                     }
                 }
             }
 
-            // 加载 html2canvas 库
+            // Load html2canvas library
             loadHtml2CanvasLibrary() {
                 return new Promise((resolve, reject) => {
                     if (typeof html2canvas !== 'undefined') {
@@ -5495,7 +5567,7 @@ ${result}`,
                 });
             }
 
-            // 下载文件
+            // Download file
             downloadFile(blob, filename) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -5505,26 +5577,26 @@ ${result}`,
                 URL.revokeObjectURL(url);
             }
 
-            // 切换下拉菜单
+            // Toggle dropdown
             toggleDropdown(id) {
                 const dropdown = document.getElementById(id);
                 dropdown.classList.toggle('active');
             }
 
-            // 关闭模态框
+            // Close modal
             closeModal(id) {
                 document.getElementById(id).classList.remove('active');
             }
 
-            // ========== 模板库功能 ==========
+            // ========== Template Library Feature ==========
 
-            // 打开模板库
+            // Open template library
             openTemplateLibrary() {
                 this.renderTemplateLibrary();
                 document.getElementById('templateLibraryModal').classList.add('active');
             }
 
-            // 渲染模板库
+            // Render template library
             renderTemplateLibrary() {
                 const grid = document.getElementById('templateGrid');
                 if (!grid || typeof markdownTemplates === 'undefined') return;
@@ -5547,7 +5619,7 @@ ${result}`,
                 });
             }
 
-            // 预览模板
+            // Preview template
             previewTemplate(templateId) {
                 if (typeof markdownTemplates === 'undefined') return;
 
@@ -5561,7 +5633,7 @@ ${result}`,
                 document.getElementById('templatePreviewModal').classList.add('active');
             }
 
-            // 插入模板内容到编辑器
+            // Insert Template内容到编辑器
             insertTemplateContent() {
                 if (!this.selectedTemplateId || typeof markdownTemplates === 'undefined') {
                     this.closeModal('templatePreviewModal');
@@ -5574,7 +5646,7 @@ ${result}`,
                     return;
                 }
 
-                // 如果没有打开的笔记，先创建一个新笔记
+                // If no open note, create a new one first
                 if (!this.currentNoteId) {
                     this.createNote();
                 }
@@ -5585,42 +5657,42 @@ ${result}`,
                     return;
                 }
 
-                // 获取当前光标位置
+                // Get current cursor position
                 const cursorPos = editor.selectionStart;
                 const textBefore = editor.value.substring(0, cursorPos);
                 const textAfter = editor.value.substring(cursorPos);
 
-                // 插入模板内容
+                // Insert Template内容
                 const content = template.content;
                 editor.value = textBefore + content + textAfter;
 
-                // 设置光标位置到插入内容的末尾
+                // Set cursor position to end of inserted content
                 const newCursorPos = cursorPos + content.length;
                 editor.setSelectionRange(newCursorPos, newCursorPos);
                 editor.focus();
 
-                // 更新预览和保存
+                // Update preview和保存
                 this.updatePreview();
                 this.saveCurrentNote();
                 this.updateStats();
 
-                // 关闭模态框
+                // Close modal
                 this.closeModal('templatePreviewModal');
                 this.closeModal('templateLibraryModal');
 
-                // 显示成功提示
+                // Show success toast
                 this.showTemplateFeedback();
             }
 
-            // 显示模板插入成功反馈
+            // Show template insert success feedback
             showTemplateFeedback() {
                 const tooltip = document.getElementById('helpTooltip');
                 if (!tooltip) return;
 
                 const originalHTML = tooltip.innerHTML;
                 tooltip.innerHTML = `
-                    <strong>模板已插入！</strong><br>
-                    将【】中的内容替换为你自己的笔记
+                    <strong>Template inserted!</strong><br>
+                    Replace content in 【】 with your own notes
                 `;
                 tooltip.style.background = '#10b981';
                 tooltip.classList.add('active');
@@ -5632,13 +5704,13 @@ ${result}`,
                 }, 3000);
             }
 
-            // 插入 AI 生成的知识卡片
+            // Insert AI-generated knowledge cards
             insertAICards(markdown) {
                 if (!markdown || markdown.trim().length === 0) {
                     return;
                 }
 
-                // 如果没有打开的笔记，先创建一个新笔记
+                // If no open note, create a new one first
                 if (!this.currentNoteId) {
                     this.createNote();
                 }
@@ -5648,38 +5720,38 @@ ${result}`,
                     return;
                 }
 
-                // 获取当前光标位置
+                // Get current cursor position
                 const cursorPos = editor.selectionStart;
                 const textBefore = editor.value.substring(0, cursorPos);
                 const textAfter = editor.value.substring(cursorPos);
 
-                // 准备插入内容（添加前后换行）
+                // Prepare insert content (add newlines before and after)
                 const contentToInsert = '\n\n' + markdown.trim() + '\n\n';
                 editor.value = textBefore + contentToInsert + textAfter;
 
-                // 设置光标位置到插入内容的末尾
+                // Set cursor position to end of inserted content
                 const newCursorPos = cursorPos + contentToInsert.length;
                 editor.setSelectionRange(newCursorPos, newCursorPos);
                 editor.focus();
 
-                // 更新预览和保存
+                // Update preview和保存
                 this.updatePreview();
                 this.saveCurrentNote();
                 this.updateStats();
 
-                // 显示成功提示
+                // Show success toast
                 this.showAICardsFeedback();
             }
 
-            // 显示 AI 卡片插入成功反馈
+            // Show AI card insert success feedback
             showAICardsFeedback() {
                 const tooltip = document.getElementById('helpTooltip');
                 if (!tooltip) return;
 
                 const originalHTML = tooltip.innerHTML;
                 tooltip.innerHTML = `
-                    <strong>AI 卡片已插入！</strong><br>
-                    点击"卡片复习"开始记忆
+                    <strong>AI cards inserted!</strong><br>
+                    Click "Review" to start memorizing
                 `;
                 tooltip.style.background = '#8b5cf6';
                 tooltip.classList.add('active');
@@ -5691,9 +5763,9 @@ ${result}`,
                 }, 3000);
             }
 
-            // ========== 统计功能 ==========
+            // ========== Stats Feature ==========
 
-            // 加载统计数据
+            // Load stats data
             loadStatsData() {
                 try {
                     const data = localStorage.getItem('markdownNotebookStats');
@@ -5706,7 +5778,7 @@ ${result}`,
                 return this.getDefaultStatsData();
             }
 
-            // 获取默认统计数据
+            // Get default stats data
             getDefaultStatsData() {
                 return {
                     totalNotes: 0,
@@ -5719,7 +5791,7 @@ ${result}`,
                 };
             }
 
-            // 保存统计数据
+            // Save stats data
             saveStatsData(stats) {
                 try {
                     localStorage.setItem('markdownNotebookStats', JSON.stringify(stats));
@@ -5728,13 +5800,13 @@ ${result}`,
                 }
             }
 
-            // 更新统计数据（创建笔记时调用）
+            // Update stats data（创建笔记时调用）
             updateStatsOnNoteCreated() {
                 const stats = this.loadStatsData();
                 stats.totalNotes = this.getTotalNotesCount();
                 stats.totalCards = this.getTotalCardsCount();
 
-                // 更新今日统计
+                // Update today stats
                 const today = this.getTodayKey();
                 if (!stats.dailyStats[today]) {
                     stats.dailyStats[today] = { notes: 0, cards: 0, reviews: 0 };
@@ -5745,12 +5817,12 @@ ${result}`,
                 this.saveStatsData(stats);
             }
 
-            // 更新复习统计
+            // Update review stats
             updateStatsOnReview() {
                 const stats = this.loadStatsData();
                 stats.reviewCount++;
 
-                // 更新今日统计
+                // Update today stats
                 const today = this.getTodayKey();
                 if (!stats.dailyStats[today]) {
                     stats.dailyStats[today] = { notes: 0, cards: 0, reviews: 0 };
@@ -5761,7 +5833,7 @@ ${result}`,
                 this.saveStatsData(stats);
             }
 
-            // 更新卡片掌握状态
+            // Update card mastery status
             updateCardMastery(cardId, mastered) {
                 const stats = this.loadStatsData();
                 if (!stats.cardMastery) {
@@ -5781,13 +5853,13 @@ ${result}`,
                 this.saveStatsData(stats);
             }
 
-            // 获取今日日期键
+            // Get today date key
             getTodayKey() {
                 const date = new Date();
                 return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
             }
 
-            // 获取总笔记数
+            // Get total note count
             getTotalNotesCount() {
                 let count = 0;
                 this.notebooks.forEach(notebook => {
@@ -5796,7 +5868,7 @@ ${result}`,
                 return count;
             }
 
-            // 获取总卡片数
+            // Get total card count
             getTotalCardsCount() {
                 let count = 0;
                 this.notebooks.forEach(notebook => {
@@ -5807,7 +5879,7 @@ ${result}`,
                 return count;
             }
 
-            // 获取近7天数据
+            // Get last 7 days data
             getLast7DaysData() {
                 const data = [];
                 const labels = [];
@@ -5827,17 +5899,17 @@ ${result}`,
                 return { labels, data };
             }
 
-            // 打开统计模态框
+            // Open stats modal
             openStatsModal() {
                 this.renderStats();
                 document.getElementById('statsModal').classList.add('active');
             }
 
-            // 渲染统计数据
+            // Render stats data
             renderStats() {
                 const stats = this.loadStatsData();
 
-                // 更新统计卡片
+                // Update stats卡片
                 document.getElementById('statsTotalNotes').textContent = this.getTotalNotesCount();
                 document.getElementById('statsTotalCards').textContent = this.getTotalCardsCount();
                 document.getElementById('statsReviewCount').textContent = stats.reviewCount || 0;
@@ -5847,15 +5919,15 @@ ${result}`,
                 const masteryRate = totalCards > 0 ? Math.round((masteredCards / totalCards) * 100) : 0;
                 document.getElementById('statsMasteryRate').textContent = masteryRate + '%';
 
-                // 更新学习建议
+                // Update study tips
                 this.updateStudyTips(stats, masteryRate);
 
-                // 渲染图表
+                // Render charts
                 this.renderWeeklyChart();
                 this.renderMasteryChart(stats, totalCards, masteredCards);
             }
 
-            // 更新学习建议
+            // Update study tips
             updateStudyTips(stats, masteryRate) {
                 const tipsContent = document.getElementById('statsTipsContent');
                 const totalNotes = this.getTotalNotesCount();
@@ -5864,23 +5936,23 @@ ${result}`,
                 let tips = [];
 
                 if (totalNotes === 0) {
-                    tips.push('开始创建你的第一条笔记吧！');
+                    tips.push('Start creating your first note!');
                 } else if (totalNotes < 5) {
-                    tips.push('笔记数量还比较少，建议多记录学习内容。');
+                    tips.push('Note count is still low, record more learning content.');
                 }
 
                 if (totalCards === 0 && totalNotes > 0) {
                     tips.push('尝试使用 :front:: 和 :back:: 创建知识卡片，帮助记忆。');
                 } else if (totalCards > 0 && masteryRate < 30) {
-                    tips.push('卡片掌握率还有提升空间，建议多复习。');
+                    tips.push('Card mastery rate has room for improvement, review more.');
                 } else if (masteryRate >= 80) {
-                    tips.push('太棒了！你的卡片掌握率很高，继续保持！');
+                    tips.push('Great! Your card mastery rate is high, keep it up!');
                 }
 
                 const today = this.getTodayKey();
                 const todayStats = stats.dailyStats[today] || { notes: 0, reviews: 0 };
                 if (todayStats.notes === 0 && todayStats.reviews === 0) {
-                    tips.push('今天还没有学习记录，快开始学习吧！');
+                    tips.push('No study record today, start learning now!');
                 } else {
                     tips.push('今天有学习记录，继续保持这个好习惯！');
                 }
@@ -5892,7 +5964,7 @@ ${result}`,
                 tipsContent.textContent = tips.join(' ');
             }
 
-            // 渲染周趋势图
+            // Render weekly trend chart
             renderWeeklyChart() {
                 const ctx = document.getElementById('weeklyChart');
                 if (!ctx) return;
@@ -5972,7 +6044,7 @@ ${result}`,
                 });
             }
 
-            // 渲染掌握率饼图
+            // Render mastery pie chart
             renderMasteryChart(stats, totalCards, masteredCards) {
                 const ctx = document.getElementById('masteryChart');
                 if (!ctx) return;
@@ -5987,7 +6059,7 @@ ${result}`,
                 this.masteryChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['已掌握', '未掌握'],
+                        labels: ['Mastered', 'Not Mastered'],
                         datasets: [{
                             data: totalCards > 0 ? [masteredCards, unmasteredCards] : [0, 1],
                             backgroundColor: [
@@ -6034,7 +6106,7 @@ ${result}`,
             }
         }
 
-        // 注册 Service Worker
+        // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/markdown-notebook/sw.js')
@@ -6047,7 +6119,7 @@ ${result}`,
             });
         }
 
-        // 检查 PWA 安装条件
+        // Check PWA install conditions
         function checkPWAInstallable() {
             const checks = {
                 https: window.location.protocol === 'https:',
@@ -6063,11 +6135,11 @@ ${result}`,
             return { allPassed, checks };
         }
 
-        // 处理 PWA 安装提示
+        // Handle PWA install prompt
         let deferredPrompt;
         let isPWAInstalled = false;
 
-        // 检测是否已作为 PWA 运行
+        // Check if running as PWA
         if (window.matchMedia('(display-mode: standalone)').matches ||
             window.navigator.standalone === true) {
             isPWAInstalled = true;
@@ -6079,7 +6151,7 @@ ${result}`,
             deferredPrompt = e;
             console.log('PWA 可以安装 - beforeinstallprompt 事件触发');
 
-            // 延迟显示安装按钮，确保 DOM 已加载
+            // Delay show install button, ensure DOM loaded
             setTimeout(() => {
                 const installBtn = document.getElementById('pwaInstallBtn');
                 if (installBtn && !isPWAInstalled) {
@@ -6089,14 +6161,14 @@ ${result}`,
             }, 1000);
         });
 
-        // PWA 安装函数
+        // PWA install function
         async function installPWA() {
             console.log('尝试安装 PWA, deferredPrompt:', deferredPrompt);
 
-            // 检查安装条件
+            // Check install conditions
             const { allPassed, checks } = checkPWAInstallable();
 
-            // iOS Safari 特殊处理
+            // iOS Safari special handling
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
 
@@ -6136,11 +6208,11 @@ ${result}`,
             }
 
             if (outcome === 'accepted') {
-                alert('应用正在安装，请稍候...');
+                alert('App installing, please wait...');
             }
         }
 
-        // 检测 PWA 是否已安装
+        // Check if PWA is installed
         window.addEventListener('appinstalled', () => {
             console.log('PWA 已安装');
             deferredPrompt = null;
@@ -6150,11 +6222,11 @@ ${result}`,
             }
         });
 
-        // 初始化应用
+        // Initialize app
         const app = new MarkdownNotebookApp();
         window.markdownNotebookApp = app;
 
-        // PWA 调试信息（开发调试用）
+        // PWA debug info (for development)
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const { allPassed, checks } = checkPWAInstallable();
@@ -6174,7 +6246,7 @@ ${result}`,
                 });
                 console.log('=====================');
 
-                // 如果所有条件满足但没有 deferredPrompt，显示手动安装按钮
+                // If all conditions met but no deferredPrompt, show manual install button
                 if (allPassed && !deferredPrompt) {
                     const installBtn = document.getElementById('pwaInstallBtn');
                     if (installBtn && !isPWAInstalled) {
@@ -6185,15 +6257,15 @@ ${result}`,
             }, 2000);
         });
 
-        // 键盘快捷键
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + S 保存
+            // Ctrl/Cmd + S to save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 app.saveCurrentNote();
             }
 
-            // ESC 关闭卡片复习
+            // ESC to close review
             if (e.key === 'Escape') {
                 app.closeCardReview();
             }
@@ -6204,7 +6276,7 @@ ${result}`,
                 app.flipCard();
             }
 
-            // 左右箭头切换卡片
+            // Left/right arrows switch cards
             if (document.getElementById('cardReviewModal').classList.contains('active')) {
                 if (e.key === 'ArrowLeft') app.prevCard();
                 if (e.key === 'ArrowRight') app.nextCard();
@@ -6216,15 +6288,15 @@ ${result}`,
             return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
 
-        // 移动端初始化
+        // Mobile initialization
         MarkdownNotebookApp.prototype.initMobile = function() {
             if (!isMobile()) return;
 
-            // 默认显示编辑器标签
+            // Default show editor tab
             this.mobileCurrentTab = 'edit';
             this.updateMobileTabUI();
 
-            // 监听窗口大小变化
+            // Listen for window resize
             window.addEventListener('resize', () => {
                 this.handleResize();
             });
@@ -6233,12 +6305,12 @@ ${result}`,
             this.initTouchGestures();
         };
 
-        // 处理窗口大小变化
+        // Handle window resize
         MarkdownNotebookApp.prototype.handleResize = function() {
             const isMobileNow = isMobile();
 
             if (!isMobileNow) {
-                // 切换到桌面端布局
+                // Switch to desktop layout
                 document.getElementById('editorPane').style.display = 'flex';
                 document.getElementById('previewPane').style.display = 'flex';
                 document.getElementById('mobileTabs').style.display = 'none';
@@ -6252,13 +6324,13 @@ ${result}`,
             }
         };
 
-        // 切换移动端标签
+        // Switch mobile tab
         MarkdownNotebookApp.prototype.switchMobileTab = function(tab) {
             this.mobileCurrentTab = tab;
             this.updateMobileTabUI();
         };
 
-        // 更新移动端标签 UI
+        // Update mobile tab UI
         MarkdownNotebookApp.prototype.updateMobileTabUI = function() {
             if (!isMobile()) return;
 
@@ -6281,7 +6353,7 @@ ${result}`,
             }
         };
 
-        // 切换移动端视图
+        // Switch mobile view
         MarkdownNotebookApp.prototype.switchMobileView = function(view) {
             document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('nav' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
@@ -6308,21 +6380,21 @@ ${result}`,
             }
         };
 
-        // 打开侧边栏
+        // Open sidebar
         MarkdownNotebookApp.prototype.openSidebar = function() {
             document.getElementById('sidebar').classList.add('open');
             document.getElementById('sidebarOverlay').classList.add('active');
             document.body.style.overflow = 'hidden';
         };
 
-        // 关闭侧边栏
+        // Close sidebar
         MarkdownNotebookApp.prototype.closeSidebar = function() {
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('sidebarOverlay').classList.remove('active');
             document.body.style.overflow = '';
         };
 
-        // 切换侧边栏
+        // Toggle sidebar
         MarkdownNotebookApp.prototype.toggleSidebar = function() {
             const sidebar = document.getElementById('sidebar');
             if (sidebar.classList.contains('open')) {
@@ -6364,7 +6436,7 @@ ${result}`,
             }, { passive: true });
         };
 
-        // 覆盖原有的 openNote 方法，添加移动端适配
+        // Override original openNote method, add mobile adaptation
         const originalOpenNote = MarkdownNotebookApp.prototype.openNote;
         MarkdownNotebookApp.prototype.openNote = function(notebookId, noteId) {
             originalOpenNote.call(this, notebookId, noteId);
@@ -6378,19 +6450,19 @@ ${result}`,
             }
         };
 
-        // 覆盖 AI 卡片生成器的按钮处理方法（支持问AI模式）
+        // Override AI card generator button handler (supports Ask AI mode)
         setTimeout(() => {
             if (typeof aiCardGeneratorUI !== 'undefined') {
                 // 保存原始方法
                 const originalHandleInsert = aiCardGeneratorUI.handleInsert.bind(aiCardGeneratorUI);
                 const originalHandleCopy = aiCardGeneratorUI.handleCopy.bind(aiCardGeneratorUI);
                 
-                // 覆盖插入方法
+                // Override insert method
                 aiCardGeneratorUI.handleInsert = function() {
                     const insertBtn = document.getElementById('aiInsertBtn');
                     console.log('[AskAI] Insert clicked, mode:', insertBtn?.dataset?.mode);
                     if (insertBtn && insertBtn.dataset.mode === 'analysis') {
-                        // 问 AI 模式：插入分析结果
+                        // Ask AI mode: insert analysis result
                         const app = window.markdownNotebookApp;
                         console.log('[AskAI] App found:', !!app, 'lastAIAnalysis:', !!app?.lastAIAnalysis);
                         console.log('[AskAI] insertAIAnalysisToNote method:', typeof app?.insertAIAnalysisToNote);
@@ -6408,21 +6480,21 @@ ${result}`,
                     }
                 };
                 
-                // 覆盖复制方法
+                // Override Copy method
                 aiCardGeneratorUI.handleCopy = async function() {
                     const copyBtn = document.getElementById('aiCopyBtn');
                     console.log('[AskAI] Copy clicked, mode:', copyBtn?.dataset?.mode);
                     if (copyBtn && copyBtn.dataset.mode === 'analysis') {
-                        // 问 AI 模式：复制分析结果
+                        // Ask AI mode: Copy analysis result
                         const app = window.markdownNotebookApp;
                         console.log('[AskAI] App found:', !!app, 'lastAIAnalysis:', !!app?.lastAIAnalysis);
                         if (app && app.lastAIAnalysis) {
                             try {
                                 await navigator.clipboard.writeText(app.lastAIAnalysis);
-                                app.showToast('已复制到剪贴板');
+                                app.showToast('Copied to clipboard');
                             } catch (err) {
-                                console.error('复制失败:', err);
-                                app.showToast('复制失败');
+                                console.error('Copy failed:', err);
+                                app.showToast('Copy failed');
                             }
                         }
                     } else {
@@ -6435,10 +6507,10 @@ ${result}`,
             }
         }, 1000);
 
-        // 初始化移动端
+        // Initialize mobile
         app.initMobile();
     </script>
-    <!-- 引入模板库 -->
+    <!-- Include Template Library -->
     <script src="templates.js"></script>
     <script src="schedule.js"></script>
     <script src="ai-cards.js"></script>

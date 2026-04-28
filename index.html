@@ -84,6 +84,7 @@
         .sidebar[data-collapsed="true"] .sidebar-tools,
         .sidebar[data-collapsed="true"] .notebook-list,
         .sidebar[data-collapsed="true"] .main-actions .btn-text,
+        .sidebar[data-collapsed="true"] .sidebar-actions .btn-text,
         .sidebar[data-collapsed="true"] .btn-icon[title] {
             display: none !important;
         }
@@ -3221,25 +3222,6 @@
                 <button class="close-btn" id="aiCloseBtn">&times;</button>
             </div>
 
-            <!-- API Key 配置区域 -->
-            <div class="ai-input-section">
-                <label class="ai-section-label">API Key 配置</label>
-                <div class="ai-apikey-row">
-                    <input
-                        type="password"
-                        class="ai-apikey-input"
-                        id="aiApiKeyInput"
-                        placeholder="请输入您的 API Key（数据仅保存在本地浏览器）"
-                    >
-                    <button class="ai-apikey-save-btn" id="aiApiKeySaveBtn" title="保存配置">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                        </svg>
-                    </button>
-                </div>
-                <div class="ai-input-hint">支持 SiliconFlow、通义千问、豆包、Kimi、MiniMax 等厂商 API（系统自动识别）</div>
-            </div>
-
             <!-- 输入区域 -->
             <div class="ai-input-section">
                 <label class="ai-section-label">输入你的问题</label>
@@ -3631,10 +3613,11 @@ $$
                     apiKeyInput.value = config.apiKey;
                 }
 
-                // 选中厂商
+                // 选中厂商并设置 tempProvider
+                this.tempProvider = config.provider || 'moonshot';
                 document.querySelectorAll('.provider-btn').forEach(btn => {
                     btn.classList.remove('active');
-                    if (btn.dataset.provider === config.provider) {
+                    if (btn.dataset.provider === this.tempProvider) {
                         btn.classList.add('active');
                     }
                 });

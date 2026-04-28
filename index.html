@@ -4405,7 +4405,7 @@ $$
                     const notebookEl = document.createElement('div');
                     notebookEl.className = 'notebook-item';
 
-                    const isActive = this.currentNotebookId === notebook.id;
+                    const isExpanded = this.expandedNotebookIds.has(notebook.id);
 
                     const cardCount = this.countNotebookCards(notes);
 
@@ -4453,18 +4453,13 @@ $$
 
             // 切换笔记本展开/收起
             toggleNotebook(notebookId) {
-                const noteList = document.getElementById(`notebook-${notebookId}`);
-                if (noteList) {
-                    const isHidden = noteList.style.display === 'none';
-                    noteList.style.display = isHidden ? 'block' : 'none';
-                    // 更新当前笔记本ID
-                    if (isHidden) {
-                        this.currentNotebookId = notebookId;
-                    } else if (this.currentNotebookId === notebookId) {
-                        this.currentNotebookId = null;
-                    }
-                    this.renderNotebookList();
+                // 使用 Set 来管理展开状态，与选中状态分离
+                if (this.expandedNotebookIds.has(notebookId)) {
+                    this.expandedNotebookIds.delete(notebookId);
+                } else {
+                    this.expandedNotebookIds.add(notebookId);
                 }
+                this.renderNotebookList();
             }
 
             // 渲染标签

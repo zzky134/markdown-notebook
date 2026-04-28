@@ -4441,6 +4441,18 @@ $$
                     return;
                 }
 
+                // 打开 AI 模态框并设置为加载状态
+                if (typeof aiCardGeneratorUI !== 'undefined') {
+                    aiCardGeneratorUI.openModal();
+                    aiCardGeneratorUI.updateUIState('loading');
+                    
+                    // 更新状态文本
+                    const statusText = document.getElementById('aiStatusText');
+                    if (statusText) {
+                        statusText.textContent = '正在分析笔记内容...';
+                    }
+                }
+
                 // 构建分析提示词
                 const prompt = `请分析以下笔记内容，总结主要知识点和学习要点：
 
@@ -4450,37 +4462,50 @@ ${note.content}
 1. 核心概念总结
 2. 重要知识点提炼
 3. 学习建议和记忆方法`;
-
-                // 显示加载提示
-                this.showToast('AI 正在分析笔记内容...');
                 
                 try {
                     // 调用 AI 生成答案
                     const result = await aiCardGenerator.generateAnswer(prompt);
                     
-                    // 显示结果（复用 AI 卡片生成器的模态框）
+                    // 显示结果
                     if (typeof aiCardGeneratorUI !== 'undefined') {
-                        aiCardGeneratorUI.openModal();
+                        // 设置成功状态（这会隐藏输入框，显示结果区域）
+                        aiCardGeneratorUI.updateUIState('success');
                         
                         // 在结果区域显示分析结果
-                        const resultArea = document.getElementById('ai-card-result');
-                        const resultContent = document.getElementById('ai-card-result-content');
-                        
-                        if (resultArea && resultContent) {
-                            resultContent.innerHTML = this.renderMarkdown(result);
-                            resultArea.style.display = 'block';
+                        const cardsContainer = document.getElementById('aiCardsContainer');
+                        if (cardsContainer) {
+                            cardsContainer.innerHTML = `
+                                <div class="ai-analysis-result" style="padding: 20px; line-height: 1.8;">
+                                    ${this.renderMarkdown(result)}
+                                </div>
+                            `;
                         }
                         
-                        // 在输入框显示提示
-                        const inputArea = document.getElementById('ai-card-input');
-                        if (inputArea) {
-                            inputArea.value = '已分析笔记：' + note.title;
+                        // 更新卡片计数
+                        const cardCount = document.getElementById('aiCardCount');
+                        if (cardCount) {
+                            cardCount.textContent = 'AI 分析结果';
+                        }
+                        
+                        // 禁用插入按钮（因为是分析结果，不是卡片）
+                        const insertBtn = document.getElementById('aiInsertBtn');
+                        if (insertBtn) {
+                            insertBtn.disabled = true;
+                            insertBtn.textContent = '分析模式';
                         }
                     }
                     
                     this.showToast('AI 分析完成！');
                 } catch (error) {
                     console.error('AI 分析失败:', error);
+                    if (typeof aiCardGeneratorUI !== 'undefined') {
+                        aiCardGeneratorUI.updateUIState('error');
+                        const statusText = document.getElementById('aiStatusText');
+                        if (statusText) {
+                            statusText.textContent = '分析失败: ' + error.message;
+                        }
+                    }
                     alert('AI 分析失败: ' + error.message);
                 }
             }

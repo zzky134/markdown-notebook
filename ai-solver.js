@@ -67,7 +67,7 @@ const CORS_PROXY = 'https://corsproxy.io/?';
  * 数学/理科解题专用系统提示词
  * 指导模型以清晰的步骤解答问题
  */
-const SYSTEM_PROMPT = `你是一位专业的解题助手，擅长解答数学、物理、化学等理科问题。
+const SOLVER_SYSTEM_PROMPT = `你是一位专业的解题助手，擅长解答数学、物理、化学等理科问题。
 
 **解题要求：**
 1. **准确理解题意**：仔细分析题目中的所有条件和数字
@@ -170,7 +170,7 @@ class AISolver {
         return {
             model: this.state.currentModel,
             messages: [
-                { role: 'system', content: SYSTEM_PROMPT },
+                { role: 'system', content: SOLVER_SYSTEM_PROMPT },
                 { role: 'user', content: question }
             ],
             stream: true,

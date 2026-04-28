@@ -159,7 +159,7 @@ const AI_CONFIG = {
         // 文档: https://www.volcengine.com/docs/82379
         doubao: {
             model: 'doubao-pro-32k',  // 豆包 Pro 32K 模型
-            apiUrl: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+            apiUrl: 'https://ark.cn-beijing.volces.com/api/v3',
             maxTokens: 2048,
             temperature: 0.7
         },

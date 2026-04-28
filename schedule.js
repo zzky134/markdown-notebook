@@ -795,8 +795,9 @@ class ScheduleApp {
     // 显示添加课程模态框
     showAddCourseModal(defaults = {}) {
         const colors = SCHEDULE_CONFIG.COLORS;
-        const colorOptions = colors.map((c, i) =>
-            `<div class="color-option ${i === 0 ? 'selected' : ''}" style="background-color: ${c}" data-color="${c}"></div>`
+        const defaultColor = defaults.color || colors[0];
+        const colorOptions = colors.map((c) =>
+            `<div class="color-option ${c === defaultColor ? 'selected' : ''}" style="background-color: ${c}" data-color="${c}"></div>`
         ).join('');
 
         const modal = document.createElement('div');
@@ -869,7 +870,7 @@ class ScheduleApp {
                     <div class="form-group">
                         <label>课程颜色</label>
                         <div class="color-picker">${colorOptions}</div>
-                        <input type="hidden" name="color" id="selectedColor" value="${colors[0]}">
+                        <input type="hidden" name="color" id="selectedColor" value="${defaults.color || colors[0]}">
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="scheduleApp.closeModal()">取消</button>

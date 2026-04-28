@@ -4150,7 +4150,13 @@ $$
                 const content = document.getElementById('editor').value;
                 const preview = document.getElementById('preview');
 
-                if (!content || !preview) return;
+                if (!preview) return;
+
+                // 清空内容时也要清空预览
+                if (!content) {
+                    preview.innerHTML = '';
+                    return;
+                }
 
                 try {
                     // 保护数学公式

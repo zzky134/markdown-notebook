@@ -100,6 +100,11 @@ const SolverState = {
     abortController: null
 };
 
+/**
+ * 本地存储键名
+ */
+const STORAGE_KEY = 'ai-solver-config';
+
 // ============================================
 // 核心功能类
 // ============================================
@@ -350,8 +355,52 @@ class AISolverUI {
         this.createUI();
         this.bindElements();
         this.bindEvents();
+        this.loadSavedConfig();
         this.renderProviderOptions();
         this.renderModelOptions();
+    }
+
+    /**
+     * 从本地存储加载配置
+     */
+    loadSavedConfig() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const config = JSON.parse(saved);
+                // 恢复厂商和模型
+                if (config.provider && AI_PROVIDERS[config.provider]) {
+                    this.solver.setProvider(config.provider, config.model);
+                    this.elements.provider.value = config.provider;
+                    this.renderModelOptions();
+                    if (config.model) {
+                        this.elements.model.value = config.model;
+                    }
+                }
+                // 恢复 API Key
+                if (config.apiKey) {
+                    this.elements.apiKey.value = config.apiKey;
+                }
+            }
+        } catch (e) {
+            console.error('加载配置失败:', e);
+        }
+    }
+
+    /**
+     * 保存配置到本地存储
+     */
+    saveConfig() {
+        try {
+            const config = {
+                provider: this.elements.provider.value,
+                model: this.elements.model.value,
+                apiKey: this.elements.apiKey.value
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        } catch (e) {
+            console.error('保存配置失败:', e);
+        }
     }
 
     /**
@@ -448,20 +497,38 @@ class AISolverUI {
 
                 .ai-solver-apikey input {
                     width: 100%;
-                    padding-right: 40px;
+                    padding-right: 80px;
                     font-family: monospace;
                 }
 
-                .ai-solver-toggle-key {
+                .ai-solver-apikey-actions {
                     position: absolute;
-                    right: 10px;
+                    right: 8px;
                     top: 50%;
                     transform: translateY(-50%);
+                    display: flex;
+                    gap: 4px;
+                }
+
+                .ai-solver-toggle-key,
+                .ai-solver-save-key {
                     background: none;
                     border: none;
                     cursor: pointer;
                     color: #6b7280;
                     padding: 4px;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                }
+
+                .ai-solver-toggle-key:hover,
+                .ai-solver-save-key:hover {
+                    background: #f3f4f6;
+                    color: #374151;
+                }
+
+                .ai-solver-save-key.saved {
+                    color: #10b981;
                 }
 
                 .ai-solver-question {
@@ -728,14 +795,23 @@ class AISolverUI {
                 </div>
 
                 <div class="ai-solver-field ai-solver-apikey" style="margin-bottom: 16px;">
-                    <label for="ai-solver-apikey">API Key</label>
+                    <label for="ai-solver-apikey">API Key <span style="font-weight: normal; color: #9ca3af;">(本地保存)</span></label>
                     <input type="password" id="ai-solver-apikey" placeholder="请输入您的 API Key">
-                    <button class="ai-solver-toggle-key" id="ai-solver-toggle-key" title="显示/隐藏">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                    </button>
+                    <div class="ai-solver-apikey-actions">
+                        <button class="ai-solver-toggle-key" id="ai-solver-toggle-key" title="显示/隐藏">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                        <button class="ai-solver-save-key" id="ai-solver-save-key" title="保存到本地">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="ai-solver-question">
@@ -797,6 +873,7 @@ class AISolverUI {
             model: document.getElementById('ai-solver-model'),
             apiKey: document.getElementById('ai-solver-apikey'),
             toggleKey: document.getElementById('ai-solver-toggle-key'),
+            saveKey: document.getElementById('ai-solver-save-key'),
             question: document.getElementById('ai-solver-question'),
             sendBtn: document.getElementById('ai-solver-send'),
             stopBtn: document.getElementById('ai-solver-stop'),
@@ -815,12 +892,33 @@ class AISolverUI {
         // 厂商切换
         this.elements.provider?.addEventListener('change', () => {
             this.handleProviderChange();
+            this.saveConfig();
+        });
+
+        // 模型切换
+        this.elements.model?.addEventListener('change', () => {
+            this.saveConfig();
         });
 
         // API Key 显示/隐藏
         this.elements.toggleKey?.addEventListener('click', () => {
             const type = this.elements.apiKey.type;
             this.elements.apiKey.type = type === 'password' ? 'text' : 'password';
+        });
+
+        // API Key 保存按钮
+        this.elements.saveKey?.addEventListener('click', () => {
+            this.saveConfig();
+            this.showSaveFeedback();
+        });
+
+        // API Key 输入时自动保存（防抖）
+        let saveTimeout;
+        this.elements.apiKey?.addEventListener('input', () => {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                this.saveConfig();
+            }, 1000);
         });
 
         // 发送按钮
@@ -844,6 +942,23 @@ class AISolverUI {
                 this.handleSend();
             }
         });
+    }
+
+    /**
+     * 显示保存成功反馈
+     */
+    showSaveFeedback() {
+        const btn = this.elements.saveKey;
+        if (!btn) return;
+
+        btn.classList.add('saved');
+        const originalTitle = btn.title;
+        btn.title = '已保存!';
+
+        setTimeout(() => {
+            btn.classList.remove('saved');
+            btn.title = originalTitle;
+        }, 1500);
     }
 
     /**

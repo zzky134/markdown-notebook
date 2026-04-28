@@ -18,7 +18,12 @@
       "Bash(cat /tmp/patch.txt)",
       "Bash(tail -n +2114 C:/Users/赵可扬/markdown-notebook/index.html)",
       "Bash(mv /tmp/index_new.html C:/Users/赵可扬/markdown-notebook/index.html)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(grep -n \"container.appendChild\\\\|};$\" /c/Users/赵可扬/markdown-notebook/index.html)",
+      "Bash(node --check /c/Users/赵可扬/markdown-notebook/index.html)",
+      "Bash(curl -s https://zzky134.github.io/markdown-notebook/index.html)",
+      "Bash(node -e ' *)",
+      "Bash(node *)"
     ]
   }
 }

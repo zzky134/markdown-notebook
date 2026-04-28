@@ -4475,9 +4475,13 @@ ${note.content}
                         // 在结果区域显示分析结果
                         const cardsContainer = document.getElementById('aiCardsContainer');
                         if (cardsContainer) {
+                            // 使用 marked 渲染 Markdown
+                            const htmlContent = typeof marked !== 'undefined' 
+                                ? marked.parse(result) 
+                                : '<pre>' + result.replace(/</g, '&lt;') + '</pre>';
                             cardsContainer.innerHTML = `
                                 <div class="ai-analysis-result" style="padding: 20px; line-height: 1.8;">
-                                    ${this.renderMarkdown(result)}
+                                    ${htmlContent}
                                 </div>
                             `;
                         }

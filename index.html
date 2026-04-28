@@ -1101,6 +1101,46 @@
             margin-top: 6px;
         }
 
+        /* API Key 输入行 */
+        .ai-apikey-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .ai-apikey-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: border-color 0.2s;
+        }
+
+        .ai-apikey-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .ai-apikey-save-btn {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        .ai-apikey-save-btn:hover {
+            opacity: 0.9;
+        }
+
         /* 生成按钮 */
         .ai-generate-btn {
             width: 100%;
@@ -2718,6 +2758,25 @@
                     AI 答疑
                 </div>
                 <button class="close-btn" id="aiCloseBtn">&times;</button>
+            </div>
+
+            <!-- API Key 配置区域 -->
+            <div class="ai-input-section">
+                <label class="ai-section-label">API Key 配置</label>
+                <div class="ai-apikey-row">
+                    <input
+                        type="password"
+                        class="ai-apikey-input"
+                        id="aiApiKeyInput"
+                        placeholder="请输入您的 API Key（数据仅保存在本地浏览器）"
+                    >
+                    <button class="ai-apikey-save-btn" id="aiApiKeySaveBtn" title="保存配置">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="ai-input-hint">支持 SiliconFlow、通义千问、豆包、Kimi、MiniMax 等厂商 API</div>
             </div>
 
             <!-- 输入区域 -->

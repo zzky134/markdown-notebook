@@ -11,7 +11,14 @@
       "Bash(taskkill /F /IM python.exe)",
       "Bash(start /b python -m http.server 8080)",
       "WebFetch(domain:platform.minimaxi.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(head -2113 C:/Users/赵可扬/markdown-notebook/index.html)",
+      "Bash(cat /tmp/patch.txt)",
+      "Bash(tail -n +2114 C:/Users/赵可扬/markdown-notebook/index.html)",
+      "Bash(mv /tmp/index_new.html C:/Users/赵可扬/markdown-notebook/index.html)",
+      "Bash(python3 *)"
     ]
   }
 }

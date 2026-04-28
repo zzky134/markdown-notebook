@@ -21,6 +21,37 @@
 // ============================================
 
 /**
+ * localStorage 存储键名
+ */
+const AI_CARDS_STORAGE_KEY = 'ai-cards-config';
+
+/**
+ * 保存配置到 localStorage
+ * @param {Object} config - 配置对象
+ */
+function saveAIConfig(config) {
+    try {
+        localStorage.setItem(AI_CARDS_STORAGE_KEY, JSON.stringify(config));
+    } catch (e) {
+        console.warn('保存 AI 配置失败:', e);
+    }
+}
+
+/**
+ * 从 localStorage 加载配置
+ * @returns {Object|null} 配置对象
+ */
+function loadAIConfig() {
+    try {
+        const saved = localStorage.getItem(AI_CARDS_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+        console.warn('加载 AI 配置失败:', e);
+        return null;
+    }
+}
+
+/**
  * ============================================
  * API 配置
  * ============================================
@@ -31,11 +62,9 @@ const AI_CONFIG = {
     // ============================================
     // 【重要】API Key 配置
     // ============================================
-    // 方式1：直接填写（仅本地测试，不要提交到仓库！）
-    // 方式2：从环境变量读取（推荐）
-    API_KEY: typeof process !== 'undefined' && process.env?.MOONSHOT_API_KEY
-        ? process.env.MOONSHOT_API_KEY
-        : 'sk-xhrBfb1VOc2X4FKeoCSl5yvOsnPAQ74GIRp5obeqcgf7M2lM', // <-- 修改这里
+    // 用户需要自行输入 API Key，不再提供硬编码的 key
+    // API Key 将通过 localStorage 保存，页面加载时自动读取
+    API_KEY: '',
 
     // ============================================
     // 选择 API 提供商
@@ -224,6 +253,42 @@ class AICardGenerator {
     constructor() {
         this.state = AIState;
         this.config = AI_CONFIG;
+        this.loadSavedConfig();
+        this.checkApiKey();
+    }
+
+    /**
+     * 从 localStorage 加载保存的配置
+     */
+    loadSavedConfig() {
+        const saved = loadAIConfig();
+        if (saved) {
+            if (saved.apiKey) {
+                this.config.API_KEY = saved.apiKey;
+            }
+            if (saved.provider && this.config.MODELS[saved.provider]) {
+                this.config.PROVIDER = saved.provider;
+            }
+        }
+    }
+
+    /**
+     * 保存配置到 localStorage
+     */
+    saveConfig() {
+        saveAIConfig({
+            apiKey: this.config.API_KEY,
+            provider: this.config.PROVIDER
+        });
+    }
+
+    /**
+     * 设置 API Key
+     * @param {string} apiKey - API Key
+     */
+    setApiKey(apiKey) {
+        this.config.API_KEY = apiKey.trim();
+        this.saveConfig();
         this.checkApiKey();
     }
 
@@ -746,6 +811,10 @@ class AIQAGeneratorUI {
             inputArea: document.getElementById('aiCardInput'),
             generateBtn: document.getElementById('aiGenerateBtn'),
 
+            // API Key 输入
+            apiKeyInput: document.getElementById('aiApiKeyInput'),
+            apiKeySaveBtn: document.getElementById('aiApiKeySaveBtn'),
+
             // 状态显示
             statusArea: document.getElementById('aiStatusArea'),
             progressBar: document.getElementById('aiProgressBar'),
@@ -763,12 +832,44 @@ class AIQAGeneratorUI {
             resetModelBtn: document.getElementById('aiResetModelBtn'),
             closeBtn: document.getElementById('aiCloseBtn')
         };
+
+        // 加载保存的 API Key 到输入框
+        this.loadApiKeyToInput();
+    }
+
+    /**
+     * 加载保存的 API Key 到输入框
+     */
+    loadApiKeyToInput() {
+        const saved = loadAIConfig();
+        if (saved?.apiKey && this.elements.apiKeyInput) {
+            this.elements.apiKeyInput.value = saved.apiKey;
+        }
     }
 
     /**
      * 绑定事件处理
      */
     bindEvents() {
+        // API Key 输入框 - 自动保存
+        this.elements.apiKeyInput?.addEventListener('input', () => {
+            const apiKey = this.elements.apiKeyInput.value.trim();
+            if (apiKey) {
+                this.ai.setApiKey(apiKey);
+            }
+        });
+
+        // API Key 保存按钮
+        this.elements.apiKeySaveBtn?.addEventListener('click', () => {
+            const apiKey = this.elements.apiKeyInput?.value.trim();
+            if (apiKey) {
+                this.ai.setApiKey(apiKey);
+                this.showSuccess('API Key 已保存');
+            } else {
+                this.showError('请输入 API Key');
+            }
+        });
+
         // 生成按钮 - 使用防抖
         let generateTimeout = null;
         this.elements.generateBtn?.addEventListener('click', () => {
@@ -1190,7 +1291,7 @@ class AIQAGeneratorUI {
             let helpText = '';
 
             if (message.includes('API Key') || message.includes('配置')) {
-                helpText = '<br><small style="color: var(--text-secondary);">请在 ai-cards.js 中配置您的 API Key</small>';
+                helpText = '<br><small style="color: var(--text-secondary);">请在上方输入您的 API Key</small>';
             } else if (message.includes('网络') || message.includes('fetch') || message.includes('timeout')) {
                 helpText = '<br><small style="color: var(--text-secondary);">请检查网络连接后重试</small>';
             } else if (message.includes('防抖') || message.includes('稍后再试')) {

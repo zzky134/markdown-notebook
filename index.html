@@ -4615,7 +4615,7 @@ ${analysis}
                 console.log('[AskAI] updatePreview called');
                 
                 // 如果编辑器是可见的，更新内容
-                const editor = document.getElementById('noteEditor');
+                const editor = document.getElementById('editor');
                 console.log('[AskAI] Looking for editor:', !!editor, 'editor display:', editor?.style?.display);
                 if (editor) {
                     editor.value = note.content;

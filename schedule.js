@@ -978,6 +978,211 @@ class ScheduleApp {
     }
 
     // 导入 CSV
+    // 导入 CSV（带模板示例）
+    importCSV() {
+        // 创建导入对话框
+        const modal = document.createElement('div');
+        modal.id = 'importCSVModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+
+        // CSV模板内容
+        const templateCSV = `课程名称,星期,开始节次,结束节次,开始周,结束周,地点,教师,颜色
+高等数学,周一,1,2,1,16,教A101,张教授,blue
+大学英语,周二,3,4,1,16,教B205,李老师,green
+计算机基础,周三,5,6,1,8,机房C301,王讲师,orange
+体育,周四,7,8,1,16,体育馆,教练,red
+`;
+
+        modal.innerHTML = `
+            <div style="
+                background: white;
+                border-radius: 12px;
+                padding: 24px;
+                max-width: 600px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            ">
+                <h3 style="margin: 0 0 16px 0; font-size: 18px; color: #1f2937;">导入课表</h3>
+
+                <div style="margin-bottom: 20px;">
+                    <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 14px;">
+                        请上传 CSV 格式的课表文件，格式如下：
+                    </p>
+
+                    <div style="
+                        background: #f9fafb;
+                        border: 1px solid #e5e7eb;
+                        border-radius: 8px;
+                        padding: 12px;
+                        margin-bottom: 12px;
+                        overflow-x: auto;
+                    ">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <thead>
+                                <tr style="background: #f3f4f6;">
+                                    <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left; font-weight: 600;">课程名称</th>
+                                    <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left; font-weight: 600;">星期</th>
+                                    <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left; font-weight: 600;">开始节次</th>
+                                    <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left; font-weight: 600;">结束节次</th>
+                                    <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left; font-weight: 600;">开始周</th>
+                                    <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left; font-weight: 600;">结束周</th>
+                                    <th style="padding: 8px; border: 1px solid #e5e7eb; text-align: left; font-weight: 600;">地点</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">高等数学</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">周一</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">1</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">2</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">1</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">16</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">教A101</td>
+                                </tr>
+                                <tr style="background: #f9fafb;">
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">大学英语</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">周二</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">3</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">4</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">1</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">16</td>
+                                    <td style="padding: 8px; border: 1px solid #e5e7eb;">教B205</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="
+                        background: #eff6ff;
+                        border-left: 4px solid #3b82f6;
+                        padding: 12px;
+                        border-radius: 4px;
+                        font-size: 13px;
+                        color: #1e40af;
+                        margin-bottom: 16px;
+                    ">
+                        <strong>说明：</strong><br>
+                        • 星期：周一、周二、周三、周四、周五、周六、周日<br>
+                        • 节次：1-12（第1节到第12节）<br>
+                        • 周次：1-20（第1周到第20周）<br>
+                        • 颜色：blue、green、orange、red、purple、pink、cyan、gray
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button id="downloadTemplateBtn" style="
+                        padding: 8px 16px;
+                        border: 1px solid #d1d5db;
+                        background: white;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        color: #374151;
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    ">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        下载模板
+                    </button>
+                    <button id="selectFileBtn" style="
+                        padding: 8px 16px;
+                        border: none;
+                        background: #3b82f6;
+                        color: white;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                    ">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        选择文件
+                    </button>
+                    <button id="cancelImportBtn" style="
+                        padding: 8px 16px;
+                        border: 1px solid #d1d5db;
+                        background: white;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        color: #6b7280;
+                    ">
+                        取消
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // 下载模板按钮
+        document.getElementById('downloadTemplateBtn').onclick = () => {
+            const blob = new Blob(['﻿' + templateCSV], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '课表模板.csv';
+            link.click();
+        };
+
+        // 选择文件按钮
+        document.getElementById('selectFileBtn').onclick = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // 关闭对话框
+                modal.remove();
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const result = this.manager.importFromCSV(event.target.result);
+                    if (result.success) {
+                        alert(`成功导入 ${result.added} 门课程`);
+                        this.renderer.refresh();
+                    } else {
+                        alert(`导入完成，但有错误：\n${result.errors.join('\n')}`);
+                        if (result.added > 0) this.renderer.refresh();
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        };
+
+        // 取消按钮
+        document.getElementById('cancelImportBtn').onclick = () => {
+            modal.remove();
+        };
+
+        // 点击背景关闭
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        };
+    }
     importCSV() {
         const input = document.createElement('input');
         input.type = 'file';

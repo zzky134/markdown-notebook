@@ -5949,6 +5949,7 @@ ${analysis}
 
         // 初始化应用
         const app = new MarkdownNotebookApp();
+        window.markdownNotebookApp = app;
 
         // PWA 调试信息（开发调试用）
         window.addEventListener('load', () => {

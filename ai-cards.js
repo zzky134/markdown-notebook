@@ -63,39 +63,44 @@ function detectProviderFromKey(apiKey) {
 
     const key = apiKey.trim();
 
-    // Moonshot (Kimi) - sk- 开头，通常包含特定字符
-    if (key.startsWith('sk-') && key.length >= 32) {
-        // Moonshot keys are typically longer and have specific patterns
-        // sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-        return 'moonshot';
-    }
+    // 先检查特定厂商的特征
 
-    // SiliconFlow - sk- 开头，通常较短
-    if (key.startsWith('sk-') && key.length < 50) {
-        return 'siliconflow';
-    }
-
-    // 通义千问 (DashScope) - sk- 或 ak- 开头
-    if (key.startsWith('sk-') || key.startsWith('ak-')) {
-        // 如果包含 dashscope 相关特征
-        if (key.includes('dashscope') || key.length > 40) {
-            return 'qwen';
-        }
-    }
-
-    // 豆包 (Volcengine) - 通常是较长的字符串
-    if (key.length > 50 && !key.startsWith('sk-')) {
-        return 'doubao';
-    }
-
-    // MiniMax - 通常是较长的字符串，可能包含 minimax 字样
-    if (key.toLowerCase().includes('minimax') || (key.length > 60 && !key.startsWith('sk-'))) {
+    // MiniMax - 包含 minimax 字样
+    if (key.toLowerCase().includes('minimax')) {
         return 'minimax';
     }
 
-    // 默认返回 moonshot（最常见的格式）
+    // 通义千问 (DashScope) - 包含 dashscope 字样
+    if (key.toLowerCase().includes('dashscope')) {
+        return 'qwen';
+    }
+
+    // 豆包 (Volcengine) - 通常是较长的字符串，不以 sk- 开头
+    if (!key.startsWith('sk-') && key.length > 40) {
+        return 'doubao';
+    }
+
+    // 对于 sk- 开头的 key，根据长度判断
     if (key.startsWith('sk-')) {
+        // SiliconFlow - sk- 开头，长度通常在 35-45 之间
+        // 例如: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        if (key.length >= 35 && key.length <= 45) {
+            return 'siliconflow';
+        }
+
+        // Moonshot (Kimi) - sk- 开头，长度通常 > 50
+        // 例如: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        if (key.length > 50) {
+            return 'moonshot';
+        }
+
+        // 默认 sk- 开头的认为是 Moonshot（最常见的格式）
         return 'moonshot';
+    }
+
+    // 通义千问也可能是 ak- 开头
+    if (key.startsWith('ak-')) {
+        return 'qwen';
     }
 
     return null;
@@ -467,6 +472,11 @@ class AICardGenerator {
      * @returns {Object} 请求体
      */
     buildRequestBody(messages) {
+        // 确保 PROVIDER 已设置（自动识别或默认值）
+        if (!this.config.PROVIDER) {
+            const detected = detectProviderFromKey(this.config.API_KEY);
+            this.config.PROVIDER = detected || 'moonshot';
+        }
         const provider = this.config.PROVIDER;
         const providerConfig = this.getProviderConfig();
 
@@ -529,8 +539,15 @@ class AICardGenerator {
      * @returns {Object} 请求头
      */
     buildHeaders() {
+        // 确保 PROVIDER 已设置（自动识别或默认值）
+        if (!this.config.PROVIDER) {
+            const detected = detectProviderFromKey(this.config.API_KEY);
+            this.config.PROVIDER = detected || 'moonshot';
+        }
         const provider = this.config.PROVIDER;
         const apiKey = this.config.API_KEY;
+
+        console.log(`[AI Cards] 使用厂商: ${provider}, API Key: ${apiKey.substring(0, 10)}...`);
 
         switch (provider) {
             case 'siliconflow':
@@ -617,6 +634,13 @@ class AICardGenerator {
         const providerConfig = this.getProviderConfig();
         const requestBody = this.buildRequestBody(messages);
         const headers = this.buildHeaders();
+
+        console.log('[AI Cards] 请求配置:', {
+            provider: this.config.PROVIDER,
+            model: providerConfig.model,
+            apiUrl: providerConfig.apiUrl,
+            headers: Object.keys(headers)
+        });
 
         try {
             this.state.currentGeneration = true;

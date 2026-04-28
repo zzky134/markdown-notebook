@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -3212,7 +3212,7 @@
                     <!-- 模型名称输入 -->
                     <div class="settings-item">
                         <label class="settings-label">模型名称</label>
-                        <input type="text" id="settingsModel" class="settings-input" placeholder="如：doubao-pro-32k 或 ep-xxxxx">
+                        <input type="text" id="settingsModel" class="settings-input" placeholder="如：kimi-k2.5 或 Qwen/Qwen2.5-7B-Instruct">
                         <div class="settings-hint" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">选择厂商后会自动填充默认模型，也可手动修改</div>
                     </div>
                     <div class="settings-item">
@@ -3230,10 +3230,7 @@
                                 <span class="provider-icon">🤖</span>
                                 <span class="provider-name">通义千问</span>
                             </button>
-                            <button class="provider-btn" data-provider="doubao" onclick="app.selectProvider('doubao')">
-                                <span class="provider-icon">🎵</span>
-                                <span class="provider-name">豆包</span>
-                            </button>
+                                <span class="provider-icon">🎵-->
                         </div>
                     </div>
 
@@ -3746,7 +3743,7 @@ $$
                     'moonshot': 'kimi-k2.5',
                     'siliconflow': 'Qwen/Qwen2.5-7B-Instruct',
                     'qwen': 'qwen-turbo',
-                    'doubao': 'doubao-pro-32k'
+                    
                 };
                 
                 const modelInput = document.getElementById('settingsModel');
@@ -3773,7 +3770,7 @@ $$
                         'moonshot': 'Kimi (Moonshot)',
                         'siliconflow': 'SiliconFlow',
                         'qwen': '通义千问',
-                        'doubao': '豆包',
+                        
                     };
                     const providerName = providerNames[config.provider] || config.provider || '未知';
                     statusEl.innerHTML = `

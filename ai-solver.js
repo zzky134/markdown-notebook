@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AI 解题助手模块
  * 纯前端实现，支持多厂商模型选择，OpenAI 兼容接口
  * 使用公共跨域代理解决 CORS 问题
@@ -35,11 +35,6 @@ const AI_PROVIDERS = {
         name: '百度千帆',
         baseUrl: 'https://qianfan.baidubce.com/v2',
         models: ['ernie-speed', 'ernie-3.5', 'ernie-4.0']
-    },
-    doubao: {
-        name: '字节豆包',
-        baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-        models: ['doubao-lite-4k', 'doubao-pro-4k']
     },
     moonshot: {
         name: 'Kimi 月之暗面',

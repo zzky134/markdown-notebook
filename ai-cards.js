@@ -1,6 +1,6 @@
-/**
+﻿/**
  * AI 答疑模块（云端 API 版本）
- * 基于 SiliconFlow / 通义千问 / 豆包等云端 API 实现问题解答功能
+ * 基于 SiliconFlow / 通义千问等云端 API 实现问题解答功能
  *
  * @module AIQAGenerator
  * @version 2.1.0
@@ -75,10 +75,6 @@ function detectProviderFromKey(apiKey) {
         return 'qwen';
     }
 
-    // 豆包 (Volcengine) - 通常是较长的字符串，不以 sk- 开头
-    if (!key.startsWith('sk-') && key.length > 40) {
-        return 'doubao';
-    }
 
     // 对于 sk- 开头的 key，根据长度判断
     if (key.startsWith('sk-')) {
@@ -124,7 +120,7 @@ const AI_CONFIG = {
     // ============================================
     // 选择 API 提供商
     // ============================================
-    // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'moonshot' | 'minimax'
+    // 可选值: 'siliconflow' | 'qwen' | 'moonshot' | 'minimax'
     // 如果设置为 null，将自动根据 API Key 识别
     PROVIDER: null,
 
@@ -155,15 +151,7 @@ const AI_CONFIG = {
             temperature: 0.7
         },
 
-        // 豆包 (字节跳动)
-        // 文档: https://www.volcengine.com/docs/82379
-        doubao: {
-            model: 'doubao-pro-32k',  // 豆包 Pro 32K 模型
-            apiUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-            maxTokens: 2048,
-            temperature: 0.7
-        },
-
+                // 文档: https://www.volcengine.com/docs/82379
         // Moonshot (Kimi)
         // 文档: https://platform.moonshot.cn/docs/api/chat
         moonshot: {
@@ -403,7 +391,6 @@ class AICardGenerator {
         const names = {
             'siliconflow': 'SiliconFlow',
             'qwen': '通义千问',
-            'doubao': '豆包',
             'moonshot': 'Kimi',
             'minimax': 'MiniMax'
         };
@@ -477,12 +464,11 @@ class AICardGenerator {
 
         switch (provider) {
             case 'siliconflow':
-            case 'doubao':
-                // OpenAI 兼容格式
+            // OpenAI 兼容格式
                 return {
                     model: providerConfig.model,
                     messages: messages,
-                    stream: true,
+                    stream: false,
                     temperature: providerConfig.temperature,
                     max_tokens: providerConfig.maxTokens,
                     top_p: this.config.GENERATION_CONFIG.topP
@@ -545,8 +531,7 @@ class AICardGenerator {
 
         switch (provider) {
             case 'siliconflow':
-            case 'doubao':
-                return {
+            return {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 };

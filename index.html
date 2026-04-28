@@ -4411,19 +4411,39 @@ $$
                     return;
                 }
 
+                // 检查是否配置了 API Key
+                const saved = localStorage.getItem('ai-cards-config');
+                let hasConfig = false;
+                let config = null;
+
+                if (saved) {
+                    try {
+                        config = JSON.parse(saved);
+                        hasConfig = config.apiKey && config.apiKey.trim().length > 0;
+                    } catch (e) {
+                        console.error('解析配置失败:', e);
+                    }
+                }
+
+                if (!hasConfig) {
+                    // 未配置，提示用户并跳转到设置
+                    alert('请先配置 API Key，请选择模型厂商并输入您的 API Key');
+                    this.openSettingsModal();
+                    return;
+                }
+
+                // 已配置，获取笔记内容
                 const notebook = this.notebooks.find(n => n.id === this.currentNotebookId);
                 const note = notebook.notes.find(n => n.id === this.currentNoteId);
                 
-                // 滚动到 AI 答疑区域（在页面底部）
-                const solverContainer = document.getElementById('ai-solver-container');
-                if (solverContainer) {
-                    solverContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                
-                // 自动填充笔记内容到问题输入框
-                const questionInput = document.getElementById('ai-solver-question');
-                if (questionInput) {
-                    questionInput.value = `请帮我分析这篇笔记的主要内容和学习要点：
+                // 打开 AI 卡片生成器模态框（复用现有组件）
+                if (typeof aiCardGeneratorUI !== 'undefined') {
+                    aiCardGeneratorUI.openModal();
+                    
+                    // 填充笔记内容到输入框
+                    const inputArea = document.getElementById('ai-card-input');
+                    if (inputArea) {
+                        inputArea.value = `请帮我分析这篇笔记的主要内容和学习要点：
 
 ---
 ${note.content}
@@ -4433,11 +4453,13 @@ ${note.content}
 1. 这篇笔记的核心概念是什么？
 2. 有哪些重要的知识点？
 3. 如何更好地理解和记忆这些内容？`;
-                    questionInput.focus();
+                        inputArea.focus();
+                    }
+                    
+                    this.showToast('笔记内容已加载，点击发送即可获取 AI 分析');
+                } else {
+                    alert('AI 模块加载中，请稍后重试');
                 }
-                
-                // 显示提示
-                this.showToast('笔记内容已加载到 AI 答疑，点击发送即可获取分析');
             }
 
             // 渲染卡片

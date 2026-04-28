@@ -4510,22 +4510,42 @@ ${note.content}
                             insertBtn.textContent = '插入笔记';
                             // 保存分析结果以便插入
                             this.lastAIAnalysis = result;
-                            // 修改点击事件为插入分析结果
-                            insertBtn.onclick = () => {
-                                if (this.lastAIAnalysis) {
-                                    this.insertAIAnalysisToNote(this.lastAIAnalysis);
-                                }
+                            // 使用标志位区分是问AI模式还是普通模式
+                            insertBtn.dataset.mode = 'analysis';
+                        }
+                        
+                        // 设置复制按钮功能
+                        const copyBtn = document.getElementById('aiCopyBtn');
+                        if (copyBtn) {
+                            copyBtn.dataset.mode = 'analysis';
+                        }
+                        
+                        // 设置重新生成按钮
+                        const regenerateBtn = document.getElementById('aiRegenerateBtn');
+                        if (regenerateBtn) {
+                            regenerateBtn.onclick = () => {
+                                // 重新调用问AI
+                                this.askAIAboutNote();
                             };
                         }
                         
                         // 设置关闭按钮恢复输入框
                         const closeBtn = document.getElementById('aiCloseBtn');
                         if (closeBtn) {
-                            const originalOnClick = closeBtn.onclick;
                             closeBtn.onclick = () => {
                                 this.restoreAIModalInput();
+                                // 清除标志位
+                                if (insertBtn) insertBtn.dataset.mode = '';
+                                if (copyBtn) copyBtn.dataset.mode = '';
                                 aiCardGeneratorUI.closeModal();
                             };
+                        }
+                        
+                        // 确保结果容器可以滚动
+                        const resultContainer = document.getElementById('aiCardsContainer');
+                        if (resultContainer) {
+                            resultContainer.style.maxHeight = '400px';
+                            resultContainer.style.overflowY = 'auto';
                         }
                     }
                     

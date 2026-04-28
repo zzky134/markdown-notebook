@@ -4296,7 +4296,7 @@ $$
             countNotebookCards(notes) {
                 let count = 0;
                 notes.forEach(note => {
-                    const cards = this.extractCards(note.content);
+                    const cards = this.extractCards(note.content, note.id);
                     count += cards.length;
                 });
                 return count;
@@ -4328,7 +4328,7 @@ $$
                 // 收集笔记本中所有笔记的卡片
                 this.cards = [];
                 notebook.notes.forEach(note => {
-                    const noteCards = this.extractCards(note.content);
+                    const noteCards = this.extractCards(note.content, note.id);
                     noteCards.forEach(card => {
                         this.cards.push({
                             ...card,
@@ -4356,7 +4356,7 @@ $$
 
                 const notebook = this.notebooks.find(n => n.id === this.currentNotebookId);
                 const note = notebook.notes.find(n => n.id === this.currentNoteId);
-                this.cards = this.extractCards(note.content).map(card => ({
+                this.cards = this.extractCards(note.content, note.id).map(card => ({
                     ...card,
                     noteTitle: note.title
                 }));
@@ -5363,7 +5363,7 @@ $$
                 let count = 0;
                 this.notebooks.forEach(notebook => {
                     notebook.notes.forEach(note => {
-                        count += this.extractCards(note.content).length;
+                        count += this.extractCards(note.content, note.id).length;
                     });
                 });
                 return count;

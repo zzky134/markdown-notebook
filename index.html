@@ -4444,7 +4444,7 @@ $$
                 });
                 
                 // 处理行内公式 $...$
-                content = content.replace(/\\$([^\\$]+)\\$/g, (match, formula) => {
+                content = content.replace(/\$([^$]+)\$/g, (match, formula) => {
                     return `<span class="math-inline" data-formula="${formula}"></span>`;
                 });
                 

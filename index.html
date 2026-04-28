@@ -4578,6 +4578,7 @@ ${note.content}
 
             // 将 AI 分析结果插入到当前笔记
             insertAIAnalysisToNote(analysis) {
+                console.log('[AskAI] insertAIAnalysisToNote called, currentNoteId:', this.currentNoteId);
                 if (!this.currentNoteId) {
                     alert('请先打开一个笔记');
                     return;
@@ -4585,6 +4586,8 @@ ${note.content}
                 
                 const notebook = this.notebooks.find(n => n.id === this.currentNotebookId);
                 const note = notebook.notes.find(n => n.id === this.currentNoteId);
+                
+                console.log('[AskAI] Found note:', note?.title, 'content length:', note?.content?.length);
                 
                 // 在笔记末尾添加分析结果
                 const timestamp = new Date().toLocaleString('zh-CN');
@@ -4597,16 +4600,23 @@ ${note.content}
 ${analysis}
 `;
                 
+                const oldContent = note.content;
                 note.content += analysisSection;
                 note.updatedAt = Date.now();
                 
+                console.log('[AskAI] Content updated, old length:', oldContent.length, 'new length:', note.content.length);
+                
                 this.saveData();
+                console.log('[AskAI] saveData called');
+                
                 this.updatePreview();
+                console.log('[AskAI] updatePreview called');
                 
                 // 如果编辑器是可见的，更新内容
                 const editor = document.getElementById('noteEditor');
                 if (editor) {
                     editor.value = note.content;
+                    console.log('[AskAI] Editor updated');
                 }
                 
                 this.showToast('AI 分析结果已插入笔记');

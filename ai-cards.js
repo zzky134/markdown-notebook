@@ -321,15 +321,8 @@ class AICardGenerator {
         if (saved) {
             if (saved.apiKey) {
                 this.config.API_KEY = saved.apiKey;
-                // 如果没有保存厂商信息，尝试自动识别
-                if (!saved.provider) {
-                    const detected = detectProviderFromKey(saved.apiKey);
-                    if (detected) {
-                        this.config.PROVIDER = detected;
-                        console.log(`[AI Cards] 从保存的 Key 自动识别厂商: ${detected}`);
-                    }
-                }
             }
+            // 使用用户手动选择的厂商，不再自动识别
             if (saved.provider && this.config.MODELS[saved.provider]) {
                 this.config.PROVIDER = saved.provider;
             }
@@ -351,18 +344,21 @@ class AICardGenerator {
      * @param {string} apiKey - API Key
      */
     setApiKey(apiKey) {
-        const trimmedKey = apiKey.trim();
-        this.config.API_KEY = trimmedKey;
-
-        // 自动识别厂商
-        const detectedProvider = detectProviderFromKey(trimmedKey);
-        if (detectedProvider) {
-            this.config.PROVIDER = detectedProvider;
-            console.log(`[AI Cards] 自动识别厂商: ${detectedProvider}`);
-        }
-
+        this.config.API_KEY = apiKey.trim();
         this.saveConfig();
         this.checkApiKey();
+    }
+
+    /**
+     * 设置厂商
+     * @param {string} provider - 厂商标识
+     */
+    setProvider(provider) {
+        if (this.config.MODELS[provider]) {
+            this.config.PROVIDER = provider;
+            this.saveConfig();
+            console.log(`[AI Cards] 设置厂商: ${provider}`);
+        }
     }
 
     /**
@@ -403,7 +399,7 @@ class AICardGenerator {
      * @returns {string} 厂商显示名称
      */
     getProviderDisplayName() {
-        const provider = this.config.PROVIDER || detectProviderFromKey(this.config.API_KEY) || 'unknown';
+        const provider = this.config.PROVIDER || 'moonshot';
         const names = {
             'siliconflow': 'SiliconFlow',
             'qwen': '通义千问',
@@ -472,10 +468,9 @@ class AICardGenerator {
      * @returns {Object} 请求体
      */
     buildRequestBody(messages) {
-        // 确保 PROVIDER 已设置（自动识别或默认值）
+        // 使用用户手动选择的厂商，默认为 moonshot
         if (!this.config.PROVIDER) {
-            const detected = detectProviderFromKey(this.config.API_KEY);
-            this.config.PROVIDER = detected || 'moonshot';
+            this.config.PROVIDER = 'moonshot';
         }
         const provider = this.config.PROVIDER;
         const providerConfig = this.getProviderConfig();
@@ -539,10 +534,9 @@ class AICardGenerator {
      * @returns {Object} 请求头
      */
     buildHeaders() {
-        // 确保 PROVIDER 已设置（自动识别或默认值）
+        // 使用用户手动选择的厂商，默认为 moonshot
         if (!this.config.PROVIDER) {
-            const detected = detectProviderFromKey(this.config.API_KEY);
-            this.config.PROVIDER = detected || 'moonshot';
+            this.config.PROVIDER = 'moonshot';
         }
         const provider = this.config.PROVIDER;
         const apiKey = this.config.API_KEY;

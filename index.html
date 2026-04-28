@@ -915,6 +915,30 @@
             color: var(--text-secondary);
         }
 
+        .card-master-star {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+            line-height: 1;
+            z-index: 10;
+        }
+
+        .card-master-star:hover {
+            transform: scale(1.2);
+            color: #fbbf24;
+        }
+
+        .card-master-star.mastered {
+            color: #fbbf24;
+        }
+
         .card-controls {
             display: flex;
             justify-content: center;
@@ -4420,7 +4444,7 @@ $$
                 });
                 
                 // 处理行内公式 $...$
-                content = content.replace(/\$/g, (match, formula) => {
+                content = content.replace(/\\$([^\\$]+)\\$/g, (match, formula) => {
                     return `<span class="math-inline" data-formula="${formula}"></span>`;
                 });
                 

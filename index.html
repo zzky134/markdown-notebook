@@ -3123,12 +3123,31 @@
                             </svg>
                             卡片复习
                         </button>
-                        <button class="btn btn-secondary" onclick="app.askAIAboutNote()">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 4px;">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                            </svg>
-                            问 AI
-                        </button>
+                        <div class="dropdown" id="aiDropdown">
+                            <button class="btn btn-secondary" onclick="app.toggleDropdown('aiDropdown')">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 4px;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                </svg>
+                                问 AI
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item" onclick="app.askAIAboutNote()">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    AI 提炼
+                                </div>
+                                <div class="dropdown-item" onclick="app.agentBatchProcess()">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                                    </svg>
+                                    Agent 批量整理
+                                </div>
+                            </div>
+                        </div>
                         <div class="dropdown" id="exportDropdown">
                             <button class="btn btn-secondary" onclick="app.toggleDropdown('exportDropdown')">
                                 导出
@@ -4644,6 +4663,110 @@ ${analysis}
                 this.showToast('AI 分析结果已插入笔记');
                 aiCardGeneratorUI.closeModal();
                 this.restoreAIModalInput();
+            }
+
+            // Agent 批量整理所有笔记
+            async agentBatchProcess() {
+                // 检查是否配置了 API Key
+                const saved = localStorage.getItem('ai-cards-config');
+                let hasConfig = false;
+                
+                if (saved) {
+                    try {
+                        const config = JSON.parse(saved);
+                        hasConfig = config.apiKey && config.apiKey.trim().length > 0;
+                    } catch (e) {
+                        console.error('解析配置失败:', e);
+                    }
+                }
+                
+                if (!hasConfig) {
+                    alert('请先配置 API Key，请选择模型厂商并输入您的 API Key');
+                    this.openSettingsModal();
+                    return;
+                }
+                
+                // 检查 AI 模块是否就绪
+                if (typeof aiCardGenerator === 'undefined' || !aiCardGenerator.state.isReady) {
+                    alert('AI 模块尚未就绪，请检查 API Key 配置');
+                    return;
+                }
+                
+                // 收集所有笔记内容
+                let allNotesContent = '';
+                let noteCount = 0;
+                
+                this.notebooks.forEach(notebook => {
+                    notebook.notes.forEach(note => {
+                        if (note.content && note.content.trim()) {
+                            allNotesContent += `
+
+=== ${notebook.name} / ${note.title} ===
+
+${note.content}
+`;
+                            noteCount++;
+                        }
+                    });
+                });
+                
+                if (noteCount === 0) {
+                    alert('没有找到任何笔记内容');
+                    return;
+                }
+                
+                if (!confirm(`将对 ${noteCount} 条笔记进行批量整理，这可能需要一些时间。是否继续？`)) {
+                    return;
+                }
+                
+                // 显示进度
+                this.showToast(`正在批量处理 ${noteCount} 条笔记...`);
+                
+                try {
+                    // 构建批量整理提示词
+                    const prompt = `请对以下所有笔记内容进行批量整理和归纳总结：
+
+${allNotesContent}
+
+请完成以下任务：
+1. 归纳所有笔记的核心主题和关键概念
+2. 整理知识框架和逻辑结构
+3. 提取重要的知识点和见解
+4. 给出学习建议和记忆方法
+5. 如有重复内容，进行合并整理`;
+                    
+                    // 调用 AI 生成答案
+                    const result = await aiCardGenerator.generateAnswer(prompt);
+                    
+                    // 在第一个笔记本中创建新笔记
+                    const targetNotebook = this.notebooks[0];
+                    const newNote = {
+                        id: Date.now().toString(),
+                        title: 'Agent批量结果',
+                        content: `# Agent 批量整理结果
+
+生成时间：${new Date().toLocaleString('zh-CN')}
+整理笔记数：${noteCount}
+
+---
+
+${result}`,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                        tags: ['AI整理']
+                    };
+                    
+                    targetNotebook.notes.unshift(newNote);
+                    this.saveData();
+                    
+                    // 自动打开新创建的笔记
+                    this.openNote(targetNotebook.id, newNote.id);
+                    
+                    this.showToast('Agent 批量整理完成！');
+                } catch (error) {
+                    console.error('Agent 批量整理失败:', error);
+                    alert('Agent 批量整理失败: ' + error.message);
+                }
             }
 
             // 渲染卡片

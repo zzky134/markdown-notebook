@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -294,6 +294,61 @@
 
         .sidebar-tools .settings-btn:hover {
             color: var(--text-primary);
+        }
+        /* 工具箱切换按钮样式 */
+        .toolbox-toggle {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .toolbox-btn {
+            width: 100%;
+            justify-content: space-between;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .toolbox-btn:hover {
+            background: var(--hover-bg);
+        }
+
+        .toolbox-btn .btn-text {
+            flex: 1;
+            text-align: left;
+            margin-left: 6px;
+        }
+
+        .toolbox-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .toolbox-btn.active .toolbox-arrow {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-tools.expanded {
+            display: block !important;
+        }
+
+        /* 我的课表按钮样式 */
+        .sidebar-tools .schedule-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .sidebar-tools .schedule-btn:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        /* 返回笔记按钮样式 */
+        .sidebar-tools .back-to-notes-btn {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+
+        .sidebar-tools .back-to-notes-btn:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
         }
 
         .btn {

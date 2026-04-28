@@ -3107,6 +3107,12 @@
                             </svg>
                             卡片复习
                         </button>
+                        <button class="btn btn-secondary" onclick="app.askAIAboutNote()">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 4px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                            </svg>
+                            问 AI
+                        </button>
                         <div class="dropdown" id="exportDropdown">
                             <button class="btn btn-secondary" onclick="app.toggleDropdown('exportDropdown')">
                                 导出
@@ -4396,6 +4402,42 @@ $$
             // 关闭卡片复习
             closeCardReview() {
                 document.getElementById('cardReviewModal').classList.remove('active');
+            }
+
+            // 问 AI 分析当前笔记
+            askAIAboutNote() {
+                if (!this.currentNoteId) {
+                    alert('请先打开一个笔记');
+                    return;
+                }
+
+                const notebook = this.notebooks.find(n => n.id === this.currentNotebookId);
+                const note = notebook.notes.find(n => n.id === this.currentNoteId);
+                
+                // 滚动到 AI 答疑区域（在页面底部）
+                const solverContainer = document.getElementById('ai-solver-container');
+                if (solverContainer) {
+                    solverContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                // 自动填充笔记内容到问题输入框
+                const questionInput = document.getElementById('ai-solver-question');
+                if (questionInput) {
+                    questionInput.value = `请帮我分析这篇笔记的主要内容和学习要点：
+
+---
+${note.content}
+---
+
+请总结：
+1. 这篇笔记的核心概念是什么？
+2. 有哪些重要的知识点？
+3. 如何更好地理解和记忆这些内容？`;
+                    questionInput.focus();
+                }
+                
+                // 显示提示
+                this.showToast('笔记内容已加载到 AI 答疑，点击发送即可获取分析');
             }
 
             // 渲染卡片

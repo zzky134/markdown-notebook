@@ -73,11 +73,116 @@
             flex-shrink: 0;
             overflow-y: auto;
             max-height: 100vh;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar[data-collapsed="true"] {
+            width: 60px;
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-header .search-box,
+        .sidebar[data-collapsed="true"] .sidebar-tools,
+        .sidebar[data-collapsed="true"] .notebook-list,
+        .sidebar[data-collapsed="true"] .main-actions .btn-text,
+        .sidebar[data-collapsed="true"] .btn-icon[title] {
+            display: none !important;
+        }
+
+        .sidebar[data-collapsed="true"] .main-actions {
+            flex-direction: column;
+            padding: 8px;
+        }
+
+        .sidebar[data-collapsed="true"] .main-actions .btn-primary {
+            padding: 8px;
+            justify-content: center;
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-header {
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-title {
+            justify-content: center;
+            margin-bottom: 0;
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-title-text {
+            display: none;
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-collapse-btn {
+            display: none;
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-tools-collapsed {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            gap: 8px;
+        }
+
+        .sidebar-tools-collapsed {
+            display: none;
+        }
+
+        .tools-toggle-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tools-toggle-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .sidebar-collapse-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s;
+        }
+
+        .sidebar-header:hover .sidebar-collapse-btn {
+            opacity: 1;
+        }
+
+        .sidebar-collapse-btn:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .sidebar[data-collapsed="true"] .sidebar-header {
+            position: relative;
         }
 
         .sidebar-header {
             padding: 16px;
             border-bottom: 1px solid var(--border-color);
+            position: relative;
         }
 
         .sidebar-title {
@@ -128,6 +233,66 @@
             display: flex;
             gap: 8px;
             border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-tools {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-tools .sidebar-actions {
+            border-bottom: none;
+            padding: 8px 16px;
+        }
+
+        .sidebar-tools .sidebar-actions:last-child {
+            padding-bottom: 16px;
+        }
+
+        .sidebar-tools .btn-secondary {
+            width: 100%;
+            justify-content: flex-start;
+            border: none;
+            background: transparent;
+        }
+
+        .sidebar-tools .btn-secondary:hover {
+            background: var(--hover-bg);
+        }
+
+        .sidebar-tools .ai-btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .sidebar-tools .ai-btn:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        }
+
+        .sidebar-tools .stats-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .sidebar-tools .stats-btn:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        }
+
+        .sidebar-tools .pwa-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .sidebar-tools .pwa-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .sidebar-tools .settings-btn {
+            color: var(--text-secondary);
+        }
+
+        .sidebar-tools .settings-btn:hover {
+            color: var(--text-primary);
         }
 
         .btn {
@@ -2286,6 +2451,186 @@
         }
 
         /* ========== 统计模态框样式 ========== */
+        /* 设置模态框 */
+        .settings-modal {
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .settings-content {
+            padding: 24px;
+        }
+
+        .settings-section {
+            margin-bottom: 32px;
+        }
+
+        .settings-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-section-title svg {
+            width: 22px;
+            height: 22px;
+            color: var(--primary-color);
+        }
+
+        .settings-item {
+            margin-bottom: 24px;
+        }
+
+        .settings-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .settings-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .settings-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .apikey-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .apikey-input-wrapper .settings-input {
+            padding-right: 48px;
+        }
+
+        .apikey-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .apikey-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        .settings-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .provider-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .provider-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .provider-btn:hover {
+            border-color: var(--primary-color);
+            background: var(--hover-bg);
+        }
+
+        .provider-btn.active {
+            border-color: var(--primary-color);
+            background: rgba(79, 70, 229, 0.05);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .provider-icon {
+            font-size: 20px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .provider-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .config-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-configured {
+            background: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .status-unconfigured {
+            background: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
         .stats-modal {
             max-width: 900px;
             width: 90%;
@@ -2514,14 +2859,21 @@
 
     <div class="app-container">
         <!-- 侧边栏 -->
-        <aside class="sidebar" id="sidebar">
+        <!-- 可伸缩工具箱侧边栏 -->
+        <aside class="sidebar" id="sidebar" data-collapsed="false">
             <div class="sidebar-header">
                 <div class="sidebar-title">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
-                    我的笔记
+                    <span class="sidebar-title-text">我的笔记</span>
                 </div>
+                <!-- 收起/展开按钮 -->
+                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="app.toggleSidebarCollapse()" title="收起工具栏">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                    </svg>
+                </button>
                 <div class="search-box">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -2529,12 +2881,14 @@
                     <input type="text" id="searchInput" placeholder="搜索笔记...">
                 </div>
             </div>
-            <div class="sidebar-actions">
+
+            <!-- 主要操作按钮 -->
+            <div class="sidebar-actions main-actions">
                 <button class="btn btn-primary" onclick="app.createNote()">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
-                    新建笔记
+                    <span class="btn-text">新建笔记</span>
                 </button>
                 <button class="btn-icon" onclick="app.createNotebook()" title="新建笔记本">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2547,46 +2901,69 @@
                     </svg>
                 </button>
             </div>
-            <div class="sidebar-actions" id="scheduleActionBtn">
-                <button class="btn btn-secondary" onclick="scheduleApp.showSchedule()" style="width: 100%; justify-content: center;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+
+            <!-- 工具箱区域（可收起） -->
+            <div class="sidebar-tools" id="sidebarTools">
+                <div class="sidebar-actions" id="scheduleActionBtn">
+                    <button class="btn btn-secondary" onclick="scheduleApp.showSchedule()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="btn-text">我的课表</span>
+                    </button>
+                </div>
+                <div class="sidebar-actions" id="backToNotesBtn" style="display: none;">
+                    <button class="btn btn-primary" onclick="scheduleApp.switchToNotes()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="btn-text">返回笔记</span>
+                    </button>
+                </div>
+                <div class="sidebar-actions">
+                    <button class="btn btn-secondary ai-btn" onclick="app.handleAIBtnClick()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
+                        </svg>
+                        <span class="btn-text">AI 答疑</span>
+                    </button>
+                </div>
+                <div class="sidebar-actions">
+                    <button class="btn btn-secondary stats-btn" onclick="app.openStatsModal()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <span class="btn-text">学习统计</span>
+                    </button>
+                </div>
+                <div class="sidebar-actions" id="pwaInstallBtn" style="display: none;">
+                    <button class="btn btn-primary pwa-btn" onclick="installPWA()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        <span class="btn-text">安装到桌面</span>
+                    </button>
+                </div>
+                <div class="sidebar-actions">
+                    <button class="btn btn-secondary settings-btn" onclick="app.openSettingsModal()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span class="btn-text">设置</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 收起状态的工具箱按钮 -->
+            <div class="sidebar-tools-collapsed" id="sidebarToolsCollapsed" style="display: none;">
+                <button class="btn-icon tools-toggle-btn" onclick="app.toggleSidebarCollapse()" title="展开工具箱">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                     </svg>
-                    我的课表
                 </button>
             </div>
-            <div class="sidebar-actions" id="backToNotesBtn" style="display: none;">
-                <button class="btn btn-primary" onclick="scheduleApp.switchToNotes()" style="width: 100%; justify-content: center;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    返回笔记
-                </button>
-            </div>
-            <div class="sidebar-actions" style="padding-top: 0;">
-                <button class="btn btn-secondary" onclick="if(typeof aiCardGeneratorUI!=='undefined'){aiCardGeneratorUI.openModal()}else{alert('AI模块加载中，请稍后重试')}" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
-                    </svg>
-                    AI 答疑
-                </button>
-            </div>
-            <div class="sidebar-actions" style="padding-top: 0;">
-                <button class="btn btn-secondary" onclick="app.openStatsModal()" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                    学习统计
-                </button>
-            </div>
-            <div class="sidebar-actions" id="pwaInstallBtn" style="display: none; padding-top: 0;">
-                <button class="btn btn-primary" onclick="installPWA()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); width: 100%; justify-content: center; animation: pulse 2s infinite;">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    安装到桌面
-                </button>
-            </div>
+
             <style>
                 @keyframes pulse {
                     0%, 100% { transform: scale(1); }
@@ -2743,6 +3120,90 @@
             <div class="template-preview-actions">
                 <button class="btn btn-secondary" onclick="app.closeModal('templatePreviewModal')">取消</button>
                 <button class="btn btn-primary" onclick="app.insertTemplateContent()">使用此模板</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置模态框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    设置
+                </div>
+                <button class="close-btn" onclick="app.closeModal('settingsModal')">&times;</button>
+            </div>
+            <div class="settings-content">
+                <!-- AI 配置区域 -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12h.01M12 21a9 9 0 110-18 9 9 0 010 18z"></path>
+                        </svg>
+                        AI 答疑配置
+                    </h3>
+
+                    <!-- 厂商选择 -->
+                    <div class="settings-item">
+                        <label class="settings-label">选择模型厂商</label>
+                        <div class="provider-selector">
+                            <button class="provider-btn" data-provider="moonshot" onclick="app.selectProvider('moonshot')">
+                                <span class="provider-icon">🌙</span>
+                                <span class="provider-name">Kimi (Moonshot)</span>
+                            </button>
+                            <button class="provider-btn" data-provider="siliconflow" onclick="app.selectProvider('siliconflow')">
+                                <span class="provider-icon">⚡</span>
+                                <span class="provider-name">SiliconFlow</span>
+                            </button>
+                            <button class="provider-btn" data-provider="qwen" onclick="app.selectProvider('qwen')">
+                                <span class="provider-icon">🤖</span>
+                                <span class="provider-name">通义千问</span>
+                            </button>
+                            <button class="provider-btn" data-provider="doubao" onclick="app.selectProvider('doubao')">
+                                <span class="provider-icon">🎵</span>
+                                <span class="provider-name">豆包</span>
+                            </button>
+                            <button class="provider-btn" data-provider="minimax" onclick="app.selectProvider('minimax')">
+                                <span class="provider-icon">🎭</span>
+                                <span class="provider-name">MiniMax</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- API Key 输入 -->
+                    <div class="settings-item">
+                        <label class="settings-label">API Key</label>
+                        <div class="apikey-input-wrapper">
+                            <input type="password" id="settingsApiKey" class="settings-input" placeholder="请输入您的 API Key">
+                            <button class="apikey-toggle" onclick="app.toggleApiKeyVisibility()">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="settings-hint">数据仅保存在浏览器本地，不会上传到服务器</div>
+                    </div>
+
+                    <!-- 当前配置状态 -->
+                    <div class="settings-item">
+                        <label class="settings-label">当前配置</label>
+                        <div class="config-status" id="configStatus">
+                            <span class="status-dot status-unconfigured"></span>
+                            <span class="status-text">未配置</span>
+                        </div>
+                    </div>
+
+                    <!-- 保存按钮 -->
+                    <div class="settings-actions">
+                        <button class="btn btn-secondary" onclick="app.closeModal('settingsModal')">取消</button>
+                        <button class="btn btn-primary" onclick="app.saveSettings()">保存配置</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -3021,6 +3482,7 @@ JavaScript 在网页开发中主要用于：
                 this.loadData();
                 this.bindEvents();
                 this.renderNotebookList();
+                this.loadSidebarState();
 
                 // 如果没有笔记本，创建一个默认的
                 if (this.notebooks.length === 0) {
@@ -3083,6 +3545,173 @@ $$
                 this.notebooks.push(defaultNotebook);
                 this.saveData();
                 this.renderNotebookList();
+            }
+
+            // ========== 侧边栏收起/展开 ==========
+
+            toggleSidebarCollapse() {
+                const sidebar = document.getElementById('sidebar');
+                const isCollapsed = sidebar.getAttribute('data-collapsed') === 'true';
+
+                if (isCollapsed) {
+                    // 展开
+                    sidebar.setAttribute('data-collapsed', 'false');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                } else {
+                    // 收起
+                    sidebar.setAttribute('data-collapsed', 'true');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                }
+            }
+
+            // 加载侧边栏状态
+            loadSidebarState() {
+                const collapsed = localStorage.getItem('sidebarCollapsed');
+                if (collapsed === 'true') {
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar) {
+                        sidebar.setAttribute('data-collapsed', 'true');
+                    }
+                }
+            }
+
+            // ========== AI 答疑按钮处理 ==========
+
+            handleAIBtnClick() {
+                // 检查是否配置了 API Key
+                const saved = localStorage.getItem('ai-cards-config');
+                let hasConfig = false;
+
+                if (saved) {
+                    try {
+                        const config = JSON.parse(saved);
+                        hasConfig = config.apiKey && config.apiKey.trim().length > 0;
+                    } catch (e) {
+                        console.error('解析配置失败:', e);
+                    }
+                }
+
+                if (!hasConfig) {
+                    // 未配置，提示用户先配置
+                    alert('请先配置 API Key\n\n点击"设置"按钮，选择模型厂商并输入您的 API Key');
+                    this.openSettingsModal();
+                    return;
+                }
+
+                // 已配置，打开 AI 答疑
+                if (typeof aiCardGeneratorUI !== 'undefined') {
+                    aiCardGeneratorUI.openModal();
+                } else {
+                    alert('AI 模块加载中，请稍后重试');
+                }
+            }
+
+            // ========== 设置模态框 ==========
+
+            openSettingsModal() {
+                this.loadSettingsToModal();
+                document.getElementById('settingsModal').classList.add('active');
+            }
+
+            loadSettingsToModal() {
+                const saved = localStorage.getItem('ai-cards-config');
+                let config = { provider: '', apiKey: '' };
+
+                if (saved) {
+                    try {
+                        config = JSON.parse(saved);
+                    } catch (e) {
+                        console.error('解析配置失败:', e);
+                    }
+                }
+
+                // 加载 API Key
+                const apiKeyInput = document.getElementById('settingsApiKey');
+                if (apiKeyInput && config.apiKey) {
+                    apiKeyInput.value = config.apiKey;
+                }
+
+                // 选中厂商
+                document.querySelectorAll('.provider-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.provider === config.provider) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // 更新状态显示
+                this.updateConfigStatus(config);
+            }
+
+            selectProvider(provider) {
+                document.querySelectorAll('.provider-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`.provider-btn[data-provider="${provider}"]`).classList.add('active');
+
+                // 临时保存选择
+                this.tempProvider = provider;
+            }
+
+            toggleApiKeyVisibility() {
+                const input = document.getElementById('settingsApiKey');
+                if (input) {
+                    input.type = input.type === 'password' ? 'text' : 'password';
+                }
+            }
+
+            updateConfigStatus(config) {
+                const statusEl = document.getElementById('configStatus');
+                if (!statusEl) return;
+
+                const hasConfig = config.apiKey && config.apiKey.trim().length > 0;
+
+                if (hasConfig) {
+                    const providerNames = {
+                        'moonshot': 'Kimi (Moonshot)',
+                        'siliconflow': 'SiliconFlow',
+                        'qwen': '通义千问',
+                        'doubao': '豆包',
+                        'minimax': 'MiniMax'
+                    };
+                    const providerName = providerNames[config.provider] || config.provider || '未知';
+                    statusEl.innerHTML = `
+                        <span class="status-dot status-configured"></span>
+                        <span class="status-text">已配置 - ${providerName}</span>
+                    `;
+                } else {
+                    statusEl.innerHTML = `
+                        <span class="status-dot status-unconfigured"></span>
+                        <span class="status-text">未配置</span>
+                    `;
+                }
+            }
+
+            saveSettings() {
+                const apiKey = document.getElementById('settingsApiKey')?.value?.trim() || '';
+                const provider = this.tempProvider || document.querySelector('.provider-btn.active')?.dataset?.provider || 'moonshot';
+
+                if (!apiKey) {
+                    alert('请输入 API Key');
+                    return;
+                }
+
+                // 保存配置
+                const config = {
+                    apiKey: apiKey,
+                    provider: provider
+                };
+
+                localStorage.setItem('ai-cards-config', JSON.stringify(config));
+
+                // 同时更新 ai-cards.js 中的配置
+                if (typeof aiCardGenerator !== 'undefined') {
+                    aiCardGenerator.setApiKey(apiKey);
+                    aiCardGenerator.config.PROVIDER = provider;
+                }
+
+                alert('配置已保存！');
+                this.closeModal('settingsModal');
             }
 
             // 绑定事件

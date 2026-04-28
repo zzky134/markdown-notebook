@@ -4303,22 +4303,41 @@ $$
             }
 
             // 提取知识卡片
-            extractCards(content) {
+            // 提取知识卡片
+            extractCards(content, noteId = '') {
                 if (!content) return [];
                 const cards = [];
                 const cardRegex = /:front::(.*?)\n:back::(.*?)(?=\n:front::|\n\n|$)/gs;
                 let match;
+                let index = 0;
 
                 while ((match = cardRegex.exec(content)) !== null) {
+                    const front = match[1].trim();
+                    const back = match[2].trim();
+                    // Generate unique ID based on noteId, front content and index
+                    const cardId = this.generateCardId(noteId, front, index);
                     cards.push({
-                        front: match[1].trim(),
-                        back: match[2].trim()
+                        id: cardId,
+                        front: front,
+                        back: back
                     });
+                    index++;
                 }
 
                 return cards;
             }
 
+            // Generate unique card ID
+            generateCardId(noteId, front, index) {
+                const str = (noteId || '') + front + index;
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return 'card_' + Math.abs(hash).toString(36);
+            }
             // 开始笔记本卡片复习
             startNotebookCardReview(notebookId, event) {
                 event.stopPropagation();

@@ -52,6 +52,56 @@ function loadAIConfig() {
 }
 
 /**
+ * 根据 API Key 自动识别厂商
+ * @param {string} apiKey - API Key
+ * @returns {string|null} 厂商标识或 null
+ */
+function detectProviderFromKey(apiKey) {
+    if (!apiKey || typeof apiKey !== 'string') {
+        return null;
+    }
+
+    const key = apiKey.trim();
+
+    // Moonshot (Kimi) - sk- 开头，通常包含特定字符
+    if (key.startsWith('sk-') && key.length >= 32) {
+        // Moonshot keys are typically longer and have specific patterns
+        // sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        return 'moonshot';
+    }
+
+    // SiliconFlow - sk- 开头，通常较短
+    if (key.startsWith('sk-') && key.length < 50) {
+        return 'siliconflow';
+    }
+
+    // 通义千问 (DashScope) - sk- 或 ak- 开头
+    if (key.startsWith('sk-') || key.startsWith('ak-')) {
+        // 如果包含 dashscope 相关特征
+        if (key.includes('dashscope') || key.length > 40) {
+            return 'qwen';
+        }
+    }
+
+    // 豆包 (Volcengine) - 通常是较长的字符串
+    if (key.length > 50 && !key.startsWith('sk-')) {
+        return 'doubao';
+    }
+
+    // MiniMax - 通常是较长的字符串，可能包含 minimax 字样
+    if (key.toLowerCase().includes('minimax') || (key.length > 60 && !key.startsWith('sk-'))) {
+        return 'minimax';
+    }
+
+    // 默认返回 moonshot（最常见的格式）
+    if (key.startsWith('sk-')) {
+        return 'moonshot';
+    }
+
+    return null;
+}
+
+/**
  * ============================================
  * API 配置
  * ============================================
@@ -70,7 +120,8 @@ const AI_CONFIG = {
     // 选择 API 提供商
     // ============================================
     // 可选值: 'siliconflow' | 'qwen' | 'doubao' | 'moonshot' | 'minimax'
-    PROVIDER: 'moonshot',
+    // 如果设置为 null，将自动根据 API Key 识别
+    PROVIDER: null,
 
     // ============================================
     // 模型配置
@@ -265,6 +316,14 @@ class AICardGenerator {
         if (saved) {
             if (saved.apiKey) {
                 this.config.API_KEY = saved.apiKey;
+                // 如果没有保存厂商信息，尝试自动识别
+                if (!saved.provider) {
+                    const detected = detectProviderFromKey(saved.apiKey);
+                    if (detected) {
+                        this.config.PROVIDER = detected;
+                        console.log(`[AI Cards] 从保存的 Key 自动识别厂商: ${detected}`);
+                    }
+                }
             }
             if (saved.provider && this.config.MODELS[saved.provider]) {
                 this.config.PROVIDER = saved.provider;
@@ -287,7 +346,16 @@ class AICardGenerator {
      * @param {string} apiKey - API Key
      */
     setApiKey(apiKey) {
-        this.config.API_KEY = apiKey.trim();
+        const trimmedKey = apiKey.trim();
+        this.config.API_KEY = trimmedKey;
+
+        // 自动识别厂商
+        const detectedProvider = detectProviderFromKey(trimmedKey);
+        if (detectedProvider) {
+            this.config.PROVIDER = detectedProvider;
+            console.log(`[AI Cards] 自动识别厂商: ${detectedProvider}`);
+        }
+
         this.saveConfig();
         this.checkApiKey();
     }
@@ -299,7 +367,7 @@ class AICardGenerator {
         const apiKey = this.config.API_KEY;
         if (!apiKey || apiKey === 'your-api-key-here' || apiKey.trim() === '') {
             this.state.isReady = false;
-            this.state.initError = 'API Key 未配置，请在 ai-cards.js 中设置您的 API Key';
+            this.state.initError = 'API Key 未配置，请在上方输入您的 API Key';
         } else {
             this.state.isReady = true;
             this.state.initError = null;
@@ -311,8 +379,34 @@ class AICardGenerator {
      * @returns {Object} 当前选中的 API 配置
      */
     getProviderConfig() {
+        // 如果没有设置 PROVIDER，尝试从 API Key 自动识别
+        if (!this.config.PROVIDER) {
+            const detected = detectProviderFromKey(this.config.API_KEY);
+            if (detected) {
+                this.config.PROVIDER = detected;
+            } else {
+                // 默认使用 moonshot
+                this.config.PROVIDER = 'moonshot';
+            }
+        }
         const provider = this.config.PROVIDER;
         return this.config.MODELS[provider];
+    }
+
+    /**
+     * 获取当前厂商名称（用于显示）
+     * @returns {string} 厂商显示名称
+     */
+    getProviderDisplayName() {
+        const provider = this.config.PROVIDER || detectProviderFromKey(this.config.API_KEY) || 'unknown';
+        const names = {
+            'siliconflow': 'SiliconFlow',
+            'qwen': '通义千问',
+            'doubao': '豆包',
+            'moonshot': 'Kimi',
+            'minimax': 'MiniMax'
+        };
+        return names[provider] || provider;
     }
 
     /**
@@ -1142,15 +1236,8 @@ class AIQAGeneratorUI {
      * @returns {string}
      */
     getProviderDisplayName() {
-        const provider = this.ai.config.PROVIDER;
-        const names = {
-            'siliconflow': 'SiliconFlow',
-            'qwen': '通义千问',
-            'doubao': '豆包',
-            'moonshot': 'Kimi',
-            'minimax': 'MiniMax'
-        };
-        return names[provider] || provider;
+        // 使用 AI 类的方法，支持自动识别
+        return this.ai.getProviderDisplayName();
     }
 
     /**

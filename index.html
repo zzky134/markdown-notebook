@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -2920,16 +2920,14 @@
 
                 <!-- 工具箱展开内容 -->
                 <div class="sidebar-tools" id="sidebarTools" style="display: none;">
-                    <div class="sidebar-actions" id="scheduleActionBtn">
-                        <button class="btn btn-secondary" onclick="scheduleApp.showSchedule()">
+                    <div class="sidebar-actions" id="scheduleActionBtn">`n                        <button class="btn btn-secondary schedule-btn" onclick="scheduleApp.showSchedule()">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                             <span class="btn-text">我的课表</span>
                         </button>
                     </div>
-                    <div class="sidebar-actions" id="backToNotesBtn" style="display: none;">
-                        <button class="btn btn-primary" onclick="scheduleApp.switchToNotes()">
+                    <div class="sidebar-actions" id="backToNotesBtn" style="display: none;">`n                        <button class="btn btn-primary back-to-notes-btn" onclick="scheduleApp.switchToNotes()">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
@@ -3472,6 +3470,7 @@ JavaScript 在网页开发中主要用于：
                 this.bindEvents();
                 this.renderNotebookList();
                 this.loadSidebarState();
+                this.loadToolboxState();
 
                 // 如果没有笔记本，创建一个默认的
                 if (this.notebooks.length === 0) {
@@ -3563,6 +3562,50 @@ $$
                     }
                 }
             }
+
+            // 工具箱展开/收起
+            toggleToolbox() {
+                const tools = document.getElementById('sidebarTools');
+                const btn = document.getElementById('toolboxBtn');
+                
+                if (!tools || !btn) return;
+                
+                const isExpanded = tools.classList.contains('expanded');
+                
+                if (isExpanded) {
+                    // 收起
+                    tools.style.display = 'none';
+                    tools.classList.remove('expanded');
+                    btn.classList.remove('active');
+                    localStorage.setItem('toolboxExpanded', 'false');
+                } else {
+                    // 展开
+                    tools.style.display = 'block';
+                    tools.classList.add('expanded');
+                    btn.classList.add('active');
+                    localStorage.setItem('toolboxExpanded', 'true');
+                }
+            }
+
+            // 加载工具箱状态
+            loadToolboxState() {
+                const expanded = localStorage.getItem('toolboxExpanded');
+                const tools = document.getElementById('sidebarTools');
+                const btn = document.getElementById('toolboxBtn');
+                
+                if (!tools || !btn) return;
+                
+                if (expanded === 'true') {
+                    tools.style.display = 'block';
+                    tools.classList.add('expanded');
+                    btn.classList.add('active');
+                } else {
+                    tools.style.display = 'none';
+                    tools.classList.remove('expanded');
+                    btn.classList.remove('active');
+                }
+            }
+
 
             // ========== AI 答疑按钮处理 ==========
 
@@ -5604,3 +5647,12 @@ $$
     <script src="ai-solver.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

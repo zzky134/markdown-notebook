@@ -3955,7 +3955,9 @@ $$
             // 保存数据
             saveData() {
                 try {
+                    console.log('[AskAI] saveData: saving', this.notebooks?.length, 'notebooks');
                     localStorage.setItem('markdownNotebook', JSON.stringify(this.notebooks));
+                    console.log('[AskAI] saveData: saved successfully');
                 } catch (e) {
                     console.error('保存数据失败:', e);
                     alert('保存失败，可能是存储空间不足');
@@ -4614,9 +4616,13 @@ ${analysis}
                 
                 // 如果编辑器是可见的，更新内容
                 const editor = document.getElementById('noteEditor');
+                console.log('[AskAI] Looking for editor:', !!editor, 'editor display:', editor?.style?.display);
                 if (editor) {
                     editor.value = note.content;
-                    console.log('[AskAI] Editor updated');
+                    console.log('[AskAI] Editor updated, new length:', editor.value.length);
+                    // 触发 input 事件以更新预览
+                    editor.dispatchEvent(new Event('input', { bubbles: true }));
+                    console.log('[AskAI] Editor input event dispatched');
                 }
                 
                 this.showToast('AI 分析结果已插入笔记');

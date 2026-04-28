@@ -4073,10 +4073,29 @@ $$
                 if (!confirm('确定要删除这条笔记吗？')) return;
 
                 const notebook = this.notebooks.find(n => n.id === notebookId);
+                const noteIndex = notebook.notes.findIndex(n => n.id === noteId);
+                
+                // 保存相邻笔记的ID（用于删除后自动切换）
+                let nextNoteId = null;
+                if (noteIndex >= 0) {
+                    // 优先选择下一条，没有则选上一条
+                    if (noteIndex < notebook.notes.length - 1) {
+                        nextNoteId = notebook.notes[noteIndex + 1].id;
+                    } else if (noteIndex > 0) {
+                        nextNoteId = notebook.notes[noteIndex - 1].id;
+                    }
+                }
+                
                 notebook.notes = notebook.notes.filter(n => n.id !== noteId);
 
                 if (this.currentNoteId === noteId) {
-                    this.closeEditor();
+                    if (nextNoteId) {
+                        // 自动切换到相邻笔记
+                        this.openNote(notebookId, nextNoteId);
+                    } else {
+                        // 没有相邻笔记才关闭编辑器
+                        this.closeEditor();
+                    }
                 }
 
                 this.saveData();
@@ -4355,23 +4374,96 @@ $$
 
                 const card = this.cards[this.currentCardIndex];
                 const showSource = card.noteTitle ? `<div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">来自: ${card.noteTitle}</div>` : '';
+                
+                // 检查卡片掌握状态
+                const stats = this.loadStatsData();
+                const isMastered = stats.cardMastery && stats.cardMastery[card.id];
+                
+                // 处理数学公式
+                const processedFront = this.processMathInCard(card.front);
+                const processedBack = this.processMathInCard(card.back);
+                
                 container.innerHTML = `
                     <div class="flashcard" id="flashcard" onclick="app.flipCard()">
                         <div class="flashcard-inner">
                             <div class="flashcard-front">
+                                <button class="card-master-star ${isMastered ? 'mastered' : ''}" onclick="app.toggleCardMastery(event, '${card.id}')" title="${isMastered ? '已掌握' : '标记为已掌握'}">
+                                    ★
+                                </button>
                                 <div class="card-label">问题</div>
                                 ${showSource}
-                                <div class="card-content">${card.front}</div>
+                                <div class="card-content">${processedFront}</div>
                                 <div class="card-hint">点击翻转查看答案</div>
                             </div>
                             <div class="flashcard-back">
                                 <div class="card-label">答案</div>
-                                <div class="card-content">${card.back}</div>
+                                <div class="card-content">${processedBack}</div>
                                 <div class="card-hint">点击翻回</div>
                             </div>
                         </div>
                     </div>
                 `;
+                
+                // 渲染KaTeX公式
+                this.renderCardMath(container);
+            }
+            
+            // 处理卡片中的数学公式
+            processMathInCard(content) {
+                if (!content) return content;
+                
+                // 保护代码块中的内容
+                const codeBlocks = [];
+                content = content.replace(//g, (match) => {
+                    codeBlocks.push(match);
+                    return `<!--CODEBLOCK${codeBlocks.length - 1}-->`;
+                });
+                
+                // 处理行内公式 $...$
+                content = content.replace(/\$/g, (match, formula) => {
+                    return `<span class="math-inline" data-formula="${formula}"></span>`;
+                });
+                
+                // 处理块级公式 $$...$$
+                content = content.replace(/\$$([\s\S]*?)\$$/g, (match, formula) => {
+                    return `<div class="math-block" data-formula="${formula}"></div>`;
+                });
+                
+                // 恢复代码块
+                content = content.replace(/<!--CODEBLOCK(\d+)-->/g, (match, index) => {
+                    return codeBlocks[parseInt(index)];
+                });
+                
+                return content;
+            }
+            
+            // 渲染卡片中的数学公式
+            renderCardMath(container) {
+                if (typeof katex === 'undefined') return;
+                
+                // 渲染行内公式
+                container.querySelectorAll('.math-inline').forEach(el => {
+                    const formula = el.dataset.formula;
+                    if (formula) {
+                        try {
+                            katex.render(formula, el, { throwOnError: false });
+                        } catch (e) {
+                            console.error('KaTeX render error:', e);
+                        }
+                    }
+                });
+                
+                // 渲染块级公式
+                container.querySelectorAll('.math-block').forEach(el => {
+                    const formula = el.dataset.formula;
+                    if (formula) {
+                        try {
+                            katex.render(formula, el, { throwOnError: false, displayMode: true });
+                        } catch (e) {
+                            console.error('KaTeX render error:', e);
+                        }
+                    }
+                });
             }
 
             // 删除重复的 renderNotebookCard，统一使用 renderCard
@@ -4380,6 +4472,64 @@ $$
             flipCard() {
                 const flashcard = document.getElementById('flashcard');
                 flashcard.classList.toggle('flipped');
+            }
+
+            // 切换卡片掌握状态
+            toggleCardMastery(event, cardId) {
+                event.stopPropagation();
+                
+                const stats = this.loadStatsData();
+                if (!stats.cardMastery) {
+                    stats.cardMastery = {};
+                }
+                
+                const isCurrentlyMastered = stats.cardMastery[cardId];
+                const newMasteredState = !isCurrentlyMastered;
+                
+                // 更新掌握状态
+                stats.cardMastery[cardId] = newMasteredState;
+                
+                // 更新掌握数量
+                if (newMasteredState) {
+                    stats.masteredCards++;
+                } else {
+                    stats.masteredCards--;
+                }
+                
+                stats.lastUpdated = Date.now();
+                this.saveStatsData(stats);
+                
+                // 更新UI
+                const starBtn = event.currentTarget;
+                starBtn.classList.toggle('mastered', newMasteredState);
+                starBtn.title = newMasteredState ? '已掌握' : '标记为已掌握';
+                
+                // 显示提示
+                this.showToast(newMasteredState ? '已标记为掌握' : '已取消掌握标记');
+            }
+
+            // 显示提示
+            showToast(message) {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    font-size: 14px;
+                    z-index: 10000;
+                    animation: fadeInOut 2s ease;
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 2000);
             }
 
             // 上一张卡片

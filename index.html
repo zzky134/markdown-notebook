@@ -4410,7 +4410,7 @@ $$
                     const cardCount = this.countNotebookCards(notes);
 
                     notebookEl.innerHTML = `
-                        <div class="notebook-header ${isActive ? 'active' : ''}">
+                        <div class="notebook-header ${isExpanded ? 'active' : ''}">
                             <div class="notebook-name" onclick="app.toggleNotebook('${notebook.id}')" style="flex: 1;">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
@@ -4425,12 +4425,12 @@ $$
                                 ${cardCount}
                             </button>
                             ` : ''}
-                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 0.2s; ${isActive ? 'transform: rotate(90deg);' : ''}; margin-left: 4px;"
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 0.2s; ${isExpanded ? 'transform: rotate(90deg);' : ''}; margin-left: 4px;"
                                 onclick="app.toggleNotebook('${notebook.id}')">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </div>
-                        <div class="note-list" id="notebook-${notebook.id}" style="${isActive ? '' : 'display: none;'}">
+                        <div class="note-list" id="notebook-${notebook.id}" style="${isExpanded ? '' : 'display: none;'}">
                             ${notes.map(note => `
                                 <div class="note-item ${this.currentNoteId === note.id ? 'active' : ''}" onclick="app.openNote('${notebook.id}', '${note.id}')">
                                     <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">

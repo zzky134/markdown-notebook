@@ -6185,9 +6185,11 @@ ${analysis}
                 // 覆盖插入方法
                 aiCardGeneratorUI.handleInsert = function() {
                     const insertBtn = document.getElementById('aiInsertBtn');
+                    console.log('[AskAI] Insert clicked, mode:', insertBtn?.dataset?.mode);
                     if (insertBtn && insertBtn.dataset.mode === 'analysis') {
                         // 问 AI 模式：插入分析结果
                         const app = window.markdownNotebookApp;
+                        console.log('[AskAI] App found:', !!app, 'lastAIAnalysis:', !!app?.lastAIAnalysis);
                         if (app && app.lastAIAnalysis) {
                             app.insertAIAnalysisToNote(app.lastAIAnalysis);
                         }
@@ -6200,9 +6202,11 @@ ${analysis}
                 // 覆盖复制方法
                 aiCardGeneratorUI.handleCopy = async function() {
                     const copyBtn = document.getElementById('aiCopyBtn');
+                    console.log('[AskAI] Copy clicked, mode:', copyBtn?.dataset?.mode);
                     if (copyBtn && copyBtn.dataset.mode === 'analysis') {
                         // 问 AI 模式：复制分析结果
                         const app = window.markdownNotebookApp;
+                        console.log('[AskAI] App found:', !!app, 'lastAIAnalysis:', !!app?.lastAIAnalysis);
                         if (app && app.lastAIAnalysis) {
                             try {
                                 await navigator.clipboard.writeText(app.lastAIAnalysis);

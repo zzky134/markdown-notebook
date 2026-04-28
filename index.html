@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -3228,10 +3228,6 @@
                                 <span class="provider-icon">🎵</span>
                                 <span class="provider-name">豆包</span>
                             </button>
-                            <button class="provider-btn" data-provider="minimax" onclick="app.selectProvider('minimax')">
-                                <span class="provider-icon">🎭</span>
-                                <span class="provider-name">MiniMax</span>
-                            </button>
                         </div>
                     </div>
 
@@ -3760,7 +3756,6 @@ $$
                         'siliconflow': 'SiliconFlow',
                         'qwen': '通义千问',
                         'doubao': '豆包',
-                        'minimax': 'MiniMax'
                     };
                     const providerName = providerNames[config.provider] || config.provider || '未知';
                     statusEl.innerHTML = `

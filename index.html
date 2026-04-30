@@ -156,10 +156,6 @@
         }
 
         .sidebar-collapse-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
             width: 28px;
             height: 28px;
             border-radius: 6px;
@@ -172,6 +168,8 @@
             justify-content: center;
             opacity: 0;
             transition: opacity 0.2s, background 0.2s;
+            margin-left: auto;
+            flex-shrink: 0;
         }
 
         .sidebar-header:hover .sidebar-collapse-btn {
@@ -3052,13 +3050,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                     </button>
+                    <!-- 收起按钮 -->
+                    <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="app.toggleSidebarCollapse()" title="收起工具栏">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+                        </svg>
+                    </button>
                 </div>
-                <!-- 收起/展开按钮 -->
-                <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" onclick="app.toggleSidebarCollapse()" title="收起工具栏">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
-                    </svg>
-                </button>
                 <!-- 展开按钮（仅在收起状态显示）-->
                 <button class="sidebar-expand-btn" id="sidebarExpandBtn" onclick="app.toggleSidebarCollapse()" title="展开工具栏">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
